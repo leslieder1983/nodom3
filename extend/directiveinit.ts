@@ -8,6 +8,7 @@ import { createDirective} from "../core/nodom";
 import { Renderer } from "../core/renderer";
 import { Router } from "../core/router";
 import { Util } from "../core/util";
+import { ModelManager } from "../core/modelmanager";
 
 export default (function () {
 
@@ -41,12 +42,18 @@ export default (function () {
                 }
                 mid = m.id;
                 //保留modelId
-                // src.subModuleId = mid;
                 dom.setParam(module,'moduleId',mid);
+                module.addChild(m);
+                //共享当前dom的model给子模块
+                if(dom.hasProp('useDomModel')){
+                    m.model = dom.model;
+                    //绑定model到子模块，共享update,watch方法
+                    ModelManager.bindToModule(m.model,m);
+                    dom.delProp('useDomModel');
+                }
             }
             //保存到dom上，提升渲染性能
             dom.subModuleId = mid;
-                
             if(handle){ //需要处理
                 //设置props，如果改变了props，启动渲染
                 let o:any = {};
@@ -95,18 +102,27 @@ export default (function () {
         'repeat',
         function(module:Module,dom:VirtualDom,src:VirtualDom){
             let rows = this.value;
+            console.log(rows);
             // 无数据，不渲染
             if (!Util.isArray(rows) || rows.length === 0) {
                 return false;
             }
+            //索引名
+            const idxName = src.getProp('$index');
             const parent = dom.parent;
             //禁用该指令
             this.disabled = true;
             for (let i = 0; i < rows.length; i++) {
-                rows[i].$index = i;
+                if(idxName){
+                    rows[i][idxName] = i;
+                }
                 //渲染一次-1，所以需要+1
                 src.staticNum++;
-                Renderer.renderDom(module,src,rows[i],parent,rows[i].$key);
+                let d = Renderer.renderDom(module,src,rows[i],parent,rows[i].$key);
+                //删除$index属性
+                if(idxName){
+                    d.delProp('$index');    
+                }
             }
             //启用该指令
             this.disabled = false;
@@ -246,62 +262,6 @@ export default (function () {
         5
     );
 
-    /**
-     * 指令名 data
-     * 描述：从当前模块获取数据并用于子模块，dom带module指令时有效
-     */
-    // createDirective('data',
-    //     function(module:Module,dom:VirtualDom,src:VirtualDom){
-    //         if (typeof this.value !== 'object' || !dom.hasDirective('module')){
-    //             return;
-    //         }
-    //         let mdlDir:Directive = dom.getDirective(module,'module');
-    //         let mid = mdlDir.getParam(module,dom,'moduleId');
-    //         if(!mid){
-    //             return;
-    //         }
-    //         let obj = this.value;
-    //         //子模块
-    //         let subMdl = ModuleFactory.get(mid);
-    //         //子model
-    //         let m: Model = subMdl.model;
-    //         let model = dom.model;
-    //         Object.getOwnPropertyNames(obj).forEach(p => {
-    //             //字段名
-    //             let field;
-    //             // 反向修改
-    //             let reverse = false;
-    //             if (Array.isArray(obj[p])) {
-    //                 field = obj[p][0];
-    //                 if (obj[p].length > 1) {
-    //                     reverse = obj[p][1];
-    //                 }
-    //                 //删除reverse，只保留字段
-    //                 obj[p] = field;
-    //             } else {
-    //                 field = obj[p];
-    //             }
-                
-    //             let d = model.$get(field);
-    //             //数据赋值
-    //             if (d !== undefined) {
-    //                 //对象直接引用，需将model绑定到新模块
-    //                 if(typeof d === 'object'){
-    //                     ModelManager.bindToModule(d,mid);
-    //                 }
-    //                 m[p] = d;
-    //             }
-    //             //反向处理（对象无需进行反向处理）
-    //             if (reverse && typeof d !== 'object') {
-    //                 m.$watch(p, function (model1,ov, nv) {
-    //                     model.$set(field, nv);
-    //                 });
-    //             }
-    //         });
-    //     },
-    //     9
-    // );
-    
     /**
      * 指令名 field
      * 描述：字段指令
@@ -461,7 +421,6 @@ export default (function () {
      */
     createDirective('slot',
         function(module:Module,dom:VirtualDom,src:VirtualDom){
-            // const parent = dom.parent;
             this.value = this.value || 'default';
             let mid = dom.parent.subModuleId;
             console.log(mid,this.value);
@@ -471,28 +430,29 @@ export default (function () {
                 let m = ModuleFactory.get(mid);
                 if(m){
                     //缓存当前替换节点
-                    m.objectManager.set('$slots.' + this.value,{rendered:dom,origin:src.clone()});
+                    m.objectManager.set('$slots.' + this.value,{dom:src.clone(),model:dom.model});
                 }
-                //设置不添加到dom树
-                dom.dontAddToTree = true;
+                //此次不继续渲染，子节点在实际模块中渲染
+                return false;
             }else{ //源slot节点
                 //获取替换节点进行替换
                 let cfg = module.objectManager.get('$slots.' + this.value);
                 console.log(cfg,'cfg');
                 
                 if(cfg){
-                    let rdom;
-                    if(dom.hasProp('innerRender')){ //内部渲染
-                        rdom = cfg.origin;
-                    }else{ //父模块渲染
-                        rdom = cfg.rendered;
-                    }
-                    //避免key重复，更新key，如果为origin，则会修改原来的key？？？
+                    let rdom = cfg.dom;
+                    //避免key重复，更新key
                     for(let d of rdom.children){
                         Util.setNodeKey(d,dom.key,true);
                     }
                     //更改渲染子节点
                     src.children = rdom.children;
+                    //非内部渲染,更改model
+                    if(!src.hasProp('innerRender')){ 
+                        for(let c of src.children){
+                            c.model = cfg.model;
+                        }
+                    }
                     module.objectManager.remove('$slots.' + this.value);
                 }
             }

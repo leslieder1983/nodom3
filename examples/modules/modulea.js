@@ -5,8 +5,8 @@ export class ModuleA extends Module{
        this.change=props?.add;
         if(props.p1){
             return `
-                <div>
-                    <div e-click='change'>这是子模块A</div>
+                <div class='modulea' style='color:red'>
+                    <div>这是子模块A</div>
                     <p>模块A的内容</p>
                     <slot></slot>
                 </div>
@@ -21,12 +21,13 @@ export class ModuleA extends Module{
             
         }else{
             return `
-                <div>
-                    <div>这是子模块2</div>
+                <div class='modulea'>
                     <div>这是外部数据name:{{n}}</div>
-                    <slot>
-                        hello plug
-                    </slot>
+                    <for cond={{rows}}>
+                        <slot name='xx' innerRender>
+                            hello plug
+                        </slot>
+                    </for>
                     <div>这是外部数据x1:{{x1}}</div>
                     <div>
                         <p>这是外部数据x2:{{x2}}</p>
