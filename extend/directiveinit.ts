@@ -223,7 +223,7 @@ export default (function () {
     );
 
     /**
-     * elseif 指令
+     * endif 指令
      */
      createDirective(
          'endif', 
@@ -464,6 +464,8 @@ export default (function () {
             // const parent = dom.parent;
             this.value = this.value || 'default';
             let mid = dom.parent.subModuleId;
+            console.log(mid,this.value);
+            
             //父dom有module指令，表示为替代节点，替换子模块中的对应的slot节点；否则为子模块定义slot节点
             if(mid){
                 let m = ModuleFactory.get(mid);
@@ -476,6 +478,8 @@ export default (function () {
             }else{ //源slot节点
                 //获取替换节点进行替换
                 let cfg = module.objectManager.get('$slots.' + this.value);
+                console.log(cfg,'cfg');
+                
                 if(cfg){
                     let rdom;
                     if(dom.hasProp('innerRender')){ //内部渲染

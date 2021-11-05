@@ -13,23 +13,23 @@ export class MdlMod4 extends Module {
             </div>-->
         </div>`
     }
-    data =  {
-        routes: [{
-                title: '商品详情',
-                path: '/router/route2/rparam/home/1/desc',
-                active: true
-            },
-            {
-                title: '评价',
-                path: '/router/route2/rparam/home/1/comment',
-                active: false
-            }
-        ]
-    }
-
-    methods = {
-        onBeforeFirstRender(model){
-            console.log(model);
+    data(){
+        return {
+            routes: [{
+                    title: '商品详情',
+                    path: '/router/route2/rparam/home/1/desc',
+                    active: true
+                },
+                {
+                    title: '评价',
+                    path: '/router/route2/rparam/home/1/comment',
+                    active: false
+                }
+            ]
         }
+    }
+    
+    onBeforeFirstRender(model){
+        console.log(model);
     }
 }

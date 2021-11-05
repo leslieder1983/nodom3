@@ -2,6 +2,7 @@ import commonjs from "@rollup/plugin-commonjs";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import path from "path";
 import ts from "rollup-plugin-typescript2";
+import {terser} from 'rollup-plugin-terser';
 export default {
 	input: path.join(__dirname, "/index.ts"),
 	output: {
@@ -16,5 +17,6 @@ export default {
 		}),
 		ts(),
 		commonjs(),
+		// terser(),
 	],
 };

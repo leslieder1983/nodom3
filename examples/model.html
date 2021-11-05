@@ -64,67 +64,63 @@
             </div>
             `
         }
-        data = {
-            x: {
-                y: {
-                    z: 'hello'
-                }
-            },
-            datas: [{
-                a: 1,
-                b: 2
-            }, {
-                a: 2,
-                b: 4
-            }],
-            name:'nodom',
-            user: {
-                name: {
-                    firstName: 'Xiaoming',
-                    lastName: 'Zhang'
+        data(){
+            return{
+                x: {
+                    y: {
+                        z: 'hello'
+                    }
                 },
-                order: {
-                    foods: {
-                        food1: {
-                            name: '酸菜鱼',
-                            price: 40
-                        },
-                        food2: {
-                            name: '麻婆豆腐',
-                            price: 15
-                        },
-                        food3: {
-                            name: '回锅肉',
-                            price: 28
-                        },
-                        food4: {
-                            name: '番茄蛋汤',
-                            price: 8
+                datas: [{
+                    a: 1,
+                    b: 2
+                }, {
+                    a: 2,
+                    b: 4
+                }],
+                name:'nodom',
+                user: {
+                    name: {
+                        firstName: 'Xiaoming',
+                        lastName: 'Zhang'
+                    },
+                    order: {
+                        foods: {
+                            food1: {
+                                name: '酸菜鱼',
+                                price: 40
+                            },
+                            food2: {
+                                name: '麻婆豆腐',
+                                price: 15
+                            },
+                            food3: {
+                                name: '回锅肉',
+                                price: 28
+                            },
+                            food4: {
+                                name: '番茄蛋汤',
+                                price: 8
+                            }
                         }
                     }
                 }
             }
         }
-        methods = {
-            changeName(model) {
-                model.name = 'yang';
-                model.datas = [{a:3,b:3}];
-                // this.rows = [{
-                //     name: 'lei'
-                // }, {
-                //     name: 'haha'
-                // }];
-                // console.log(this.data);
-            },
-            onBeforeFirstRender(model){
-                model.$watch('datas',(m,oldValue,newValue)=>{
-                    console.log(m,oldValue,newValue)
-                })
-            }
+        
+        changeName(model) {
+            model.name = 'yang';
+            model.datas = [{a:3,b:3}];
+            
         }
-}
+        onBeforeFirstRender(model){
+            model.$watch('datas',(m,oldValue,newValue)=>{
+                console.log(m,oldValue,newValue);
+            });
+        }
+    }
 
-nodom(Module1,'div');
+    nodom(Module1,'div');
 </script>
 
 </html>

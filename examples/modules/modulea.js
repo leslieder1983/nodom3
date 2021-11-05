@@ -2,10 +2,11 @@ import {Module,registModule} from '../../dist/nodom.js'
 import {ModuleB} from './moduleb.js'
 export class ModuleA extends Module{
     template(props){
+       this.change=props?.add;
         if(props.p1){
             return `
                 <div>
-                    <div>这是子模块A</div>
+                    <div e-click='change'>这是子模块A</div>
                     <p>模块A的内容</p>
                     <slot></slot>
                 </div>
@@ -37,39 +38,30 @@ export class ModuleA extends Module{
         }
         
     }
-    data = {
-        name:'yang',
-        x1:0,
-        x2:0,
-        rows:[{name:'nodom1'},{name:'nodom2'},{name:'nodom3'}]
-    }
-
-    methods = {
-<<<<<<< HEAD
-        onBeforeFirstRender(){
-            console.log(this);
-        },
-        changeX2(model,dom,){
-            model.x2 = 'hahaha'
-=======
-        changeX2(model){
-            model.x2='hello';
-            console.log(model);
-        },
-        onBeforeFirstRender(){
-            // console.log(this);
-        },
-        onBeforeRender(model){
-            if(!this.props || !this.props.$data){
-                return;
-            }
-            for(let k of Object.keys(this.props.$data)){
-                model[k] = this.props.$data[k];
-            }
-            delete this.props.$data
->>>>>>> 7f23f804704351135f6c900ed982ade3ed659656
+    data(){
+        return{
+            name:'yang',
+            x1:0,
+            x2:0,
+            rows:[{name:'nodom1'},{name:'nodom2'},{name:'nodom3'}]
         }
+    }
+    changeX2(model){
+        model.x2='hello';
+    }
+    onBeforeFirstRender(){
+        // console.log(this);
+    }
+    onBeforeRender(model){
+        console.log('我渲染啦');
+        if(!this.props || !this.props.$data){
+            return;
+        }
+        for(let k of Object.keys(this.props.$data)){
+            model[k] = this.props.$data[k];
+        }
+        delete this.props.$data
     }
 }
 
-registModule(ModuleA,'mod-a');
+  registModule(ModuleA,'mod-a');

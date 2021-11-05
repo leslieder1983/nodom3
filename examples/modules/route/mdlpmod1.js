@@ -14,19 +14,18 @@ export class MdlPMod1 extends Module {
         </div>	
         `;
     } 
-    data = {
-        home: true,
-        list: false,
-        data: false
-    }
-    methods= {
-        onFirstRender () {
-            // console.log(this);
-        },
-        redirect(){
-            Router.redirect("/router/route3/r1/r2");
+    data(){
+        return{
+            home: true,
+            list: false,
+            data: false
         }
-
-
+    }
+    
+    onFirstRender () {
+        // console.log(this);
+    }
+    redirect(){
+        Router.redirect("/router/route3/r1/r2");
     }
 }

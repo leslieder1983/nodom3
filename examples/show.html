@@ -42,17 +42,16 @@
                 `
             }
 
-            data = {
-                show:true,
-                price:2000
-            }
-
-            methods = {
-                change(model){
-                    model.show = !model.show;
+            data(){
+                    return{
+                    show:true,
+                    price:2000
                 }
             }
-
+            
+            change(model){
+                model.show = !model.show;
+            }
         }
 
         nodom(Module1,'div')

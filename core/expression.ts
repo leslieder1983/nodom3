@@ -37,7 +37,7 @@ export class Expression {
             return;
         }
         const funStr = this.compile(exprStr);
-        this.execFunc = new Function('$model','$module',`return ` + funStr);
+        this.execFunc = new Function('$model',`return ` + funStr);
     }
 
     /**
@@ -100,9 +100,9 @@ export class Expression {
                 if(!Util.isKeyWord(fn)){
                     let lch = str[str.length-1];
                     if(lch !== ')'){ //有参数
-                        return '$module.invokeMethod("' + fn + '",';
+                        return 'this.invokeMethod("' + fn + '",';
                     }else{ //无参数
-                        return '$module.invokeMethod("' + fn + '")';
+                        return 'this.invokeMethod("' + fn + '")';
                     }
                 }
             }else if(str[0] !== '.'){  //第一个为点不处理
@@ -126,7 +126,7 @@ export class Expression {
         } 
         let v;
         try {
-            v = this.execFunc.apply(module.model,[model,module]);
+            v = this.execFunc.apply(module,[model,module]);
         } catch (e) {
             // console.error(e);
         }
