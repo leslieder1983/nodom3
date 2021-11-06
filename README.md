@@ -872,32 +872,32 @@ data(){
 
 ### 列表
 
-在我们的日常开发中，渲染一个`列表`类型的模块是十分常见的应用场景。接下来我们看看，在`Nodom`中是如何来实现`列表`的渲染的。
+在我们的日常开发中，渲染一个`列表`是十分常见的应用场景。接下来我们看看，在`Nodom`中是如何来实现`列表`的渲染的。
 
 #### 基础使用
 
 在`Nodom`中，我们提供了两种方式来实现`列表`的渲染。
 
-第一种是通过内置指令`x-reapet`的方式。这种方式是通过将数据传给`x-reapet`指令，实现`列表`的渲染。
+第一种是通过内置指令`x-reapet`的方式。
 
-第二种方式通过`Nodom`实现的`<for>`标签。回想一下，当你想要渲染一个按钮组件的时候，你会毫不犹豫的想到用`<button>`标签。那么在你想要渲染`列表`组件的时候，`Nodom`也完全支持你使用`<for>`标签。`<for>`标签是`Nodom`的封装标签，含有一个`cond`属性，用来传入需要渲染的列表数据。
+第二种方式通过`Nodom`实现的`<for>`标签。回想一下，当你想要渲染一个按钮组件的时候，你会毫不犹豫的想到用`<button>`标签。那么在你想要渲染`列表`组件的时候，`Nodom`也完全支持你使用`<for>`标签。`<for>`标签是`Nodom`的内置的指令元素，含有一个`cond`属性，用来传入需要渲染的列表数据。
 
 `Nodom`会自动帮你将所有数据转换为响应式数据。
 
-```jsx
-// x-repeat 指令
+```html
+<!-- x-repeat 指令 -->
 <div class="code">
     菜单：
-    <div x-repeat={{foods}} class={{genCls($index)}}>
+    <div x-repeat={{foods}} $index='idx'>
         <span>菜名：{{name}}，价格：{{price}}</span>
     </div>
 </div>
 
-// <for>标签
+<!-- <for>标签 -->
 <div class="code">
     菜单：
-    <for cond={{foods}} class={{genCls($index)}}>
-    	<span>菜名：{{name}}，价格：{{price}}</span>
+    <for cond="{{foods}}" $index='idx'}}>
+        <span>菜名：{{name}}，价格：{{price}}</span>
     </for>
 </div>
 ```
@@ -906,40 +906,40 @@ data(){
 
 #### 索引号的使用（编号从0开始）
 
-目前，有一个这样的需求，你需要为你的列表模块添加一个编号。所以我们需要知道当前元素的索引、那么我们如何去获取当前索引呢？`Nodom`自动为你当前的`model`注入了`$index`这一变量，用来获取当前索引。
+目前，有一个这样的需求，你需要为你的列表模块添加一个编号。所以我们需要知道当前元素的索引、那么我们如何去获取当前索引呢？`Nodom`自动为你当前的`model`注入了`$index`这一变量，用来获取当前索引。但在使用之前，我们需要你指定索引的名字
 
-```jsx
+```html
 <div class=tip>索引号的使用（编号从0开始）</div> 
-// x-repeat 指令
+<!-- x-repeat 指令 -->
 <div class=code>
     菜单：
-    <div x-repeat={{foods}} $index="ind">
-        编号：{{$index}}，菜名：{{name}}，价格：{{price}}
+    <div x-repeat={{foods}} $index='idx'>
+        编号：{{idx}}，菜名：{{name}}，价格：{{price}}
     </div>
 </div>
 
-// <for>标签
+<!-- <for>标签 -->
 <div class=code>
     菜单：
-    <for cond={{foods}}>
-        编号：{{$index}}，菜名：{{name}}，价格：{{price}}
+    <for cond={{foods}} $index='idx'>
+        编号：{{idx}}，菜名：{{name}}，价格：{{price}}
     </for>
 </div>
 ```
 
 **结果**：
 
-**注意**：你不应该修改`$index`这个内置变量，因为这将造成不可预知的错误。
+**注意**：不论你是否使用，我们都建议你指定`$index`的索引名，否则将造成不可预知的错误。
 
-#### 访问`data`中的数据
+#### 访问`Model`中的数据
 
 如果你需要访问`data`中的数据，那么直接访问是不行的。因为每一个`x-repeat`复制出来的`module`是独立的`model`，他们与基础的`module`的指向的全局`model`不同，这类`module`会指向自己的独立`model`，你仅能访问`cond`里对象的属性。那我们如何来访问呢？只有在当前`module`中通过`this.model`调用全局`model`来访问`data`中的数据。
 
-```js
+```html
 <div class=tip>访问 data 中的数据</div>
 <div class="code">
     菜单：
-    <for cond={{foods}}>
+    <for cond={{foods}} $index='idx'>
         data中的show: {{this.model.show}}
     </for>
 </div>
@@ -951,19 +951,19 @@ data(){
 
 现在，你只想看到`22`元以上的菜，那么，你可以使用一个自定义函数来为你自己筛选这些菜。
 
-```jsx
+```html
 <div class=tip>自定义过滤数组</div>
-// x-repeat 指令
+<!-- x-repeat 指令 -->
 <div class="code">
     菜单：
-    <div x-repeat={{getFood(foods)}}>
+    <div x-repeat={{getFood(foods)}} $index='idx'>
         菜名：{{name}}，价格：{{price}}
     </div>
 </div>
-// <for>标签
+<!-- <for>标签 -->
 <div class="code">
     菜单：
-    <for cond={{getFood(foods)}}>
+    <for cond={{getFood(foods)}} $index='idx'>
         菜名：{{name}}，价格：{{price}}
     </for>
 </div>
@@ -987,7 +987,7 @@ getFood(arr) {
 
 **结果**：
 
-**注意**：自定义函数中传入的数据已经不是原来`data`中的初始数据了，而是包裹了一层`Proxy`的响应式数据。针对会改变响应式数据的数组方法，`Nodom`提供全面支持。例如：
+**注意**：自定义函数中传入的数据已经不是原来`data`中的初始数据了，而是包裹了一层`Proxy`的响应式数据。因此，你将只能调用一些支持的方法。例如：
 
 - `push()`
 - `pop()`
@@ -1007,11 +1007,11 @@ getFood(arr) {
 <div class=tip>repeat 嵌套</div>
 <div class=code>
     菜单：
-    <div x-repeat={{foods1}}>
-        编号：{{$index+1}}，菜名：{{name}}，价格：{{price}}
+    <div x-repeat={{foods1}} $index='idx'>
+        编号：{{idx+1}}，菜名：{{name}}，价格：{{price}}
         <p>配料列表：</p>
         <ol>
-            <li x-repeat={{rows}}>食材：{{title}}，重量：{{weight}}</li>
+            <li x-repeat={{rows}} $index='idx'>食材：{{title}}，重量：{{weight}}</li>
         </ol>
     </div>
 </div>
@@ -1025,7 +1025,7 @@ getFood(arr) {
 
 #### `x-repeat`指令和`x-recur`指令
 
-`x-recur`指令可以和`x-repeat`一起使用，更快速的解析`树形结构`的数据。例如，现在你需要写一个树形组件，他的数据格式是这样的:
+`x-recur`指令可以和`x-repeat`一起使用，更快速的解析`树形结构`的数据。例如，现在你需要写一个树形组件，他的数据格式是这样的
 
 ```js
 {
@@ -1105,11 +1105,11 @@ getFood(arr) {
 
 你如果仅仅使用`x-repeat`指令，那么很难去生成一个`树形结构`。还好，`Nodom`帮你做了处理，现在将`x-recur`加入进来。
 
-```jsx
+```html
 <h3>递归带repeat</h3>
 <div x-model='ritem2'>
     <recur cond='items' name='r1' class='secondct'>
-        <for cond={{items}} >
+        <for cond={{items}} $index='idx'>
             <div class='second'>id is:{{id}}-{{title}}</div>
             <recur ref='r1' />
         </for>
@@ -1123,9 +1123,10 @@ getFood(arr) {
 
 #### 注意
 
-+ `x-repeat`指令和`<for>`标签中均只能使用对象数组作为数据。
-+ `<for>`标签最终渲染的标签为`<div>`。
++ `x-for`指令和`<for>`标签中均只能使用对象数组作为数据。
++ `<for>`标签最终渲染的标签为`<div>`
 + 不要将`<for>`标签和`x-repeat`指令一起使用。
+
 
 ### 虚拟Dom
 
