@@ -1127,14 +1127,11 @@ getFood(arr) {
 + `<for>`标签最终渲染的标签为`<div>`
 + 不要将`<for>`标签和`x-repeat`指令一起使用。
 
+### 虚拟Dom		
 
-### 虚拟Dom
+Nodom通过js进行虚拟dom缓存，在dom树上进行比对然后渲染dom树，进行对dom操作性能的优化，通过状态的改变和与模板容器dom中做比对来进行对dom树的渲染操作。
 
-		Nodom是以通过js进行虚拟dom缓存，然后在dom树上进行比对然后渲染dom树的方式，来进行对dom操作性能的优化，通过状态的改变和与模板容器dom中做比对后进行对dom树的渲染操作。
-		虚拟dom有着真实dom一些达不到优势比如虚拟dom可以经过diff找出最小差异，然后批量进行patch，我们无需手动操作DOM极大的提高了页面性能。同时虚拟DOM是JS的对象，就比较方便进行跨平台操作，像服务器渲染等。
-
-
-​		接下来将介绍Nodom 虚拟dom（VirtualDom）的部分主要属性以及方法
+#### tagName属性
 
 ```typescript
 /**
@@ -1143,16 +1140,18 @@ getFood(arr) {
 public tagName: string;
 ```
 
-​		
+#### key属性
 
-```
+Nodom中虚拟dom的key是唯一的标识，对节点的操作时提供并保证正确的位置，也可以通过key来获取虚拟dom中的值
+
+```typescript
 /**
  * key，整颗虚拟dom树唯一
  */
 public key: string;
 ```
 
-​		Nodom中虚拟DOM的key是唯一的标识，在做一些对于节点的操作时提供并保证正确的位置，你也可以通过key来获取虚拟dom中的值
+#### model属性
 
 ```typescript
 /**
@@ -1161,8 +1160,6 @@ public key: string;
 public model: Model;
 ```
 
-​		在Nodom中的renderer.ts文件中的部分代码可以较容易的理解model属性
-
 ```typescript
 public static renderDom(module:Module,src:VirtualDom,model:Model,parent?:VirtualDom,key?:string):VirtualDom{
     //节点自带model优先级高
@@ -1170,110 +1167,11 @@ public static renderDom(module:Module,src:VirtualDom,model:Model,parent?:Virtual
     let dst:VirtualDom = new VirtualDom(src.tagName,key?src.key+'_'+key:src.key);
 ```
 
-​		接下来是一些主要方法
+#### AddEvent()方法			
+
+添加事件时，可以使用Nodom虚拟dom中的addEvent方法，如果这个事件已经添加，将不再进行添加操作
 
 ```typescript
-/**
- * 移除多个指令
- * @param directives   待删除的指令类型数组或指令类型
- */
-public removeDirectives(directives: string[]) {
-    if(!this.directives){
-        return;
-    }
-    
-    //数组
-    directives.forEach(d=>{
-        this.removeDirective(d);
-    });
-}
-```
-
-​		这个方法可以同时移除多个命令，你可以传入一个含有你想要删除指令的字符串数组，或者你也可以只移除一个指令如下
-
-```typescript
-/**
- * 移除指令
- * @param directive    待删除的指令类型名
- */
-public removeDirective(directive: string) {
-    if(!this.directives){
-        return;
-    }
-    
-    let ind;
-    if ((ind = this.directives.findIndex(item => item.type.name === directive)) !== -1) {
-        this.directives.splice(ind, 1);
-    }
-    if(this.directives.length === 0){
-        delete this.directives;
-    }
-}
-```
-
-​		同时还有增加指令方法
-
-```typescript
-public addDirective(directive: Directive, sort?: boolean) {
-    if(!this.directives){
-        this.directives = [];
-    }else if(this.directives.find(item=>item.type.name === directive.type.name)){
-        return;
-    }
-    this.directives.push(directive);
-    //指令按优先级排序
-    if (sort) {
-        this.sortDirective();
-    }
-}
-```
-
-​		如果你想知道是否存在某个class，你可以使用以下方法，同时你还可以addClass和removeClass
-
-```
-public hasClass(cls: string): boolean {
-    let clazz = this.getProp('class');
-    if (!clazz) {
-        return false;
-    } else {
-        return clazz.trim().split(/\s+/).includes(cls);
-    }
-}
-```
-
-​		而对于props的操作名和class操作名相类似，比如当你像查询当前虚拟DOM元素是否拥有属性时，你可以使用hasProp方法
-
-```typescript
-/**
- * 是否拥有属性
- * @param propName  属性名
- * @param isExpr    是否只检查表达式属性
- */
-public hasProp(propName: string) {
-    if(this.props){
-        return this.props.has(propName);
-    }
-}
-```
-
-​		或者当你想要获取属性值，或者只获取表达式属性时，你可以使用getProp方法，里面的isExpr属性可以给你一个选择。
-
-```
-/**
- * 获取属性值
- * @param propName  属性名
- * @param isExpr    是否只获取表达式属性
- */
-public getProp(propName: string,isExpr?:boolean) {
-    if(this.props){
-        return this.props.get(propName);
-    }
-}
-```
-
-​		当你想添加事件时，你可以使用Nodom虚拟dom中的addEvent方法，在其中如果这个事件已经添加，将不再进行添加操作
-
-```
 public addEvent(event: NEvent) {
     if(!this.events){
         this.events = new Map();
@@ -1290,108 +1188,7 @@ public addEvent(event: NEvent) {
 }
 ```
 
-​		如果你要获取html dom 或者查找子孙节点，你可以使用getEl方法来获取html dom 用query方法来获取子孙节点
-
-​		
-
-```
-/**
- * 获取html dom
- * @param module    模块 
- * @returns         对应的html dom
- */
-public getEl(module:Module):Node{
-    return module.getNode(this.key);
-}
-
-/**
- * 查找子孙节点
- * @param key  element key
- * @returns       虚拟dom/undefined
- */
-public query(key: string) {
-    if (this.key === key) {
-        return this;
-    }
-    if(this.children){
-        for (let i = 0; i < this.children.length; i++) {
-            let dom = this.children[i].query(key);
-            if (dom) {
-                return dom;
-            }
-        }
-    }
-}
-```
-
-​		而对于cache的的设置等操作，你可以使用Nodom中Param的相关方法来进行，比如设置cache参数方法setParam
-
-```typescript
-/**
- * 设置cache参数
- * @param module    模块
- * @param name      参数名
- * @param value     参数值
- */
-public setParam(module:Module,name:string,value:any){
-    module.objectManager.setElementParam(this.key,name,value);
-}
-```
-
-​		我们还有克隆方法来进行克隆：
-
-```
-/**
- * 克隆
- * @param changeKey     是否更改key，如果为true，则生成的节点用新的key
- */
- public clone(): VirtualDom {
-    let dst: VirtualDom = new VirtualDom(this.tagName,this.key);
-    if(this.tagName){
-        //属性
-        if(this.props && this.props.size>0){
-            for(let p of this.props){
-                dst.setProp(p[0],p[1]);
-            }
-        }
-        
-        if(this.assets && this.assets.size>0){
-            for(let p of this.assets){
-                dst.setAsset(p[0],p[1]);
-            }
-        }
-        
-        //事件
-        if(this.events && this.events.size>0){
-            for(let p of this.events){
-                //复制数组
-                dst.setEvent(p[0],p[1].slice(0));
-            }    
-        }
-        
-        if(this.directives && this.directives.length>0){
-            dst.directives = [];
-            for(let d of this.directives){
-                dst.directives.push(d.clone());
-            }
-        }
-        
-        //子节点clone
-        if(this.children){
-            for(let c of this.children){
-                dst.add(c.clone());
-            }
-        }
-    }else{
-        dst.expressions = this.expressions;
-        dst.textContent = this.textContent;
-    }
-    dst.staticNum = this.staticNum;
-    return dst;
-}
-```
-
-​		Nodom提供了大量对于虚拟dom的操作方法以及属性，在提升性能方面有有了很大提高。
+虚拟dom经过diff找出最小差异，批量进行patch，无需手动操作dom元素，极大的提高了页面性能。同时虚拟dom是JS的对象，有利于进行跨平台操作。
 
 ## 深入
 
