@@ -1626,7 +1626,7 @@ class Main extends Module{
 
 ​	**Nodom对Css提供额外的支持。**
 
-* 在模板代码中的 `<style></style>` 标签中直接写入css样式，示例代码如下：
+* 在模板代码中的 `<style></style>` 标签中直接写入Css样式，示例代码如下：
 
 ```js
 class Module1 extends Module {
@@ -1644,7 +1644,7 @@ class Module1 extends Module {
 }
 ```
 
-* 在模板代码中的 `<style></style>` 标签中的通过表达式调用函数返回css样式代码串，示例代码如下：
+* 在模板代码中的 `<style></style>` 标签中的通过表达式调用函数返回Css样式代码串，示例代码如下：
 
 ```js
 class Module1 extends Module {
@@ -1664,7 +1664,7 @@ class Module1 extends Module {
 }
 ```
 
-* 在模块模板中的 `<style></style>` 标签中通过@import url('css url路径')引入css样式文件，示例代码如下：
+* 在模块模板中的 `<style></style>` 标签中通过@import url('css url路径')引入Css样式文件，示例代码如下：
 
 ```js
 class Module1 extends Module {
@@ -1681,7 +1681,7 @@ class Module1 extends Module {
 }
 ```
 
-* 在模块模板代码中需要样式的节点中直接写css样式，示例代码如下：
+* 在模块模板代码中需要样式的节点中直接写Css样式，示例代码如下：
 
 ```js
 class Module1 extends Module {
