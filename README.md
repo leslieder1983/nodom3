@@ -14,7 +14,7 @@ npm install
 安装依赖包  
 再执行  
 npm run build  
-即可编译出可运行的nodom.js  
+即可编译出可运行的nodom.js
 使用Live Server启动在./examples目录下的html文件即可  
 ```
 # 文档
