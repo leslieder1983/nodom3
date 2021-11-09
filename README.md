@@ -367,6 +367,135 @@ nodom的事件命名为`e-`+原生事件名不写`on`，例如：
 
 关于事件绑定的详细信息可以阅读本章的事件绑定章节。
 
+### Nodom css支持
+
+#### 原生css支持
+
+（1）链接式  ： 在网页的 `<head></head>` 标签对中使用 `<link>` 标签来引入外部样式表文件，使用html规则引入外部css :
+
+```html
+<link href="CSS url路径" rel="stylesheet" type="text/css"/>
+```
+
+（2）内联css文件，直接在header里面的 `<style></style>` 标签中写css样式，如：	
+
+```html
+<style type="text/css">
+	div {
+        margin: 0;
+        padding: 0;
+        border:1px red solid;
+    }
+</style>
+```
+
+（3）导入式 ： 将一个独立的.css文件引入html文件中，导入式使用css规则引入外部css文件，使用的语法如下：     
+
+```html
+<style type="text/css"> 
+	@import url("css url路径");  //此处要注意.css文件的路径
+</style>
+```
+
+（4）直接在需要样式的标签里写css样式，如：
+
+```html
+<div style="border:1px red solid;">hello Nodom!</div>
+```
+
+
+
+#### 模板代码css支持
+
+（1）方式一：在模块模板代码template中的 `<style></style>` 标签中直接写入css样式，示例代码如下：
+
+```js
+class Module1 extends Module {
+    template() {
+        return plate = `
+				<div>
+                    <h1 class="test">Hello nodom!</h1>
+                    <style>
+                        .test {
+                            color: red;
+                        }
+                    </style>
+                </div>`;
+       }
+}
+```
+
+（2）方式二：在模块模板template中的 `<style></style>` 标签中的通过表达式调用函数返回css样式代码串，示例代码如下：
+
+```js
+class Module1 extends Module {
+     template() {
+         let plate = `
+			<div>
+                <h1 class="test">Hello nodom!</h1>
+                <style>{{css()}}</style>
+            </div>`;
+     }
+     css() {
+            return `.test {
+					color: red;
+				}`;
+     }
+}
+```
+
+（3）方式三：在模块模板template中的 `<style></style>` 标签中通过@import url('css url路径')引入css样式文件，示例代码如下：
+
+```js
+class Module1 extends Module {
+     template() {
+            let plate = `
+				<div>
+                    <h1 class="test">Hello nodom!</h1>
+                    <style>
+                        @import url('./style.css')
+                    </style>
+                </div>
+			`;
+     }
+}
+```
+
+（4）方式四：在模块模板代码template中需要样式的标签中直接写css样式，示例代码如下：
+
+```js
+class Module1 extends Module {
+     template() {
+            let plate = `
+				<div>
+                    <h1 style="color: red;" class="test">Hello nodom!</h1>
+                </div>
+			`;
+     }
+}	
+```
+
+
+
+##### scope属性 
+
+​	添加该属性后Nodom会自动在css选择器前加前置名使css样式的作用域变成当前模块内，保证css的作用域不会变成全局污染其它模块。示例代码如下：
+
+```js
+class Module1 extends Module {
+     template() {
+            let plate = `
+				<div>
+                    <h1 class="test">Hello nodom!</h1>
+                    <style scope="this">
+                        @import url('./style.css')
+                    </style>
+                </div>
+			`;
+     }
+}
+```
+
 ### 表达式
 
 在Nodom中，与视图进行数据绑定的最常用形式就是使用**{{}}**(双大括号)，灵感追溯至Mustache库，用来与对应模块实例data内的属性值进行替换，比如：
