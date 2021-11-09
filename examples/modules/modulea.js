@@ -5,7 +5,7 @@ export class ModuleA extends Module{
        this.change=props?.add;
         if(props.p1){
             return `
-                <div class='modulea' style='color:red'>
+                <div class='modulea' style='color:red' tem={{'<div>{{name}}</div>'}}>
                     <div>这是子模块A</div>
                     <p>模块A的内容</p>
                     <slot></slot>
