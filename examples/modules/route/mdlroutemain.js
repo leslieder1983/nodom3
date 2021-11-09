@@ -4,8 +4,8 @@ export class MdlRouteMain extends Module {
         return `
         <div>
             <div>当前时间:{{formatDate(date1)}}</div>
-            <a x-route='/router' class={{page1?'colorimp':''}} active='page1'>page1</a>
-            <div x-router></div>
+            <a </div>x-route='/router' class={{page1?'colorimp':''}} active='page1'>page1</a>
+            <div x-router>
         </div>
         `;
     }

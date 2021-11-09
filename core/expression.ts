@@ -98,7 +98,6 @@ export class Expression {
          */
         function handleFunc(str):string{
             let ind = str.indexOf('.');
-                    
             //中间无'.'
             if(ind === -1){
                 let ind1 = str.lastIndexOf('(');

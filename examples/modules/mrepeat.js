@@ -1,14 +1,16 @@
-import { Module } from "../../dist/nodom.js";
+import {
+    Module
+} from '../../dist/nodom.js';
+
 export class MRepeat extends Module {
-	template() {
-		return `
+    template() {
+        return `
         <div class="view">
             <button e-click='pop'>pop</button>
             <button e-click='push'>push</button>
             <button e-click='addFood'>addFood</button>
             <button e-click='desc'>价格降序</button>
             <button e-click='clear'>清空</button>
-            
             <div class="tip">基本使用</div>
             <div class="code">
                 菜单：
@@ -41,7 +43,6 @@ export class MRepeat extends Module {
                     <ol>
                         <li x-repeat={{rows}}>食材：{{title}}，重量：{{weight}}</li>
                     </ol>
-                    
                 </div>
             </div>
 
