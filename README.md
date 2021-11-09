@@ -14,7 +14,7 @@ npm install
 安装依赖包  
 再执行  
 npm run build  
-即可编译出可运行的nodom.js  
+即可编译出可运行的nodom.js
 使用Live Server启动在./examples目录下的html文件即可  
 ```
 # 文档
@@ -872,32 +872,32 @@ data(){
 
 ### 列表
 
-在我们的日常开发中，渲染一个`列表`类型的模块是十分常见的应用场景。接下来我们看看，在`Nodom`中是如何来实现`列表`的渲染的。
+在我们的日常开发中，渲染一个`列表`是十分常见的应用场景。接下来我们看看，在`Nodom`中是如何来实现`列表`的渲染的。
 
 #### 基础使用
 
 在`Nodom`中，我们提供了两种方式来实现`列表`的渲染。
 
-第一种是通过内置指令`x-reapet`的方式。这种方式是通过将数据传给`x-reapet`指令，实现`列表`的渲染。
+第一种是通过内置指令`x-reapet`的方式。
 
-第二种方式通过`Nodom`实现的`<for>`标签。回想一下，当你想要渲染一个按钮组件的时候，你会毫不犹豫的想到用`<button>`标签。那么在你想要渲染`列表`组件的时候，`Nodom`也完全支持你使用`<for>`标签。`<for>`标签是`Nodom`的封装标签，含有一个`cond`属性，用来传入需要渲染的列表数据。
+第二种方式通过`Nodom`实现的`<for>`标签。回想一下，当你想要渲染一个按钮组件的时候，你会毫不犹豫的想到用`<button>`标签。那么在你想要渲染`列表`组件的时候，`Nodom`也完全支持你使用`<for>`标签。`<for>`标签是`Nodom`的内置的指令元素，含有一个`cond`属性，用来传入需要渲染的列表数据。
 
 `Nodom`会自动帮你将所有数据转换为响应式数据。
 
-```jsx
-// x-repeat 指令
+```html
+<!-- x-repeat 指令 -->
 <div class="code">
     菜单：
-    <div x-repeat={{foods}} class={{genCls($index)}}>
+    <div x-repeat={{foods}} $index='idx'>
         <span>菜名：{{name}}，价格：{{price}}</span>
     </div>
 </div>
 
-// <for>标签
+<!-- <for>标签 -->
 <div class="code">
     菜单：
-    <for cond={{foods}} class={{genCls($index)}}>
-    	<span>菜名：{{name}}，价格：{{price}}</span>
+    <for cond="{{foods}}" $index='idx'}}>
+        <span>菜名：{{name}}，价格：{{price}}</span>
     </for>
 </div>
 ```
@@ -906,40 +906,40 @@ data(){
 
 #### 索引号的使用（编号从0开始）
 
-目前，有一个这样的需求，你需要为你的列表模块添加一个编号。所以我们需要知道当前元素的索引、那么我们如何去获取当前索引呢？`Nodom`自动为你当前的`model`注入了`$index`这一变量，用来获取当前索引。
+目前，有一个这样的需求，你需要为你的列表模块添加一个编号。所以我们需要知道当前元素的索引、那么我们如何去获取当前索引呢？`Nodom`自动为你当前的`model`注入了`$index`这一变量，用来获取当前索引。但在使用之前，我们需要你指定索引的名字
 
-```jsx
+```html
 <div class=tip>索引号的使用（编号从0开始）</div> 
-// x-repeat 指令
+<!-- x-repeat 指令 -->
 <div class=code>
     菜单：
-    <div x-repeat={{foods}} $index="ind">
-        编号：{{$index}}，菜名：{{name}}，价格：{{price}}
+    <div x-repeat={{foods}} $index='idx'>
+        编号：{{idx}}，菜名：{{name}}，价格：{{price}}
     </div>
 </div>
 
-// <for>标签
+<!-- <for>标签 -->
 <div class=code>
     菜单：
-    <for cond={{foods}}>
-        编号：{{$index}}，菜名：{{name}}，价格：{{price}}
+    <for cond={{foods}} $index='idx'>
+        编号：{{idx}}，菜名：{{name}}，价格：{{price}}
     </for>
 </div>
 ```
 
 **结果**：
 
-**注意**：你不应该修改`$index`这个内置变量，因为这将造成不可预知的错误。
+**注意**：不论你是否使用，我们都建议你指定`$index`的索引名，否则将造成不可预知的错误。
 
-#### 访问`data`中的数据
+#### 访问`Model`中的数据
 
 如果你需要访问`data`中的数据，那么直接访问是不行的。因为每一个`x-repeat`复制出来的`module`是独立的`model`，他们与基础的`module`的指向的全局`model`不同，这类`module`会指向自己的独立`model`，你仅能访问`cond`里对象的属性。那我们如何来访问呢？只有在当前`module`中通过`this.model`调用全局`model`来访问`data`中的数据。
 
-```js
+```html
 <div class=tip>访问 data 中的数据</div>
 <div class="code">
     菜单：
-    <for cond={{foods}}>
+    <for cond={{foods}} $index='idx'>
         data中的show: {{this.model.show}}
     </for>
 </div>
@@ -951,19 +951,19 @@ data(){
 
 现在，你只想看到`22`元以上的菜，那么，你可以使用一个自定义函数来为你自己筛选这些菜。
 
-```jsx
+```html
 <div class=tip>自定义过滤数组</div>
-// x-repeat 指令
+<!-- x-repeat 指令 -->
 <div class="code">
     菜单：
-    <div x-repeat={{getFood(foods)}}>
+    <div x-repeat={{getFood(foods)}} $index='idx'>
         菜名：{{name}}，价格：{{price}}
     </div>
 </div>
-// <for>标签
+<!-- <for>标签 -->
 <div class="code">
     菜单：
-    <for cond={{getFood(foods)}}>
+    <for cond={{getFood(foods)}} $index='idx'>
         菜名：{{name}}，价格：{{price}}
     </for>
 </div>
@@ -987,7 +987,7 @@ getFood(arr) {
 
 **结果**：
 
-**注意**：自定义函数中传入的数据已经不是原来`data`中的初始数据了，而是包裹了一层`Proxy`的响应式数据。针对会改变响应式数据的数组方法，`Nodom`提供全面支持。例如：
+**注意**：自定义函数中传入的数据已经不是原来`data`中的初始数据了，而是做了响应式处理的响应式数据。`Nodom`响应式数组数据中，支持的`js`原生方法有很多，例如：
 
 - `push()`
 - `pop()`
@@ -1007,11 +1007,11 @@ getFood(arr) {
 <div class=tip>repeat 嵌套</div>
 <div class=code>
     菜单：
-    <div x-repeat={{foods1}}>
-        编号：{{$index+1}}，菜名：{{name}}，价格：{{price}}
+    <div x-repeat={{foods1}} $index='idx'>
+        编号：{{idx+1}}，菜名：{{name}}，价格：{{price}}
         <p>配料列表：</p>
         <ol>
-            <li x-repeat={{rows}}>食材：{{title}}，重量：{{weight}}</li>
+            <li x-repeat={{rows}} $index='idx'>食材：{{title}}，重量：{{weight}}</li>
         </ol>
     </div>
 </div>
@@ -1025,7 +1025,7 @@ getFood(arr) {
 
 #### `x-repeat`指令和`x-recur`指令
 
-`x-recur`指令可以和`x-repeat`一起使用，更快速的解析`树形结构`的数据。例如，现在你需要写一个树形组件，他的数据格式是这样的:
+`x-recur`指令可以和`x-repeat`一起使用，更快速的解析`树形结构`的数据。例如，现在你需要写一个树形组件，他的数据格式是这样的
 
 ```js
 {
@@ -1105,11 +1105,11 @@ getFood(arr) {
 
 你如果仅仅使用`x-repeat`指令，那么很难去生成一个`树形结构`。还好，`Nodom`帮你做了处理，现在将`x-recur`加入进来。
 
-```jsx
+```html
 <h3>递归带repeat</h3>
 <div x-model='ritem2'>
     <recur cond='items' name='r1' class='secondct'>
-        <for cond={{items}} >
+        <for cond={{items}} $index='idx'>
             <div class='second'>id is:{{id}}-{{title}}</div>
             <recur ref='r1' />
         </for>
@@ -1123,17 +1123,15 @@ getFood(arr) {
 
 #### 注意
 
-+ `x-repeat`指令和`<for>`标签中均只能使用对象数组作为数据。
-+ `<for>`标签最终渲染的标签为`<div>`。
++ `x-for`指令和`<for>`标签中均只能使用对象数组作为数据。
++ `<for>`标签最终渲染的标签为`<div>`
 + 不要将`<for>`标签和`x-repeat`指令一起使用。
 
-### 虚拟Dom
+### 虚拟Dom		
 
-		Nodom是以通过js进行虚拟dom缓存，然后在dom树上进行比对然后渲染dom树的方式，来进行对dom操作性能的优化，通过状态的改变和与模板容器dom中做比对后进行对dom树的渲染操作。
-		虚拟dom有着真实dom一些达不到优势比如虚拟dom可以经过diff找出最小差异，然后批量进行patch，我们无需手动操作DOM极大的提高了页面性能。同时虚拟DOM是JS的对象，就比较方便进行跨平台操作，像服务器渲染等。
+Nodom通过js进行虚拟dom缓存，在dom树上进行比对然后渲染dom树，进行对dom操作性能的优化，通过状态的改变和与模板容器dom中做比对来进行对dom树的渲染操作。
 
-
-​		接下来将介绍Nodom 虚拟dom（VirtualDom）的部分主要属性以及方法
+#### tagName属性
 
 ```typescript
 /**
@@ -1142,16 +1140,18 @@ getFood(arr) {
 public tagName: string;
 ```
 
-​		
+#### key属性
 
-```
+Nodom中虚拟dom的key是唯一的标识，对节点的操作时提供并保证正确的位置，也可以通过key来获取虚拟dom中的值
+
+```typescript
 /**
  * key，整颗虚拟dom树唯一
  */
 public key: string;
 ```
 
-​		Nodom中虚拟DOM的key是唯一的标识，在做一些对于节点的操作时提供并保证正确的位置，你也可以通过key来获取虚拟dom中的值
+#### model属性
 
 ```typescript
 /**
@@ -1160,8 +1160,6 @@ public key: string;
 public model: Model;
 ```
 
-​		在Nodom中的renderer.ts文件中的部分代码可以较容易的理解model属性
-
 ```typescript
 public static renderDom(module:Module,src:VirtualDom,model:Model,parent?:VirtualDom,key?:string):VirtualDom{
     //节点自带model优先级高
@@ -1169,110 +1167,11 @@ public static renderDom(module:Module,src:VirtualDom,model:Model,parent?:Virtual
     let dst:VirtualDom = new VirtualDom(src.tagName,key?src.key+'_'+key:src.key);
 ```
 
-​		接下来是一些主要方法
+#### AddEvent()方法			
+
+添加事件时，可以使用Nodom虚拟dom中的addEvent方法，如果这个事件已经添加，将不再进行添加操作
 
 ```typescript
-/**
- * 移除多个指令
- * @param directives   待删除的指令类型数组或指令类型
- */
-public removeDirectives(directives: string[]) {
-    if(!this.directives){
-        return;
-    }
-    
-    //数组
-    directives.forEach(d=>{
-        this.removeDirective(d);
-    });
-}
-```
-
-​		这个方法可以同时移除多个命令，你可以传入一个含有你想要删除指令的字符串数组，或者你也可以只移除一个指令如下
-
-```typescript
-/**
- * 移除指令
- * @param directive    待删除的指令类型名
- */
-public removeDirective(directive: string) {
-    if(!this.directives){
-        return;
-    }
-    
-    let ind;
-    if ((ind = this.directives.findIndex(item => item.type.name === directive)) !== -1) {
-        this.directives.splice(ind, 1);
-    }
-    if(this.directives.length === 0){
-        delete this.directives;
-    }
-}
-```
-
-​		同时还有增加指令方法
-
-```typescript
-public addDirective(directive: Directive, sort?: boolean) {
-    if(!this.directives){
-        this.directives = [];
-    }else if(this.directives.find(item=>item.type.name === directive.type.name)){
-        return;
-    }
-    this.directives.push(directive);
-    //指令按优先级排序
-    if (sort) {
-        this.sortDirective();
-    }
-}
-```
-
-​		如果你想知道是否存在某个class，你可以使用以下方法，同时你还可以addClass和removeClass
-
-```
-public hasClass(cls: string): boolean {
-    let clazz = this.getProp('class');
-    if (!clazz) {
-        return false;
-    } else {
-        return clazz.trim().split(/\s+/).includes(cls);
-    }
-}
-```
-
-​		而对于props的操作名和class操作名相类似，比如当你像查询当前虚拟DOM元素是否拥有属性时，你可以使用hasProp方法
-
-```typescript
-/**
- * 是否拥有属性
- * @param propName  属性名
- * @param isExpr    是否只检查表达式属性
- */
-public hasProp(propName: string) {
-    if(this.props){
-        return this.props.has(propName);
-    }
-}
-```
-
-​		或者当你想要获取属性值，或者只获取表达式属性时，你可以使用getProp方法，里面的isExpr属性可以给你一个选择。
-
-```
-/**
- * 获取属性值
- * @param propName  属性名
- * @param isExpr    是否只获取表达式属性
- */
-public getProp(propName: string,isExpr?:boolean) {
-    if(this.props){
-        return this.props.get(propName);
-    }
-}
-```
-
-​		当你想添加事件时，你可以使用Nodom虚拟dom中的addEvent方法，在其中如果这个事件已经添加，将不再进行添加操作
-
-```
 public addEvent(event: NEvent) {
     if(!this.events){
         this.events = new Map();
@@ -1289,108 +1188,7 @@ public addEvent(event: NEvent) {
 }
 ```
 
-​		如果你要获取html dom 或者查找子孙节点，你可以使用getEl方法来获取html dom 用query方法来获取子孙节点
-
-​		
-
-```
-/**
- * 获取html dom
- * @param module    模块 
- * @returns         对应的html dom
- */
-public getEl(module:Module):Node{
-    return module.getNode(this.key);
-}
-
-/**
- * 查找子孙节点
- * @param key  element key
- * @returns       虚拟dom/undefined
- */
-public query(key: string) {
-    if (this.key === key) {
-        return this;
-    }
-    if(this.children){
-        for (let i = 0; i < this.children.length; i++) {
-            let dom = this.children[i].query(key);
-            if (dom) {
-                return dom;
-            }
-        }
-    }
-}
-```
-
-​		而对于cache的的设置等操作，你可以使用Nodom中Param的相关方法来进行，比如设置cache参数方法setParam
-
-```typescript
-/**
- * 设置cache参数
- * @param module    模块
- * @param name      参数名
- * @param value     参数值
- */
-public setParam(module:Module,name:string,value:any){
-    module.objectManager.setElementParam(this.key,name,value);
-}
-```
-
-​		我们还有克隆方法来进行克隆：
-
-```
-/**
- * 克隆
- * @param changeKey     是否更改key，如果为true，则生成的节点用新的key
- */
- public clone(): VirtualDom {
-    let dst: VirtualDom = new VirtualDom(this.tagName,this.key);
-    if(this.tagName){
-        //属性
-        if(this.props && this.props.size>0){
-            for(let p of this.props){
-                dst.setProp(p[0],p[1]);
-            }
-        }
-        
-        if(this.assets && this.assets.size>0){
-            for(let p of this.assets){
-                dst.setAsset(p[0],p[1]);
-            }
-        }
-        
-        //事件
-        if(this.events && this.events.size>0){
-            for(let p of this.events){
-                //复制数组
-                dst.setEvent(p[0],p[1].slice(0));
-            }    
-        }
-        
-        if(this.directives && this.directives.length>0){
-            dst.directives = [];
-            for(let d of this.directives){
-                dst.directives.push(d.clone());
-            }
-        }
-        
-        //子节点clone
-        if(this.children){
-            for(let c of this.children){
-                dst.add(c.clone());
-            }
-        }
-    }else{
-        dst.expressions = this.expressions;
-        dst.textContent = this.textContent;
-    }
-    dst.staticNum = this.staticNum;
-    return dst;
-}
-```
-
-​		Nodom提供了大量对于虚拟dom的操作方法以及属性，在提升性能方面有有了很大提高。
+虚拟dom经过diff找出最小差异，批量进行patch，无需手动操作dom元素，极大的提高了页面性能。同时虚拟dom是JS的对象，有利于进行跨平台操作。
 
 ## 深入
 
@@ -1823,6 +1621,102 @@ class Main extends Module{
     }
 }
 ```
+
+### Css支持
+
+​	**Nodom对Css提供额外的支持。**
+
+* 在模板代码中的 `<style></style>` 标签中直接写入Css样式，示例代码如下：
+
+```js
+class Module1 extends Module {
+    template() {
+        return plate = `
+				<div>
+                    <h1 class="test">Hello nodom!</h1>
+                    <style>
+                        .test {
+                            color: red;
+                        }
+                    </style>
+                </div>`;
+       }
+}
+```
+
+* 在模板代码中的 `<style></style>` 标签中的通过表达式调用函数返回Css样式代码串，示例代码如下：
+
+```js
+class Module1 extends Module {
+     template() {
+         let plate = `
+			<div>
+                <h1 class="test">Hello nodom!</h1>
+                <style>{{css()}}</style>
+            </div>`;
+     }
+     css() {
+         return `
+			.test {
+				color: red;
+			}`;
+     }
+}
+```
+
+* 在模块模板中的 `<style></style>` 标签中通过@import url('css url路径')引入Css样式文件，示例代码如下：
+
+```js
+class Module1 extends Module {
+     template() {
+            let plate = `
+				<div>
+                    <h1 class="test">Hello nodom!</h1>
+                    <style>
+                        @import url('./style.css')
+                    </style>
+                </div>
+			`;
+     }
+}
+```
+
+* 在模块模板代码中需要样式的节点中直接写Css样式，示例代码如下：
+
+```js
+class Module1 extends Module {
+     template() {
+            let plate = `
+				<div>
+                    <h1 style="color: red;" class="test">Hello nodom!</h1>
+                </div>
+			`;
+     }
+}	
+```
+
+**scope属性** 
+
+​	给节点添加该属性后，Nodom会自动在Css选择器前加前置名。使Css样式的作用域限定在当前模块内，不会污染其它模块。
+
+​	示例代码如下：
+
+```js
+class Module1 extends Module {
+     template() {
+            let plate = `
+				<div>
+                    <h1 class="test">Hello nodom!</h1>
+                    <style scope="this">
+                        @import url('./style.css')
+                    </style>
+                </div>
+			`;
+     }
+}
+```
+
+
 
 ### 自定义
 
