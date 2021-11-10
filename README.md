@@ -280,7 +280,7 @@ nodom采用基于HTML的模板语法。
 ......
 ```
 
-这样页面会显示`Hello，Bob！`的欢迎信息，但用户如果不是`Bob`，如上模板构建的界面只会显示Bob的欢迎信息，如果需要显示不同用户的欢迎信息，需要我们将`userName`绑定到模板中，实现动态渲染用户名：
+页面会显示用户Bob的的欢迎信息`Hello，Bob！`，当切换用户时，页面还是显示用户Bob的欢迎信息，这显然是不合理的。如果希望根据用户名来显示不同的欢迎信息，需要将用户名`userName`绑定到模板中，实现动态渲染用户名：
 
 ```HTML
 <h1>Hello,{{ userName }}!</h1>
@@ -288,12 +288,12 @@ nodom采用基于HTML的模板语法。
 // model.userName = 'Joe';
 ```
 
-这样Nodom就会去当前模块实例的`model`里去寻找为`userName`的值，并且用它替换`{{ userName }}`。这样我们就能够通过操作`userName`的值来显示不同用户的欢迎信息。
+这样Nodom就会去当前模块实例的`model`里去寻找为`userName`的值，并且用它替换`{{ userName }}`。这样就能够通过操作`userName`的值来显示不同用户的欢迎信息。
 
 
 
 > 默认标签的属性值需要使用引号包裹（单引号`'`或者双引号`"`均可），但如果将表达式作为属性值，可以不写引号。
->  如：<div class="cls1 cls2" name={{userName}}></div>
+>  如：`<div class="cls1 cls2" name={{userName}}></div>`
 
 关于表达式的详细信息可以阅读本章的表达式章节。
 
@@ -305,7 +305,7 @@ Nodom的指令以`x-`开头，指令用来增强模板的功能，比如，`x-sh
 <span x-show={{ isShow }}> Hello,nodom!</span>
 ```
 
-`x-show`指令接收`true`或者`false`，我们可以使用表达式为其传值，如果表达式的值为`true`，则会渲染该元素，如果为`false`则不会渲染该元素。
+`x-show`指令接收`true`或者`false`，可以使用表达式为其传值，如果表达式的值为`true`，则会渲染该元素，如果为`false`则不会渲染该元素。
 
 关于指令的详细信息可以阅读本章的指令与指令元素章节。
 
@@ -425,7 +425,7 @@ class Hello extends Module{
 
 ### 事件绑定
 
-Nodom使用了专门的事件类`NEvent`来处理Dom事件操作，在模板中以`e-`开头，如：`e-click`、`e-mouseup`等，事件支持所有HTML元素标准事件，接收一个模块实例上的方法名作为事件处理方法。当事件触发的时，Nodom会执行该方法。如：`e-click="methodName"`。具体用法如下：
+Nodom使用了专门的事件类`NEvent`来处理Dom的事件操作，在模板中以`e-`开头，如：`e-click`、`e-mouseup`等。事件支持所有HTML元素标准事件，接收一个模块实例上的方法名作为事件处理方法，如：`e-click="methodName"`，当事件触发的时，Nodom会执行该方法。具体用法如下：
 ```js
 export class ModuleA extends Module{
 	template(){
@@ -453,14 +453,17 @@ export class ModuleA extends Module{
 
 #### 回调函数的参数
 
-与原生事件使用不同，Nodom中不需要指定事件参数，事件方法会自带四个参数，如下：
+与原生事件使用不同，Nodom中不需要指定事件参数，事件方法会自带四个参数。参数如下所示：
+
+
 | 序号 | 参数名 | 描述                  |
 | ---- | ------ | --------------------- |
 | 1    | model  | dom对应的model        |
 | 2    | dom    | 事件对象对应的虚拟dom |
 | 3    | nEvent | Nodom事件对象         |
-| 4    | e      | html原生事件对象      |
+| 4    | event  | html原生事件对象      |
 
+代码如下：
 ```js
 	//  事件触发回调。
 	addCount(model,vdom,nEvnet,event){
@@ -1418,10 +1421,8 @@ class Main extends Module{
 
 `Model`会深层代理内部的`object`类型数据。
 
-基于`Proxy`，我们可以实现数据劫持和数据监听，来做到数据改变的时候自动更新渲染。
-> 关于`Proxy`的详细信息你可以参照[Proxy-MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy)。
-
-> Model在管理数据的时候会新增部分以`$`开头的数据项和方法，所以在定义方法和数据时，尽量避免使用`$`开头的数据项和方法名。
+基于`Proxy`，Nodom可以实现数据劫持和数据监听，来做到数据改变时候的响应式更新渲染。
+> 关于`Proxy`的详细信息请参照[Proxy-MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy)。
 
 在使用的时，可以直接把`Model`当作对象来操作：
 
@@ -1443,7 +1444,7 @@ changeTitle(model){
 }
 
 ```
-
+> Model在管理数据的时候会新增部分以`$`开头的数据项和方法，所以在定义方法和数据时，尽量避免使用`$`开头的数据项和方法名。
 #### Model与模块渲染
 
 每个`Model`存有一个模块列表，当`Model`内部的数据变化时，会引起该`Model`的模块列表中所有模块的渲染。默认`Model`的模块列表中只有`Model`所在的模块，如果需要`Model`触发多个模块的渲染，则需要将对应模块添加到`Model`对应的模块列表中(绑定方式查看API ModelManager.bindToModule)。
@@ -1835,7 +1836,7 @@ DirectiveElementManager.add(MYELEMENT);
 
 Nodom使用`x-animation`指令管理动画和过渡，该指令接收一个存在于`Model`上的对象，其中包括`tigger`属性和`name`属性。
 
-- `name`属性的值就是你过渡或者动画的类名；
+- `name`属性的值就是过渡或者动画的类名；
 - `tigger`为过渡的触发条件。
 
 过渡分为`enter`和`leave`，触发`enter`还是`leave`由`tigger`的值决定
@@ -1843,7 +1844,7 @@ Nodom使用`x-animation`指令管理动画和过渡，该指令接收一个存�
 - `tigger`为`true`，触发`enter`；
 - `tigger`为`false`,触发`leave`。
 
-对于`enter`过渡，需要提供以`-enter-active`、`-enter-from`、`-enter-to`为后缀的一组类名，当然在传入给`x-animation`指令的对象中只需要提供前面的名字，`x-animation`在工作时会自动的加上这些后缀。这些规则对于`leave`过渡同理。
+对于`enter`过渡，需要提供以`-enter-active`、`-enter-from`、`-enter-to`为后缀的一组类名。在传入给`x-animation`指令的对象中只需要将名字传入给`name`属性，而不必添加后缀，`x-animation`在工作时会自动的加上这些后缀。这些规则对于`leave`过渡同理。
 
 `tigger`为`true`时，指令首先会在元素上添加`-enter-from`和`-enter-active`的类名，然后再下一帧开始的时候添加`-enter-to`的类名，同时移除掉`-enter-from`的类名。
 
@@ -1962,19 +1963,17 @@ class Module1 extends Module {
 
 #### 进入/离开动画
 
-在传入`x-aniamtion`指令的对象里面有一个属性`isAppear`（默认值为`true`）可以用来配置当前的过渡/动画是否是进入离开过渡/动画。
+在传入`x-aniamtion`指令的对象属性中设置`isAppear`（默认值为`true`）属性，可以配置当前的过渡/动画是否是进入离开过渡/动画。
 
 - 若为`true`，则表示在离开动画播放完成之后会隐藏该元素（dispaly：none);
 - 若为`false`,则表示在离开动画播放完成之后不会隐藏该元素。
 
 #### 钩子函数
 
-在传入`x-aniamtion`指令的对象里面有一个`hooks`属性，用于配置过渡/动画执行前后的钩子函数。这两个函数的名字分别为`before`和`after`。
+在传入`x-aniamtion`指令的对象里中设置`hooks`属性，可以配置过渡/动画执行前后的钩子函数。且这两个函数名字固定，分别为`before`和`after`。
 他们的触发时机为:
-
 - `before`触发动画/过渡之前。
 - `after`触发动画/过渡之后。
-
 ```js
 class Module1 extends Module {
 	template() {
@@ -2013,16 +2012,16 @@ class Module1 extends Module {
 
 传入`x-animation`指令的对象不止上述提到的这些，还有一些控制参数，下表是所有可以传入的属性所示：
 
-| name           | 作用                                     | 可选值                              | 默认值       | 必填 |
-| -------------- | ---------------------------------------- | ----------------------------------- | ------------ | ---- |
-| tigger         | 触发动画                                 | true/false                          | true         | 是   |
-| name           | 过渡/动画名（不包含-enter-active等后缀） | -                                   | 无           | 是   |
-| isAppear       | 是否是进入离开过渡/动画                  | true/false                          | true         | 否   |
-| type           | 是过渡还是动画                           | 'aniamtion'/'transition'            | 'transition' | 否   |
-| duration       | 过渡/动画的执行时间                      | 同css的duration的可选值             | ''           | 否   |
-| delay          | 过渡/动画的延时时间                      | 同css的delay的可选值                | '0s'         | 否   |
-| timingFunction | 过渡/动画的时间函数                      | 同css的timingFunction的可选值       | 'ease'       | 否   |
-| hooks          | 过渡/动画执行前后钩子函数                | before/after函数或者enter/leave对象 | 无           | 否   |
+| name           | 作用                      | 可选值                              | 默认值       | 必填 |
+| -------------- | ------------------------- | ----------------------------------- | ------------ | ---- |
+| tigger         | 触发动画                  | true/false                          | true         | 是   |
+| name           | 过渡/动画名（不包含后缀） | -                                   | 无           | 是   |
+| isAppear       | 是否是进入离开过渡/动画   | true/false                          | true         | 否   |
+| type           | 是过渡还是动画            | 'aniamtion'/'transition'            | 'transition' | 否   |
+| duration       | 过渡/动画的执行时间       | 同css的duration的可选值             | ''           | 否   |
+| delay          | 过渡/动画的延时时间       | 同css的delay的可选值                | '0s'         | 否   |
+| timingFunction | 过渡/动画的时间函数       | 同css的timingFunction的可选值       | 'ease'       | 否   |
+| hooks          | 过渡/动画执行前后钩子函数 | before/after函数或者enter/leave对象 | 无           | 否   |
 
 #### 分别配置`enter`/`leave`
 
