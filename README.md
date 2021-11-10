@@ -544,7 +544,11 @@ export class ModuleA extends Module{
 
 ### 指令(Directive)
 
-​	指令用于增强元素的表现能力，有两种使用方式，一种是以"x-"开头，作为元素的属性(attribute)使用，另外一种是把指令名用作标签名，例如<module></module>目前NoDom支持14个指令:module,model,repeat,recur,class,if,else,elseif,endif,show,field,route,router,slot。
+指令用于增强元素的表现能力，以"x-"开头，以设置元素属性(attribute)的形式来使用。目前NoDom支持以下几个指令:
+
+| 指令名                                                       |
+| ------------------------------------------------------------ |
+| module,model,repeat,recur,class,if,else,elseif,endif,show,field,route,router,slot |
 
 #### 指令优先级
 
@@ -563,98 +567,110 @@ export class ModuleA extends Module{
 model指令用于给view绑定数据，数据采用层级关系，如:需要使用数据项data1.data2.data3，可以直接使用data1.data2.data3，也可以分2层设置分别设置x-model='data1'，x-model='data2'，然后使用数据项data3。下面的例子中描述了x-model的几种用法。
 model指令改变了数据层级，则如何用外层的数据呢，NoDom支持从根向下查找数据功能，当需要从根数据向下找数据项时，需要使用"$$"
 
-##### 模版代码
-
 ```
-<div x-model="user">
-      顾客信息：
-      <div x-model="name">
-            <div>姓氏：{{lastName}}</div>
-            <div>名字：{{firstName}}</div>
-      </div>
+<div x-model="user"> <!-- 绑定数据 --!>
+    顾客信息：
+    <div x-model="name">
+        <div>姓氏：{{lastName}}</div>
+        <div>名字：{{firstName}}</div>
+     </div>
 </div>
 ```
-
-##### js代码
 
 ```
 data(){ 
 	return{ 
 		user: { 
 			name: { firstName: 'Xiaoming', lastName: 'Zhang' } 
-			} 
 		} 
-	} W
+	} 
+} 
 ```
 
 #### repeat 指令
 
-repeat指令用于给按照绑定的数组数据重复生成多个相同的dom，每个dom由指定数组索引对应的数据对象或数据进行渲染。使用方式为x-repeat='items|filter',其中items为json数组，filter为过滤器。
+repeat指令用于给按照绑定的数组数据生成多个dom节点，每个dom由指定的数据对象进行渲染。使用方式为x-repeat={{item}}，其中items为json数组。
 
 ##### 数据索引
 
 索引数据项为$index，为避免不必要的二次渲染,index需要单独配置。
 
-##### 模版代码
-
 ```
-<div x-repeat={{foods1}}>
-                    编号：{{$index+1}}，菜名：{{name}}，价格：{{price}}
-                    <p>配料列表：</p>
-                    <ol>
-                        <li x-repeat={{rows}}>食材：{{title}}，重量：{{weight}}</li>
-                    </ol>                  
+<div x-repeat={{foods1}}><!-- 绑定数组数据 --!>
+    编号：{{$index+1}}，菜名：{{name}}，价格：{{price}}
+    <p>配料列表：</p>
+    <ol>
+        <li x-repeat={{rows}}>食材：{{title}}，重量：{{weight}}</li>
+    </ol>                  
 </div>
 ```
 
-##### js代码
-
 ```
 data(){
- foods1:[{
-                name: '夫妻肺片',
-                price: 25,
-                rows:[{title:'芹菜',weight:100},{title:'猪头肉',weight:200}]
-            }, {
-                name: '京酱肉丝',
-                price: 22,
-                rows:[{title:'瘦肉',weight:100},{title:'葱',weight:200}]
-            }, {
-                name: '糖醋里脊',
-                price: 20,
-                rows:[{title:'排骨',weight:200}]
-            }]
+ 	foods1:[{
+         name: '夫妻肺片',
+         price: 25,
+         rows:[{title:'芹菜',weight:100},{title:'猪头肉',weight:200}]}, 
+         {
+            name: '京酱肉丝',
+            price: 22,
+            rows:[{title:'瘦肉',weight:100},{title:'葱',weight:200}]},
+          {
+            name: '糖醋里脊',
+            price: 20,
+            rows:[{title:'排骨',weight:200}]}
+]}
 }
 ```
 
 #### recur 指令
 
-recur指令用于递归，能够实现一层包一层的结构，在使用时，注意数据中的层次关系即可。
-
-##### 模版代码
+recur指令生成树形节点，能够实现嵌套结构，在使用时，注意数据中的层次关系即可。recur也可以通过使用recur元素来实现嵌套结构。
 
 ```
 <div x-recur='ritem'>
 			<span class="{{cls}}">{{title}}</span>
 			<recur ref/>
 </div>
+<recur cond='items' name='r1' class='secondct'>
+		<for cond={{items}} >
+				<div class='second'>id is:{{id}}-{{title}}</div>
+				<recur ref='r1' />
+		</for>
+</recur>
 ```
 
-##### js代码
-
 ```
-ritem: {
-						title: "第一层",
-						cls: "cls1",
-						ritem: {
-							title: "第二层",
-							cls: "cls2",
-							ritem: {
-								title: "第三层",
-								cls: "cls3",
-							},
-						}
-		}
+data(){
+    ritem: {
+       title: "第一层",
+       cls: "cls1",
+       ritem: {
+          title: "第二层",
+          cls: "cls2",
+          ritem: {
+             title: "第三层",
+             cls: "cls3"
+         		 }
+              }
+     },
+    ritem2:{
+		items:[{
+				title:'aaa',
+				id:1,
+				items:[{
+					id:1,
+					title:'aaa1',
+					items:[{
+						title:'aaa12',id:12},{
+						title:'aaa11',id:11,items:[
+						{title:'aaa111',id:111},
+						{title:'aaa112',id:112}]},
+						{title:'aaa13',id:13}]}
+	}
+	]
+	}      
+}
 ```
 
 #### if/elseif/else/endif指令
@@ -756,117 +772,6 @@ data(){
     }
 } 
 ```
-
-### 指令元素（Element）
-
-指令元素和指令的使用效果类似，使用方法有一些不同。
-
-#### module元素
-
-module元素用于表示该元素为一个模块容器，module指向模块类会作为子模块渲染到该元素内。使用前先创建所需要的moduleA，然后把模块名作为标签名进行使用。
-
-#### 模板代码
-
-```
-<ModuleA xxx='333'>
-        <h3 style='color:gold'>
-              我自动作为solot节点
-        </h3>
-</ModuleA>
-```
-
-#### for元素
-
-#### recur元素
-
-recur元素和recur指令的功能一样，都用于递归，能够实现一层包一层的结构，在使用时，注意数据中的层次关系即可。
-
-##### 模版代码
-
-```
-<recur cond='items' name='r1' class='secondct'>
-		<for cond={{items}} >
-				<div class='second'>id is:{{id}}-{{title}}</div>
-				<recur ref='r1' />
-		</for>
-</recur>
-```
-
-##### js代码
-
-```
-data(){
-	return{
-		ritem2:{
-						items:[
-							{
-								title:'aaa',
-								id:1,
-								items:[{
-									id:1,
-									title:'aaa1',
-									items:[
-										{title:'aaa12',id:12},
-										{title:'aaa11',id:11,items:[
-											{title:'aaa111',id:111},
-											{title:'aaa112',id:112}
-										]},
-										{title:'aaa13',id:13}
-									]}
-	}
-	]
-	}
-	}
-}
-```
-
-#### if/elseif/else/endif元素
-
-- 单个if标签：if标签用于条件判断，需要设置cond属性用于添加条件，当条件为真时渲染该节点，否则隐藏并执行endif。
-- if/else标签：当if标签条件为假时，渲染else标签并执行endif。
-- if/elseif/else标签：elseif需要设置cond属性。当if标签条件为假时，进行后续的elseif标签的条件判断，当某个条件为真时，则渲染该节点，并执行endif。如果所有elseif标签的条件都为假，则渲染else标签然后执行endif。
-- endif标签：结束上一个条件判断。
-
-##### 模板代码
-
-```
-<div>
-	<div>单个if指令</div>
-    <div>如果discount<0.8，显示价格</div>
-    <if cond={{discount < 0.8}}>价格：{{price}}</if>
-    <endif/>
-</div>
-
-<div>
-	<div>完整的if/else指令</div>
-    <div>如果age<18，显示未成年，否则显示成年</div>
-    <if cond={{age<18}}>年龄：{{age}}，未成年</if>
-    <else>年龄：{{age}}，成年</else>
-    <endif/>
-</div>
-
-<div>
-	<div>if elseif else</div>
-    根据不同分数显示不同等级，<60不及格，60-69及格，70-79中等，80-89良好，>=90优秀
-    <if cond={{grade<60}}>不及格</if>
-    <elseif cond={{grade>60 && grade<70}}> 及格 </elseif>
-    <elseif cond={{grade>70 && grade<80}}> 中等 </elseif>
-    <elseif cond={{grade>80 && grade<90}}> 良好 </elseif>
-    <else> 优秀 </else>
-    <endif/>
-</div>
-
-data(){
-    return {
-        discount: 0.7,
-        price: 200,
-        age: 20,
-        grade: 73,
-    }
-}
-```
-
-
 
 
 
