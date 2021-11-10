@@ -137,15 +137,19 @@ Nodom会将传入模块渲染至传入的选择器。
 
 ### 模块基础
 
-Nodom基于模块进行应用搭建，一个应用由单个或多个模块组成。
+NoDom以模块为单位进行应用构建，一个应用由单个或多个模块组成。。
 
 #### 模块定义
 
-模块定义需要继承Module类。模版类定义方式主要便于各模块独立和重复使用。
-定义模块时，为提升模块重用性，通过template()方法返回模板字符串定义模板代码，通过data()方法返回对象指定数据，还可以自定义模块需要的方法。      典型定义如下代码所示：
+模块定义需要继承Module类。定义模块时，为提升模块重用性，通过template（）方法返回字符串形式模板代码，建议使用模板字符串。
+
+通过data()方法返回数据对象，还可以自定义模块方法。    
+
+  示例代码如下：
 
 ```javascript
 		class Module1 extends Module{
+            //Nodom会将模板代码编译成虚拟 DOM ，再渲染至真实DOM上
 			template(){
 				return `
                     <div>
@@ -154,11 +158,13 @@ Nodom基于模块进行应用搭建，一个应用由单个或多个模块组成
                     </div>
 				`
 			}
+            //定义模块需要的数据
 			data(){
 				return {
 					name:'nodom',
 				}
 			}	
+            //自定义模块方法
 			change(model){
 				model.name='nodom3';
 			}    
@@ -177,6 +183,7 @@ Nodom基于模块进行应用搭建，一个应用由单个或多个模块组成
 | onFirstRender             | 执行首次渲染后事件       | model |  module  |
 | onBeforeRenderToHtml      | 增量渲染到html前执行事件 | model |  module  |
 | onRender                  | 执行每次渲染后事件       | model |  module  |
+|                           |                          |       |          |
 
 #### 
 
