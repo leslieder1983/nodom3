@@ -21,7 +21,7 @@ npm run build
 
 ## 安装
 
-Nodom是一款用于构建用户界面的前端框架，Nodom支持按需、渐进式引入。不论是体验Nodom还是构建复杂的单页应用，Nodom均完全支持。
+Nodom是一款用于构建用户界面的前端`MVVM`模式框架，Nodom支持按需、渐进式引入。不论是体验Nodom还是构建复杂的单页应用，Nodom均完全支持。
 
 在项目内可引入的方式如下：
 
@@ -118,7 +118,7 @@ import{nodom,Module} from '../dist/nodom.js'
 
  #### 渲染元素
 
-Nodom支持渐进式开发，框架内部会使用元素选择器将该元素作为框架处理的入口。所以，传入你的渲染器作为框架处理的入口，将该元素完全交给Nodom托管。
+Nodom支持渐进式开发，框架内部会将传入的容器作为框架处理的入口。所以，传入你的元素选择器作为渲染的容器，将该容器完全交给Nodom托管。
 
 例如有一节点：
 
@@ -127,7 +127,7 @@ Nodom支持渐进式开发，框架内部会使用元素选择器将该元素作
 </div>
 ```
 
-我们将其称为根节点，如果需要将一个Nodom模块渲染到根节点，只需要编写元素选择器，依序传入Nodom方法内，第一个参数为定义的模块类，第二个参数为dom选择器。
+我们将其称为根节点，如果需要将一个Nodom模块渲染到根节点，只需要编写元素选择器，依序传入Nodom方法内，第一个参数为定义的模块类，第二个参数为Dom选择器。
 
 ```js
 nodom(HelloWorld, "#app");
@@ -137,15 +137,19 @@ Nodom会将传入模块渲染至传入的选择器。
 
 ### 模块基础
 
-Nodom基于模块进行应用搭建，一个应用由单个或多个模块组成。
+NoDom以模块为单位进行应用构建，一个应用由单个或多个模块组成。。
 
 #### 模块定义
 
-模块定义需要继承Module类。模版类定义方式主要便于各模块独立和重复使用。
-定义模块时，为提升模块重用性，通过template()方法返回模板字符串定义模板代码，通过data()方法返回对象指定数据，还可以自定义模块需要的方法。      典型定义如下代码所示：
+模块定义需要继承Module类。定义模块时，为提升模块重用性，通过template（）方法返回字符串形式模板代码，建议使用模板字符串。
+
+通过data()方法返回数据对象，还可以自定义模块方法。    
+
+  示例代码如下：
 
 ```javascript
 		class Module1 extends Module{
+            //Nodom会将模板代码编译成虚拟 DOM ，再渲染至真实DOM上
 			template(){
 				return `
                     <div>
@@ -154,11 +158,13 @@ Nodom基于模块进行应用搭建，一个应用由单个或多个模块组成
                     </div>
 				`
 			}
+            //定义模块需要的数据
 			data(){
 				return {
 					name:'nodom',
 				}
 			}	
+            //自定义模块方法
 			change(model){
 				model.name='nodom3';
 			}    
@@ -177,6 +183,7 @@ Nodom基于模块进行应用搭建，一个应用由单个或多个模块组成
 | onFirstRender             | 执行首次渲染后事件       | model |  module  |
 | onBeforeRenderToHtml      | 增量渲染到html前执行事件 | model |  module  |
 | onRender                  | 执行每次渲染后事件       | model |  module  |
+|                           |                          |       |          |
 
 #### 
 
@@ -184,57 +191,6 @@ Nodom基于模块进行应用搭建，一个应用由单个或多个模块组成
 
 ![nodom生命周期](D:\User_zhao\App_file\Google_file\nodom生命周期.jpg)
 
-#### 模块注册
-
-根模块注册除外，Nodom为子模块提供两种注册方式：
-
-* 模块modules数组注册
-
-```js
-<!--待注册模块A -->
-class ModuleA extends Module{
-    ...
-}
-<!--待注册模块B -->
-class ModuleB extends Module{
-    ...
-}
-<!--注册使用模块A，B -->
-class Module extends Module{
-    ...
-    modules=[ModuleA,ModuleB]//或者在构造函数内指定
-    ...
-template(){
-    return `
- 	使用模块A
-	<ModuleA></ModuleA>
-	使用模块B
-	<ModuleB></ModuleB>
- `
- }
-}
-```
-
-* *registModule*方法
-  registModule方法可以给待注册模块设置**别名**，在模板中使用模块时，既可以使用模块类名作为标签名，也可以使用注册的别名作为标签名。
-
-
-```js
-<!--待注册模块A -->
-class ModuleA extends Module{
-    ...
-}
-registModule(ModuleA,'User');
-class Main extends Module{
-    template(){
-        return `
-<!--两种方式均可-->
-<ModuleA></ModuleA>
-<User></User>
-`
-    }
-}
-```
 
 ### 模板语法
 
@@ -368,14 +324,16 @@ Nodom的事件命名为`e-`+`原生事件名`，例如：
 
 
 ### 表达式
-
-在Nodom中，与视图进行数据绑定的最常用形式就是使用**{{}}**(双大括号)，灵感追溯至Mustache库，用来与对应模块实例data内的属性值进行替换，比如：
+> 为描述方便,接下来将模块实例中对data函数返回的数据对象做响应式处理后的对象，称为Model，  
+> 也就是说data函数返回的数据会存在于Model内。 
+ 
+在Nodom中，与视图进行数据绑定的最常用形式就是使用双大括号。Nodom将其称为表达式，灵感追溯至Mustache库，用来与对应模块实例的Model内的属性值进行替换。比如：
 
 ```html
-<div>{{msg}}，I'am Coming</div>
+<div>{{msg}}，I'm Coming</div>
 ```
 
-对应模块内的data为：
+模块实例中对应的data函数为：
 
 ```js
 data(){
@@ -385,13 +343,13 @@ data(){
 }
 ```
 
-最终在页面上会变成
+最终在页面上会变为：
 
 ```html
-HelloWorld,I'am Coming
+HelloWorld,I'm Coming
 ```
 
-当然，Nodom对JavaScript表达式实现了支持。所以确保双大括号内传入的是**单个JavaScript表达式**。也就是需要返回一个计算结果。
+当然，Nodom对原生的JavaScript表达式实现了支持。所以确保双大括号内传入的是**单个JavaScript表达式**。也就是其需要返回一个计算结果。
 
 ```js
 <!-- 取值 -->
@@ -402,7 +360,7 @@ HelloWorld,I'am Coming
 {{name.toUpperCase()}}
 ```
 
-在表达式内，JavaScript常见的内置对象是可用的，比如：Math、Object、Date等。由于表达式的执行环境是一个沙盒，请勿在内部使用用户定义的全局变量，
+在表达式内，JavaScript常见的内置对象是可用的，比如：Math、Object、Date等。由于表达式的执行环境是一个沙盒，请勿在内部使用用户定义的全局变量。
 
 一些常见非表达式写法包括：赋值，流程控制。**避免**使用他们：
 
@@ -412,10 +370,9 @@ HelloWorld,I'am Coming
 ```
 
 #### 表达式用法
+表达式功能强大，在表达式内，可以访问模块实例与表达式所在节点对应的Model，赋予了表达式较高的灵活性，常见的用法包括：
 
-表达式功能强大，在表达式内，可以访问模块实例(Module)与表达式所在节点对应的数据对象(Model)，赋予了表达式较高的灵活性，常见的用法包括：
-
-* 访问实例数据
+* 获取实例数据
 * 调用模块方法
 * 访问模块属性
 
@@ -434,8 +391,8 @@ class Hello extends Module{
         }
     }
 }
-<!-- 表达式语法内，普通的属性名对应模块实例data字段的同名属性值，this指向的即是对应模块实例 -->
-访问实例数据：{{title}}//'helloWorld'
+<!-- 表达式语法内，普通的属性名对应当前节点对应的Model对象内的同名属性值，this指向的即是对应模块实例 -->
+获取模块实例数据：{{title}}//'helloWorld'
 调用模块方法：{{this.getData()}} //['星期一'，'星期二'，'星期三'，'星期四''星期五']
 访问模块属性：{{this.name}} //'hello'
 ```
@@ -443,7 +400,7 @@ class Hello extends Module{
 在视图模板内，表达式用途广泛，包括：
 
 * 指令取值
-* 普通属性赋值
+* 数据预处理
 * 展示数据
 * 编写CSS样式(详见CSS支持章节)
 
@@ -460,8 +417,9 @@ class Hello extends Module{
 
 ```html
 <div>
-    <!-- 如果对应模块数据对象内无该字符段，默认会返回空字符串 -->
-   {{age}} //''
+    <!-- 如果对应Model内无该字段，默认会返回空字符串 -->
+    <!-- 页面显示''-->
+    {{age}} 
 </div>
 ```
 
@@ -785,15 +743,21 @@ data(){
 
 #### Module 指令
 
-module指令用于表示该元素为一个模块容器，module指向模块类会作为子模块渲染到该元素内。使用前先创建所需要的moduleA，然后编写完毕后，再用nodom(moduleA,'容器')即可。
+module指令用于表示该元素为一个模块容器，module指令数据对应的模块会被渲染至该元素内。使用方式为x-module='模块类名'，Nodom会自动创建实例并将其渲染。
 
 模版代码
 
 ```
-class ModuleA extends Module{ 
-	template(){ return `
-    <div>这是我的moduleA</div>`}
-nodom(ModuleA,'div')
+<!-- 这里的Title为一个完整的Nodom模块-->
+import Title from './src/dist';
+class ModuleA extendsModule{ 
+	template(){ 
+        return `
+        <!-- 将Title模块渲染至当前div-->
+        <div x-module='Title'></div>
+        `
+    }
+
 ```
 
 #### Field 指令
@@ -960,7 +924,7 @@ getFood(arr) {
 
 **结果**：
 
-**注意**：自定义函数中传入的数据已经不是原来`data`中的初始数据了，而是做了响应式处理的响应式数据。`Nodom`响应式数组数据中，支持的`js`原生方法有很多，例如：
+**注意**：自定义函数中传入的数据已经不是原来`data`中的初始数据了，而是做了响应式处理的响应式数据。针对会引起响应式数据改变的数组方法，Nodom都提供了支持。例如：
 
 - `push()`
 - `pop()`
@@ -1102,7 +1066,7 @@ getFood(arr) {
 
 ### 虚拟Dom		
 
-Nodom通过js进行虚拟dom缓存，在dom树上进行比对然后渲染dom树，进行对dom操作性能的优化，通过状态的改变和与模板容器dom中做比对来进行对dom树的渲染操作。
+Nodom通过js对象的方式实现对真实Dom的映射，通过虚拟Dom树的比对更新，达到最小操作真实Dom的目的。
 
 #### tagName属性
 
@@ -1166,16 +1130,66 @@ public addEvent(event: NEvent) {
 ## 深入
 
 <!--本章节建议先阅读完模块基础，再来了解核心-->
+#### 模块注册
 
+根模块的注册除外，Nodom为其余模块提供两种注册方式：
+
+* 模块modules数组注册
+
+```js
+<!--待注册模块A -->
+class ModuleA extends Module{
+    ...
+}
+<!--待注册模块B -->
+class ModuleB extends Module{
+    ...
+}
+<!--注册使用模块A，B -->
+class Module extends Module{
+    ...
+    modules=[ModuleA,ModuleB]//或者在构造函数内指定
+    ...
+template(){
+    return `
+ 	<!-- 使用模块A-->
+	<ModuleA></ModuleA>
+	<!-- 使用模块B-->
+	<ModuleB></ModuleB>
+ `
+ }
+}
+```
+
+* *registModule*方法  
+  registModule方法可以给待注册模块设置**别名**，在模板代码中使用模块时，既可以使用模块类名作为标签名引入，也可以使用注册的别名作为标签名引入。
+
+
+```js
+<!--待注册模块A -->
+class ModuleA extends Module{
+    ...
+}
+registModule(ModuleA,'User');
+class Main extends Module{
+    template(){
+        return `
+<!--两种方式均可-->
+<ModuleA></ModuleA>
+<User></User>
+`
+    }
+}
+```
 ### 模块传值&Props
 
-为了加强模块之间的联系，Nodom在模块之间提供Props来传递数据。除根组件外，每个模块在进行模板解析时，执行模块实例的template方法时，会将父模块通过dom节点传递的属性以对象的形式作为参数传入，也就是说，子模块可以在自己的template函数内，依据传入的props**动态创建模板**。
+为了加强模块之间的联系，Nodom在模块之间提供Props来传递数据。除根模块外，每个模块在进行模板代码解析，执行模块实例的template方法时，会将父模块通过dom节点传递的属性以对象的形式作为参数传入，也就是说，子模块可以在自己的template函数内，依据传入的props**动态创建模板**。
 
 ```js
 <!--模块A  功能：根据父模块依据标签传入props的值展示不同的视图代码-->
 class ModuleA extends Module{
       template(props){
-          //在template函数内可以进行预处理
+          //在template函数内可以进行模板预处理
           if(props.name=='add'){
               return `<h1>${props.name}<h1>`
           }else{
@@ -1188,17 +1202,19 @@ registModule(ModuleA,'User');
 class Main extends Module{
     template(){
         return `
- <ModuleA name='add'></ModuleA>//展示<h1>add</h1>
+        <!-- 展示<h1>add</h1>-->
+        <ModuleA name='add'></ModuleA>
 `
     }
 }
 ```
 
-借助模板字符串的加持，可以包含特定语法（`${expression}`）的占位符，很大程度的拓展了模板代码的灵活度。可以插入原生的JavaScript表达式。
+借助模板字符串的加持，可以使用包含特定语法（`${expression}`）的占位符，很大程度的拓展了模板代码的灵活度。在占位符内可以插入原生的JavaScript表达式。
 
 #### 数据传递
 
-Nodom数据传递为单向数据流，props可以实现父模块向子模块的数据传递，但是这是被动的传递方式，如果需要将其保存至子模块内的代理数据对象，可以在传递的属性名前，加上’$'后缀，Nodom会将其传入子模块的代理对象内，实现响应式监听。
+Nodom数据传递为单向数据流，Props可以实现父模块向子模块的数据传递，但是这是被动的传递方式，如果需要将其保存至子模块内的代理数据对象，可以在传递的属性名前，加上`$`前缀，Nodom会将其传入子模块的根Model内，实现响应式监听。
+> 注意：以$前缀开头的Props属性，如果对应的是一个Model对象，该Model对象存在于两个模块内，Model内数据的改变会造成两个模块的渲染。
 
 ```js
 <!--模块A  功能：父模块主动传值，将其保存至模块A的代理对象Model内-->
@@ -1212,8 +1228,9 @@ registModule(ModuleA,'User');
 class Main extends Module{
     template(){
         return `
- <ModuleA $name={{name}}></ModuleA>//展示<h1>Nodom</h1>
-`
+        <!-- 展示<h1>Nodom</h1>-->
+        <ModuleA $name={{name}}></ModuleA>
+    `
     }
     data(){
         return {
@@ -1225,13 +1242,13 @@ class Main extends Module{
 
 #### 反向传递
 
-由于props的存在，父模块可以暴露外部接口，将其通过props传递给子模块，子模块调用该方法即可实现反向传递的功能。例如:
+由于Props的存在，父模块可以暴露外部接口，将其通过Props传递给子模块，子模块调用该方法即可实现反向传递的功能。例如:
 
 ```js
 <!--模块A  功能：点击按钮使父模块的数据改变-->
 class ModuleA extends Module{
       template(props){
-          this.parentChange=props.add;
+        this.parentChange=props.add;
              return `<button e-click='change'>点击改变父模块的数据<button>`
     }
     change(){
@@ -1243,9 +1260,9 @@ registModule(ModuleA,'User');
 class Main extends Module{
     template(){
         return `
-   count={{sum}}
- <User add={{this.add}}></User>
-`
+        count={{sum}}
+        <User add={{this.add}}></User>
+        `
     }
     data(){
         return {
@@ -1268,14 +1285,14 @@ class Main extends Module{
 
 可使用第三方**数据发布-订阅**库。
 
-在开发大型项目时，可以使用数据管理库帮助我们管理数据，使数据以可预测的方式发生变化，我们推荐使用团队开发的**kayaks**库，或者其他优化的数据管理库均可。
+在开发大型项目时，可以使用数据管理库帮助我们管理数据，使数据以可预测的方式发生变化，我们推荐使用Nodom团队开发的**kayaks**库，或者其他优秀的数据管理库均可。
 
 ### 插槽
 
-在实际开发中，插槽功能会较大程度的简化项目难度，插槽作为模板暴露的外部接口，增大了模板的灵活度，更利于模块化开发。Nodom以指令和指令元素的方式实现插槽功能，两者的功能类似。
+在实际开发中，插槽功能会较大程度的降低应用开发难度，插槽作为模板暴露的外部接口，增大了模板的灵活度，更利于模块化开发。Nodom以指令和自定义元素的方式实现插槽功能，两者的功能类似。
 
 ```html
-<!--指令元素的方式使用插槽 -->
+<!--自定义元素的方式使用插槽 -->
 <slot>
     <h1>
     title
@@ -1380,10 +1397,10 @@ registModule(ModuleA,'User');
 class Main extends Module{
     template(){
         return `
-  				<User>
-					{{title}}
-				 </User>
-`
+  			<User>
+				{{title}}
+			</User>
+        `
     }
     data(){
         return {
@@ -1533,7 +1550,7 @@ class Main extends Module{
 
 在使用props的场景下，如果我们传递的属性值发生改变，那么子模块会先触发编译模板的过程,再进行渲染操作，也就是模块重新激活。
 
-特殊的，在Props中，对于传递`Object`类型的数据，Nodom会将其默认为**数据改变**。
+特殊的，在Props中，对于传递`Object`类型的数据，每次渲染,Nodom会将该模块默认为**数据改变**。
 
 ```js
 <!--模块A  由于父模块传入的Props数据发生了改变，ModuleA重新激活，触发template函数进行编译，再进行渲染-->
@@ -2130,11 +2147,11 @@ createRoute({
 });
 ```
 
-可以发现，每个配置对象内均可设置子路由，于是，你就能开始嵌套多层路由了。
+可以发现，每个配置对象内均可设置子路由，那么就可以实现嵌套多层路由了。
 
 #### 路由跳转
 
-借助`x-route`指令，用户无需手动控制路由跳转。但在一些情况下，需要手动操作路由跳转，Nodom提供两种方式手动跳转：
+借助`x-route`指令，用户无需手动控制路由跳转。但在一些情况下，需要手动控制路由跳转，Nodom提供两种方式手动跳转：
 
 * `Router.go`
 * `Router.redirect`
@@ -2143,7 +2160,7 @@ createRoute({
 
 #### 路由传值
 
-如果想要实现路由传值，只需在路径内以`：params`配置。例如：
+如果想要实现路由传值，只需在路径内以`:params`配置。例如：
 
 ```js
 import {createRoute} from './nodom.js';
@@ -2157,7 +2174,7 @@ createRoute({
 });
 ```
 
-Nodom将通过路由传的值放入模块的数据对象模型(Model)的`$route`中。
+Nodom将通过路由传的值放入模块根Model的`$route`中。
 
 路由模块中可以通过`$route.data`获取path传入的值。
 
@@ -2185,7 +2202,7 @@ Nodom将通过路由传的值放入模块的数据对象模型(Model)的`$route`
 
 * `onLeave`事件，`onLeave`事件在路由离开时执行。 
 
-执行时传入第一个参数：当前模块的根模型对象(Model)。
+执行时传入第一个参数：当前模块的根Model。
 
 如：从/r1/r2/r3 切换到 /r1/r4/r5。
 则`onLeave`响应顺序为r3 `onLeave`、r2 `onLeave`。
@@ -2273,4 +2290,8 @@ export{RouteFilter};
 ### 生态
 
 #### NodomUI
-
+一款基于Nodom的组件库。
+#### Kayaks
+数据管理库，用于开发大型项目。
+#### Nodom VsCode插件
+提供模板代码高亮功能，以及其他多种辅助功能。

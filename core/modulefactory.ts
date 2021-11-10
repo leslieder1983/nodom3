@@ -91,7 +91,6 @@ export class ModuleFactory {
         }
 
         let m:Module = Reflect.construct(cls, []);
-        console.log(m);
         m.init();
         return m;
     }

@@ -34,7 +34,6 @@ export class MAnimation extends Module {
                 
                 <h1>内置过渡</h1>
                 <p> 内置过渡效果均为进入离开过渡，再播放离开动画之后会隐藏(dispaly:none)你的元素 </p>
-
                 <button e-click='tigger2'>点我触发scale</button>
                 <h2>scale</h2>
                 <div class="container">
@@ -55,9 +54,7 @@ export class MAnimation extends Module {
                 <div class="container">
                     <div class='div2' x-animation={{transition7}}></div>
                 </div> 
-
                 
-
                 <p>对于进入离开过渡，你可以分别配置，你也可以控制延时时间和播放时间以及timingFunction</p>
                 <button e-click='tigger6'>点我触发过渡</button>
                 <h2>进入/离开分开配置</h2>
@@ -66,7 +63,6 @@ export class MAnimation extends Module {
                 </div> 
             
                 
-
                 <h1>动画</h1>
                 <p>我们将fade效果从transiton改为animation</p>
                 <pre>
@@ -117,15 +113,15 @@ export class MAnimation extends Module {
 				},
 			},
 			transition2: {
-				tigger: true, // 必填
+				tigger: false, // 必填
 				name: "scale-fixtop", // 必填
 			},
 			transition3: {
-				tigger: true, // 必填
+				tigger: false, // 必填
 				name: "scale-fixleft", // 必填
 			},
 			transition4: {
-				tigger: true, // 必填
+				tigger: false, // 必填
 				name: "scale-fixcenterY", // 必填
 			},
 			transition5: {

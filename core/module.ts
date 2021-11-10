@@ -169,7 +169,12 @@ export class Module {
         }
         //执行前置方法
         this.doRenderOps(0);
-        this.doModuleEvent('onBeforeRender');
+        //渲染前事件返回true，则不进行渲染
+        if(this.doModuleEvent('onBeforeRender')){
+            this.dontAddToRender = false;
+            return;
+        }
+        
         if (!this.renderTree) {
             this.doFirstRender();
         } else { //增量渲染
@@ -329,9 +334,11 @@ export class Module {
     /**
      * 执行模块事件
      * @param eventName 	事件名
+     * @returns             执行结果，各事件返回值如下：
+     *                          onBeforeRender：如果为true，表示不进行渲染
      */
-    private doModuleEvent(eventName: string) {
-        this.invokeMethod(eventName, this.model);
+    private doModuleEvent(eventName: string):boolean{
+        return this.invokeMethod(eventName, this.model);
     }
 
     /**

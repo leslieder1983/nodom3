@@ -17,7 +17,7 @@ export class NEvent {
      */
     public name: string;
     /**
-     * 事件处理函数名(需要在模块methods中定义)
+     * 事件处理函数名(需要在模块中定义)
      */
     public handler: string | Function;
     /**

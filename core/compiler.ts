@@ -1,3 +1,4 @@
+import { DefineElementManager } from "./defineelementmanager";
 import { Directive } from "./directive";
 import { DirectiveElementManager } from "./directiveelementmanager";
 import { NError } from "./error";
@@ -47,6 +48,7 @@ export class Compiler {
         srcStr = srcStr.replace(regExp, '');
 
         // 正则式分解标签和属性
+        // const regTag = /(?<!{{[^}}]*)(?:<(\/?)\s*?([a-zA-Z][a-zA-Z0-9-_]*)([\s\S]*?)(\/?)(?<!=)>)(?![^{{]*}})/g;  //标签完全识别版本
         const regTag = /((?<!\\)'[\s\S]*?(?<!\\)')|((?<!\\)"[\s\S]*?(?<!\\)")|((?<!\\)`[\s\S]*?(?<!\\)`)|({{[\S\s]*?\}{0,2}\s*}})|([\w$-]+(\s*=)?)|(<\s*[a-zA-Z][a-zA-Z0-9-_]*)|(\/?>)|(<\/\s*[a-zA-Z][a-zA-Z0-9-_]*>)/g;
 
         //dom数组
@@ -323,16 +325,14 @@ export class Compiler {
      * 包括：模块类元素、自定义元素
      * @param node  虚拟dom节点
      */
-    private postHandleNode(node: VirtualDom) {
-
+    private postHandleNode(node:VirtualDom){
         // 模块类判断
         if (ModuleFactory.hasClass(node.tagName)) {
             node.addDirective(new Directive('module', node.tagName));
             node.tagName = 'div';
-
-        } else if (DirectiveElementManager.has(node.tagName)) { //自定义元素
-            let clazz = DirectiveElementManager.get(node.tagName);
-            Reflect.construct(clazz, [node, this.module]);
+        }else if(DefineElementManager.has(node.tagName)){ //自定义元素
+            let clazz = DefineElementManager.get(node.tagName);
+            Reflect.construct(clazz,[node,this.module]);
         }
     }
 

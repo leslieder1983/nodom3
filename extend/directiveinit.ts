@@ -102,6 +102,8 @@ export default (function () {
             const parent = dom.parent;
             //禁用该指令
             this.disabled = true;
+            //避免在渲染时对src设置了model，此处需要删除
+            delete src.model;
             for (let i = 0; i < rows.length; i++) {
                 rows[i].$index = i;
                 //渲染一次-1，所以需要+1
@@ -223,7 +225,7 @@ export default (function () {
     );
 
     /**
-     * endif 指令
+     * elseif 指令
      */
     createDirective(
         'endif',
@@ -464,8 +466,6 @@ export default (function () {
             // const parent = dom.parent;
             this.value = this.value || 'default';
             let mid = dom.parent.subModuleId;
-            console.log(mid,this.value);
-            
             //父dom有module指令，表示为替代节点，替换子模块中的对应的slot节点；否则为子模块定义slot节点
             if (mid) {
                 let m = ModuleFactory.get(mid);
@@ -478,16 +478,11 @@ export default (function () {
             } else { //源slot节点
                 //获取替换节点进行替换
                 let cfg = module.objectManager.get('$slots.' + this.value);
-                if (cfg) {
-                    let rdom;
-                    if (dom.hasProp('innerRender')) { //内部渲染
-                        rdom = cfg.origin;
-                    } else { //父模块渲染
-                        rdom = cfg.rendered;
-                    }
-                    //避免key重复，更新key，如果为origin，则会修改原来的key？？？
-                    for (let d of rdom.children) {
-                        Util.setNodeKey(d, dom.key, true);
+                if(cfg){
+                    let rdom = cfg.dom;
+                    //避免key重复，更新key
+                    for(let d of rdom.children){
+                        Util.setNodeKey(d,dom.key,true);
                     }
                     //更改渲染子节点
                     src.children = rdom.children;
@@ -500,9 +495,9 @@ export default (function () {
     );
 
     /**
- * 指令名 
- * 描述：显示指令
- */
+     * 指令名 
+     * 描述：动画指令
+     */
     createDirective('animation',
         function (module: Module, dom: VirtualDom, src: VirtualDom) {
             const confObj = this.value
