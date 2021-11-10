@@ -1,10 +1,8 @@
-import {
-    Module
-} from '../../dist/nodom.js';
+import { Module } from "../../dist/nodom.js";
 
 export class MRepeat extends Module {
-    template() {
-        return `
+	template() {
+		return `
         <div class="view">
             <button e-click='pop'>pop</button>
             <button e-click='push'>push</button>
@@ -14,7 +12,7 @@ export class MRepeat extends Module {
             <div class="tip">基本使用</div>
             <div class="code">
                 菜单：
-                <for cond="{{foods}}" $index='idx'>
+                <for cond="{{foods}}" $index='idx' >
                     <span>菜名：{{name}}，价格：{{price}}</span>
                 </for>
             </div>

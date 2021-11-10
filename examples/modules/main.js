@@ -1,5 +1,4 @@
 import { Module } from "../../dist/nodom.js";
-// import {ModuleA} from './modulea.js'
 // import {ModuleB} from './moduleb.js'
 // import {ModuleC} from './modulec.js'
 // import {ModuleD} from './moduled.js'
@@ -63,34 +62,34 @@ export class ModuleMain extends Module {
 		};
 	}
 
-    getData(){
-        // return {
-        //     x1:'x.y',
-        //     x2:['y',true]
-        // }
-        return{
-            n:'name',
-            x1:'x.y',
-            x2:['y',true]
-        }
-    }
-    change=(model)=>{
-        console.log('aa',model);
-        this.model.show=!this.model.show;
-        model.show = false;
-        model.y = 'aaaa';
-        // console.log(this);
-    }
-    genTemp(show){
-        if(show)
-            return `
+	getData() {
+		// return {
+		//     x1:'x.y',
+		//     x2:['y',true]
+		// }
+		return {
+			n: "name",
+			x1: "x.y",
+			x2: ["y", true],
+		};
+	}
+	change = (model) => {
+		console.log("aa", model);
+		this.model.show = !this.model.show;
+		model.show = false;
+		model.y = "aaaa";
+		// console.log(this);
+	};
+	genTemp(show) {
+		if (show)
+			return `
                 <p>这是传递的子模版111</p>
                 <div x-repeat={{rows}}>{{name}}</div>
             `;
 		return `
             <p>这是传递的子模版222</p>
             <div>name is: {{name}}</div>
-        `
-    }
-    // modules = [ModuleA]
+        `;
+	}
+	// modules = [ModuleA]
 }
