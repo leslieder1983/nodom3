@@ -288,12 +288,12 @@ nodom采用基于HTML的模板语法。
 // model.userName = 'Joe';
 ```
 
-这样Nodom就会去当前模块实例的`model`里去寻找为`userName`的值，并且用它替换`{{ userName }}`。这样我们就能够通过操作`userName`的值来显示不同用户的欢迎信息。
+这样Nodom就会去当前模块实例的`model`里去寻找为`userName`的值，并且用它替换`{{ userName }}`。这样就能够通过操作`userName`的值来显示不同用户的欢迎信息。
 
 
 
 > 默认标签的属性值需要使用引号包裹（单引号`'`或者双引号`"`均可），但如果将表达式作为属性值，可以不写引号。
->  如：<div class="cls1 cls2" name={{userName}}></div>
+>  如：`<div class="cls1 cls2" name={{userName}}></div>`
 
 关于表达式的详细信息可以阅读本章的表达式章节。
 
@@ -425,7 +425,7 @@ class Hello extends Module{
 
 ### 事件绑定
 
-Nodom使用了专门的事件类`NEvent`来处理Dom事件操作，在模板中以`e-`开头，如：`e-click`、`e-mouseup`等，事件支持所有HTML元素标准事件，接收一个模块实例上的方法名作为事件处理方法。当事件触发的时，Nodom会执行该方法。如：`e-click="methodName"`。具体用法如下：
+Nodom使用了专门的事件类`NEvent`来处理Dom的事件操作，在模板中以`e-`开头，如：`e-click`、`e-mouseup`等。事件支持所有HTML元素标准事件，接收一个模块实例上的方法名作为事件处理方法，如：`e-click="methodName"`，当事件触发的时，Nodom会执行该方法。具体用法如下：
 ```js
 export class ModuleA extends Module{
 	template(){
@@ -456,12 +456,12 @@ export class ModuleA extends Module{
 与原生事件使用不同，Nodom中不需要指定事件参数，事件方法会自带四个参数。参数如下所示：
 
 
-| 序号 | 参数名    | 描述           |
-| -- | ------ | ------------ |
-| 1  | model  | dom对应的model  |
-| 2  | dom    | 事件对象对应的虚拟dom |
-| 3  | nEvent | Nodom事件对象    |
-| 4  | event  | html原生事件对象   |
+| 序号 | 参数名 | 描述                  |
+| ---- | ------ | --------------------- |
+| 1    | model  | dom对应的model        |
+| 2    | dom    | 事件对象对应的虚拟dom |
+| 3    | nEvent | Nodom事件对象         |
+| 4    | event  | html原生事件对象      |
 
 代码如下：
 ```js
@@ -1421,8 +1421,8 @@ class Main extends Module{
 
 `Model`会深层代理内部的`object`类型数据。
 
-基于`Proxy`，我们可以实现数据劫持和数据监听，来做到数据改变的时候自动更新渲染。
-> 关于`Proxy`的详细信息你可以参照[Proxy-MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy)。
+基于`Proxy`，Nodom可以实现数据劫持和数据监听，来做到数据改变时候的响应式更新渲染。
+> 关于`Proxy`的详细信息请参照[Proxy-MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy)。
 
 在使用的时，可以直接把`Model`当作对象来操作：
 
@@ -1844,7 +1844,7 @@ Nodom使用`x-animation`指令管理动画和过渡，该指令接收一个存�
 - `tigger`为`true`，触发`enter`；
 - `tigger`为`false`,触发`leave`。
 
-对于`enter`过渡，需要提供以`-enter-active`、`-enter-from`、`-enter-to`为后缀的一组类名。当然在传入给`x-animation`指令的对象中只需要提供前面的名字，而可以忽略后缀，`x-animation`在工作时会自动的加上这些后缀。这些规则对于`leave`过渡同理。
+对于`enter`过渡，需要提供以`-enter-active`、`-enter-from`、`-enter-to`为后缀的一组类名。在传入给`x-animation`指令的对象中只需要将名字传入给`name`属性，而不必添加后缀，`x-animation`在工作时会自动的加上这些后缀。这些规则对于`leave`过渡同理。
 
 `tigger`为`true`时，指令首先会在元素上添加`-enter-from`和`-enter-active`的类名，然后再下一帧开始的时候添加`-enter-to`的类名，同时移除掉`-enter-from`的类名。
 
