@@ -454,6 +454,8 @@ export class ModuleA extends Module{
 #### 回调函数的参数
 
 与原生事件使用不同，Nodom中不需要指定事件参数，事件方法会自带四个参数。参数如下所示：
+
+
 | 序号 | 参数名    | 描述           |
 | -- | ------ | ------------ |
 | 1  | model  | dom对应的model  |
