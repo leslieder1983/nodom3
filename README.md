@@ -562,7 +562,7 @@ export class ModuleA extends Module{
 | module                         | 8        |
 | field,route,router             | 10       |
 
-#### model指令
+#### Model 指令
 
 model指令用于给view绑定数据，数据采用层级关系，如:需要使用数据项data1.data2.data3，可以直接使用data1.data2.data3，也可以分2层设置分别设置x-model='data1'，x-model='data2'，然后使用数据项data3。下面的例子中描述了x-model的几种用法。
 model指令改变了数据层级，则如何用外层的数据呢，NoDom支持从根向下查找数据功能，当需要从根数据向下找数据项时，需要使用"$$"
@@ -587,11 +587,11 @@ data(){
 } 
 ```
 
-#### repeat 指令
+#### Repeat 指令
 
 repeat指令用于给按照绑定的数组数据生成多个dom节点，每个dom由指定的数据对象进行渲染。使用方式为x-repeat={{item}}，其中items为json数组。
 
-##### 数据索引
+数据索引
 
 索引数据项为$index，为避免不必要的二次渲染,index需要单独配置。
 
@@ -623,7 +623,7 @@ data(){
 }
 ```
 
-#### recur 指令
+#### Recur 指令
 
 recur指令生成树形节点，能够实现嵌套结构，在使用时，注意数据中的层次关系即可。recur也可以通过使用recur元素来实现嵌套结构。
 
@@ -673,20 +673,29 @@ data(){
 }
 ```
 
-#### if/elseif/else/endif指令
+#### If/Elseif/Else/Endif 指令
 
-if/else指令用于条件渲染，当if指令条件为真时，则渲染该节点。当if指令条件为假时，则进行后续的elseif指令及else指令判断，如果某个节点判断条件为真，则渲染该节点，最后通过endif指令结束上一个if条件判断。
+指令用法
 
-##### 模板代码
+- 指令说明：if/else指令用于条件渲染，当if指令条件为true时，则渲染该节点。当if指令条件为false时，则进行后续的elseif指令及else指令判断，如果某个节点判断条件为true，则渲染该节点，最后通过endif指令结束上一个if条件判断。
+
+模板代码
 
 ```
 <div>
+	<!--  --!>
     <div>如果discount<0.8，显示价格</div>
+    <!-- 使用if指令判断discount是否小于0.6 --!>
     <div x-if={{discount<0.6}}>价格：{{price}}</div>
+    <!-- if指令条件为false，进行elseif指令判断 --!>
     <div x-elseif={{discount<0.7}}>价格：{{price}}</div>
+    <!-- elseif指令为false，进行else判断 --!>
     <div x-else={{discount<0.8}}>价格：{{price}}</div>
     <div x-endif></div>
 </div>
+```
+
+```
 data(){
     return {
         discount: 0.7,
@@ -695,34 +704,84 @@ data(){
 }
 ```
 
+标签用法
 
+- 需要设置cond属性用于添加判断条件。
 
-#### show指令
-
-show指令用于显示或隐藏view，如果指令对应的条件为真，则显示该view，否则隐藏。使用方式为x-show='condition'。
-
-##### 模板代码
+模板代码
 
 ```
 <div>
-    <button e-click='change'>change</button>
-    <div x-show={{show}}>价格：{{price}}</div>
+	<!-- 单个if指令 --!>
+    <div>如果discount<0.8，显示价格</div>
+    <!-- 判断discount是否小于0.8 --!>
+    <if cond={{discount < 0.8}}>价格：{{price}}</if>
+    <endif/>
 </div>
 
+<div>
+	<!-- 完整的if/else指令 --!>
+    <div>如果age<18，显示未成年，否则显示成年</div>
+    <!-- 判断age是否小于18 --!>
+    <if cond={{age<18}}>年龄：{{age}}，未成年</if>
+    <!-- if条件为false，进入else判断 --!>
+    <else>年龄：{{age}}，成年</else>
+    <endif/>
+</div>
+
+<div>
+	<!-- if elseif else --!>
+    根据不同分数显示不同等级，<60不及格，60-69及格，70-79中等，80-89良好，>=90优秀
+    <!-- 判断grade是否小于60 --!>
+    <if cond={{grade<60}}>不及格</if>
+    <!-- if条件为false，进入elseif判断 --!>
+    <elseif cond={{grade>60 && grade<70}}> 及格 </elseif>
+    <!-- 上一个elseif条件为false，进入该elseif判断 --!>
+    <elseif cond={{grade>70 && grade<80}}> 中等 </elseif>
+    <!-- 上一个elseif条件为true，渲染该节点，结束判断 --!>
+    <elseif cond={{grade>80 && grade<90}}> 良好 </elseif>
+    <else> 优秀 </else>
+    <endif/>
+</div>
+```
+
+```
+data(){
+    return {
+        discount: 0.7,
+        price: 200,
+        age: 20,
+        grade: 73,
+    }
+}
+```
+
+#### Show 指令
+
+show指令用于显示或隐藏视图，如果指令对应的条件为true，则显示该视图，否则隐藏。使用方式为x-show='condition'。
+
+模板代码
+
+```
+<div>
+    <div x-show={{show}}>价格：{{price}}</div>
+</div>
+```
+
+```
 data(){
     return{
         show:true,
         price:2000
     }
 }
-
 ```
 
-#### module指令
+#### Module 指令
 
 module指令用于表示该元素为一个模块容器，module指向模块类会作为子模块渲染到该元素内。使用前先创建所需要的moduleA，然后编写完毕后，再用nodom(moduleA,'容器')即可。
 
-##### 模版代码
+模版代码
 
 ```
 class ModuleA extends Module{ 
@@ -731,31 +790,36 @@ class ModuleA extends Module{
 nodom(ModuleA,'div')
 ```
 
-#### field指令
+#### Field 指令
 
-field指令用于实现form表单下的输入类型元素，如input、combo、select、textarea等输入元素与数据项之间的双向绑定，即二者中一个改变另一个也会改变。
+- 指令说明：field指令用于实现输入类型元素，如input、select、textarea等输入元素与数据项之间的双向绑定。
 
-##### 配置说明
+配置说明
 
 - 绑定单选框radio：多个radio的x-field值必须设置为同一个数据项，同时需要设置value属性，该属性与数据项可能选值保持一致。
 - 绑定复选框checkbox：除了设置x-field绑定数据项外，还需要设置yes-value和no-value两个属性，分别对应选中和未选中时所绑定数据项的值。
 - 绑定select：多个option选项可以使用x-repeat指令生成，同时使用x-field给select绑定初始数据即可。
 - 绑定textarea：直接使用x-field绑定数据项即可。
 
-##### 模板代码
+模板代码
 
 ```
 <div>
+	<!-- 绑定name数据项 --!>
     姓名：<input x-field="name" />
+    <!-- 绑定sexy数据项 --!>
     性别：<input type="radio" x-field="sexy" value="M" />男
     	 <input x-field="sexy" type="radio" value="F" />女
+    <!-- 绑定married数据项 --!>
     已婚：<input type="checkbox" x-field="married" yes-value="1" no-value="0" />
+    <!-- 绑定edu数据项，并使用x-field指令生成多个option --!>
     学历：<select x-field="edu">
     		<option x-repeat={{edus}} value="{{eduId}}">{{eduName}}</option>
     	 </select>
-    简介:<textarea x-field='intro'></textarea>
 </div>
+```
 
+```
 data(){
     return{
     name: 'nodom',
@@ -772,8 +836,6 @@ data(){
     }
 } 
 ```
-
-
 
 ### 列表
 
