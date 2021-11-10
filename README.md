@@ -544,28 +544,34 @@ export class ModuleA extends Module{
 
 ### 指令(Directive)
 
-指令用于增强元素的表现能力，以"x-"开头，以设置元素属性(attribute)的形式来使用。目前NoDom支持以下几个指令:
+指令用于增强元素的表现能力，以"x-"开头，以设置元素属性(attribute)的形式来使用。指令具有优先级，按照数字从小到大，数字越小，优先级越高。优先级高的指令优先执行。
 
-| 指令名                                                       |
-| ------------------------------------------------------------ |
-| module,model,repeat,recur,class,if,else,elseif,endif,show,field,route,router,slot |
+目前NoDom支持以下几个指令:
 
-#### 指令优先级
+| 指令名 | 指令优先级 | 指令描述                           |
+| ------ | ---------- | ---------------------------------- |
+| model  | 1          | 绑定数据                           |
+| repeat | 2          | 按照绑定的数组数据生成多个相同节点 |
+| recur  | 2          | 生成嵌套结构                       |
+| if     | 5          | 条件判断                           |
+| else   | 5          | 条件判断                           |
+| elseif | 5          | 条件判断                           |
+| endif  | 5          | 结束判断                           |
+| show   | 5          | 显示视图                           |
+| slot   | 5          | 插槽                               |
+| module | 8          | 加载模块                           |
+| field  | 10         | 双向数据绑定                       |
+| route  | 10         | 路由跳转                           |
+| router | 10         | 路由占位                           |
 
-指令具有优先级，按照数字从小到大，数字越小，优先级越高。优先级高的指令优先执行。
 
-| 指令名                         | 优先级值 |
-| ------------------------------ | -------- |
-| model                          | 1        |
-| repeat，recur                  | 2        |
-| if,else,elseif,endif,show,slot | 5        |
-| module                         | 8        |
-| field,route,router             | 10       |
 
 #### Model 指令
 
 model指令用于给view绑定数据，数据采用层级关系，如:需要使用数据项data1.data2.data3，可以直接使用data1.data2.data3，也可以分2层设置分别设置x-model='data1'，x-model='data2'，然后使用数据项data3。下面的例子中描述了x-model的几种用法。
 model指令改变了数据层级，则如何用外层的数据呢，NoDom支持从根向下查找数据功能，当需要从根数据向下找数据项时，需要使用"$$"
+
+模板代码
 
 ```
 <div x-model="user"> <!-- 绑定数据 --!>
@@ -589,14 +595,17 @@ data(){
 
 #### Repeat 指令
 
-repeat指令用于给按照绑定的数组数据生成多个dom节点，每个dom由指定的数据对象进行渲染。使用方式为x-repeat={{item}}，其中items为json数组。
+Repeat指令用于给按照绑定的数组数据生成多个dom节点，每个dom由指定的数据对象进行渲染。使用方式为x-repeat={{item}}，其中items为数组对象。
 
 数据索引
 
 索引数据项为$index，为避免不必要的二次渲染,index需要单独配置。
 
+模板代码
+
 ```
-<div x-repeat={{foods1}}><!-- 绑定数组数据 --!>
+<!-- 绑定数组数据 --!>
+<div x-repeat={{foods1}}>
     编号：{{$index+1}}，菜名：{{name}}，价格：{{price}}
     <p>配料列表：</p>
     <ol>
@@ -628,6 +637,7 @@ data(){
 recur指令生成树形节点，能够实现嵌套结构，在使用时，注意数据中的层次关系即可。recur也可以通过使用recur元素来实现嵌套结构。
 
 ```
+<!-- 绑定数组数据 --!>
 <div x-recur='ritem'>
 			<span class="{{cls}}">{{title}}</span>
 			<recur ref/>
