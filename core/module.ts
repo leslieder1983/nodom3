@@ -105,6 +105,11 @@ export class Module {
     public replaceContainer:boolean;
 
     /**
+     * 生成dom时的keyid，每次编译置0
+     */
+    domKeyId:number;
+
+    /**
      * 构造器
      */
     constructor() {
@@ -267,6 +272,7 @@ export class Module {
         if (ModuleFactory.getMain() === this) {
             return;
         }
+        this.doModuleEvent('beforeUnActive');
         //设置状态
         this.state = 1;
         //删除容器
@@ -278,13 +284,17 @@ export class Module {
         this.keyNodeMap.clear();
         //清理缓存
         this.clearCache();
-
+        this.doModuleEvent('unActive');
         //处理子模块
         for(let id of this.children){
             let m = ModuleFactory.get(id);
             if(m){
                 m.unactive();
             }
+        }
+        //从html 卸载
+        if(this.container){
+            Util.empty(this.container);
         }
     }
 
@@ -450,6 +460,7 @@ export class Module {
      * 编译
      */
     public compile(){
+        this.domKeyId = 0;
         //清除缓存
         this.clearCache();
         const str = this.template(this.props);
@@ -495,5 +506,13 @@ export class Module {
      */
     public saveNode(key:string,node:Node){
         this.keyNodeMap.set(key,node);
+    }
+
+    /**
+     * 获取dom key id
+     * @returns     key id
+     */
+    public getDomKeyId():number{
+        return ++this.domKeyId;
     }
 }
