@@ -461,6 +461,7 @@ export class ModuleA extends Module{
 | 3    | nEvent | Nodom事件对象         |
 | 4    | event  | html原生事件对象      |
 
+代码如下：
 ```js
 	//  事件触发回调。
 	addCount(model,vdom,nEvnet,event){
