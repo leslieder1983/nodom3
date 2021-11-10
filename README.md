@@ -544,133 +544,168 @@ export class ModuleA extends Module{
 
 ### 指令(Directive)
 
-​	指令用于增强元素的表现能力，有两种使用方式，一种是以"x-"开头，作为元素的属性(attribute)使用，另外一种是把指令名用作标签名，例如<module></module>目前NoDom支持14个指令:module,model,repeat,recur,class,if,else,elseif,endif,show,field,route,router,slot。
+指令用于增强元素的表现能力，以"x-"开头，以设置元素属性(attribute)的形式来使用。指令具有优先级，按照数字从小到大，数字越小，优先级越高。优先级高的指令优先执行。
 
-#### 指令优先级
+目前NoDom支持以下几个指令:
 
-指令具有优先级，按照数字从小到大，数字越小，优先级越高。优先级高的指令优先执行。
+| 指令名 | 指令优先级 | 指令描述                           |
+| ------ | ---------- | ---------------------------------- |
+| model  | 1          | 绑定数据                           |
+| repeat | 2          | 按照绑定的数组数据生成多个相同节点 |
+| recur  | 2          | 生成嵌套结构                       |
+| if     | 5          | 条件判断                           |
+| else   | 5          | 条件判断                           |
+| elseif | 5          | 条件判断                           |
+| endif  | 5          | 结束判断                           |
+| show   | 5          | 显示视图                           |
+| slot   | 5          | 插槽                               |
+| module | 8          | 加载模块                           |
+| field  | 10         | 双向数据绑定                       |
+| route  | 10         | 路由跳转                           |
+| router | 10         | 路由占位                           |
 
-| 指令名                         | 优先级值 |
-| ------------------------------ | -------- |
-| model                          | 1        |
-| repeat，recur                  | 2        |
-| if,else,elseif,endif,show,slot | 5        |
-| module                         | 8        |
-| field,route,router             | 10       |
 
-#### model指令
+
+#### Model 指令
 
 model指令用于给view绑定数据，数据采用层级关系，如:需要使用数据项data1.data2.data3，可以直接使用data1.data2.data3，也可以分2层设置分别设置x-model='data1'，x-model='data2'，然后使用数据项data3。下面的例子中描述了x-model的几种用法。
 model指令改变了数据层级，则如何用外层的数据呢，NoDom支持从根向下查找数据功能，当需要从根数据向下找数据项时，需要使用"$$"
 
-##### 模版代码
+模板代码
 
 ```
-<div x-model="user">
-      顾客信息：
-      <div x-model="name">
-            <div>姓氏：{{lastName}}</div>
-            <div>名字：{{firstName}}</div>
-      </div>
+<div x-model="user"> <!-- 绑定数据 --!>
+    顾客信息：
+    <div x-model="name">
+        <div>姓氏：{{lastName}}</div>
+        <div>名字：{{firstName}}</div>
+     </div>
 </div>
 ```
-
-##### js代码
 
 ```
 data(){ 
 	return{ 
 		user: { 
 			name: { firstName: 'Xiaoming', lastName: 'Zhang' } 
-			} 
 		} 
-	} W
+	} 
+} 
 ```
 
-#### repeat 指令
+#### Repeat 指令
 
-repeat指令用于给按照绑定的数组数据重复生成多个相同的dom，每个dom由指定数组索引对应的数据对象或数据进行渲染。使用方式为x-repeat='items|filter',其中items为json数组，filter为过滤器。
+Repeat指令用于给按照绑定的数组数据生成多个dom节点，每个dom由指定的数据对象进行渲染。使用方式为x-repeat={{item}}，其中items为数组对象。
 
-##### 数据索引
+数据索引
 
 索引数据项为$index，为避免不必要的二次渲染,index需要单独配置。
 
-##### 模版代码
+模板代码
 
 ```
+<!-- 绑定数组数据 --!>
 <div x-repeat={{foods1}}>
-                    编号：{{$index+1}}，菜名：{{name}}，价格：{{price}}
-                    <p>配料列表：</p>
-                    <ol>
-                        <li x-repeat={{rows}}>食材：{{title}}，重量：{{weight}}</li>
-                    </ol>                  
+    编号：{{$index+1}}，菜名：{{name}}，价格：{{price}}
+    <p>配料列表：</p>
+    <ol>
+        <li x-repeat={{rows}}>食材：{{title}}，重量：{{weight}}</li>
+    </ol>                  
 </div>
 ```
 
-##### js代码
-
 ```
 data(){
- foods1:[{
-                name: '夫妻肺片',
-                price: 25,
-                rows:[{title:'芹菜',weight:100},{title:'猪头肉',weight:200}]
-            }, {
-                name: '京酱肉丝',
-                price: 22,
-                rows:[{title:'瘦肉',weight:100},{title:'葱',weight:200}]
-            }, {
-                name: '糖醋里脊',
-                price: 20,
-                rows:[{title:'排骨',weight:200}]
-            }]
+ 	foods1:[{
+         name: '夫妻肺片',
+         price: 25,
+         rows:[{title:'芹菜',weight:100},{title:'猪头肉',weight:200}]}, 
+         {
+            name: '京酱肉丝',
+            price: 22,
+            rows:[{title:'瘦肉',weight:100},{title:'葱',weight:200}]},
+          {
+            name: '糖醋里脊',
+            price: 20,
+            rows:[{title:'排骨',weight:200}]}
+]}
 }
 ```
 
-#### recur 指令
+#### Recur 指令
 
-recur指令用于递归，能够实现一层包一层的结构，在使用时，注意数据中的层次关系即可。
-
-##### 模版代码
+recur指令生成树形节点，能够实现嵌套结构，在使用时，注意数据中的层次关系即可。recur也可以通过使用recur元素来实现嵌套结构。
 
 ```
+<!-- 绑定数组数据 --!>
 <div x-recur='ritem'>
 			<span class="{{cls}}">{{title}}</span>
 			<recur ref/>
 </div>
+<recur cond='items' name='r1' class='secondct'>
+		<for cond={{items}} >
+				<div class='second'>id is:{{id}}-{{title}}</div>
+				<recur ref='r1' />
+		</for>
+</recur>
 ```
 
-##### js代码
-
 ```
-ritem: {
-						title: "第一层",
-						cls: "cls1",
-						ritem: {
-							title: "第二层",
-							cls: "cls2",
-							ritem: {
-								title: "第三层",
-								cls: "cls3",
-							},
-						}
-		}
+data(){
+    ritem: {
+       title: "第一层",
+       cls: "cls1",
+       ritem: {
+          title: "第二层",
+          cls: "cls2",
+          ritem: {
+             title: "第三层",
+             cls: "cls3"
+         		 }
+              }
+     },
+    ritem2:{
+		items:[{
+				title:'aaa',
+				id:1,
+				items:[{
+					id:1,
+					title:'aaa1',
+					items:[{
+						title:'aaa12',id:12},{
+						title:'aaa11',id:11,items:[
+						{title:'aaa111',id:111},
+						{title:'aaa112',id:112}]},
+						{title:'aaa13',id:13}]}
+	}
+	]
+	}      
+}
 ```
 
-#### if/elseif/else/endif指令
+#### If/Elseif/Else/Endif 指令
 
-if/else指令用于条件渲染，当if指令条件为真时，则渲染该节点。当if指令条件为假时，则进行后续的elseif指令及else指令判断，如果某个节点判断条件为真，则渲染该节点，最后通过endif指令结束上一个if条件判断。
+指令用法
 
-##### 模板代码
+- 指令说明：if/else指令用于条件渲染，当if指令条件为true时，则渲染该节点。当if指令条件为false时，则进行后续的elseif指令及else指令判断，如果某个节点判断条件为true，则渲染该节点，最后通过endif指令结束上一个if条件判断。
+
+模板代码
 
 ```
 <div>
+	<!--  --!>
     <div>如果discount<0.8，显示价格</div>
+    <!-- 使用if指令判断discount是否小于0.6 --!>
     <div x-if={{discount<0.6}}>价格：{{price}}</div>
+    <!-- if指令条件为false，进行elseif指令判断 --!>
     <div x-elseif={{discount<0.7}}>价格：{{price}}</div>
+    <!-- elseif指令为false，进行else判断 --!>
     <div x-else={{discount<0.8}}>价格：{{price}}</div>
     <div x-endif></div>
 </div>
+```
+
+```
 data(){
     return {
         discount: 0.7,
@@ -679,34 +714,84 @@ data(){
 }
 ```
 
+标签用法
 
+- 需要设置cond属性用于添加判断条件。
 
-#### show指令
-
-show指令用于显示或隐藏view，如果指令对应的条件为真，则显示该view，否则隐藏。使用方式为x-show='condition'。
-
-##### 模板代码
+模板代码
 
 ```
 <div>
-    <button e-click='change'>change</button>
-    <div x-show={{show}}>价格：{{price}}</div>
+	<!-- 单个if指令 --!>
+    <div>如果discount<0.8，显示价格</div>
+    <!-- 判断discount是否小于0.8 --!>
+    <if cond={{discount < 0.8}}>价格：{{price}}</if>
+    <endif/>
 </div>
 
+<div>
+	<!-- 完整的if/else指令 --!>
+    <div>如果age<18，显示未成年，否则显示成年</div>
+    <!-- 判断age是否小于18 --!>
+    <if cond={{age<18}}>年龄：{{age}}，未成年</if>
+    <!-- if条件为false，进入else判断 --!>
+    <else>年龄：{{age}}，成年</else>
+    <endif/>
+</div>
+
+<div>
+	<!-- if elseif else --!>
+    根据不同分数显示不同等级，<60不及格，60-69及格，70-79中等，80-89良好，>=90优秀
+    <!-- 判断grade是否小于60 --!>
+    <if cond={{grade<60}}>不及格</if>
+    <!-- if条件为false，进入elseif判断 --!>
+    <elseif cond={{grade>60 && grade<70}}> 及格 </elseif>
+    <!-- 上一个elseif条件为false，进入该elseif判断 --!>
+    <elseif cond={{grade>70 && grade<80}}> 中等 </elseif>
+    <!-- 上一个elseif条件为true，渲染该节点，结束判断 --!>
+    <elseif cond={{grade>80 && grade<90}}> 良好 </elseif>
+    <else> 优秀 </else>
+    <endif/>
+</div>
+```
+
+```
+data(){
+    return {
+        discount: 0.7,
+        price: 200,
+        age: 20,
+        grade: 73,
+    }
+}
+```
+
+#### Show 指令
+
+show指令用于显示或隐藏视图，如果指令对应的条件为true，则显示该视图，否则隐藏。使用方式为x-show='condition'。
+
+模板代码
+
+```
+<div>
+    <div x-show={{show}}>价格：{{price}}</div>
+</div>
+```
+
+```
 data(){
     return{
         show:true,
         price:2000
     }
 }
-
 ```
 
-#### module指令
+#### Module 指令
 
 module指令用于表示该元素为一个模块容器，module指向模块类会作为子模块渲染到该元素内。使用前先创建所需要的moduleA，然后编写完毕后，再用nodom(moduleA,'容器')即可。
 
-##### 模版代码
+模版代码
 
 ```
 class ModuleA extends Module{ 
@@ -715,31 +800,36 @@ class ModuleA extends Module{
 nodom(ModuleA,'div')
 ```
 
-#### field指令
+#### Field 指令
 
-field指令用于实现form表单下的输入类型元素，如input、combo、select、textarea等输入元素与数据项之间的双向绑定，即二者中一个改变另一个也会改变。
+- 指令说明：field指令用于实现输入类型元素，如input、select、textarea等输入元素与数据项之间的双向绑定。
 
-##### 配置说明
+配置说明
 
 - 绑定单选框radio：多个radio的x-field值必须设置为同一个数据项，同时需要设置value属性，该属性与数据项可能选值保持一致。
 - 绑定复选框checkbox：除了设置x-field绑定数据项外，还需要设置yes-value和no-value两个属性，分别对应选中和未选中时所绑定数据项的值。
 - 绑定select：多个option选项可以使用x-repeat指令生成，同时使用x-field给select绑定初始数据即可。
 - 绑定textarea：直接使用x-field绑定数据项即可。
 
-##### 模板代码
+模板代码
 
 ```
 <div>
+	<!-- 绑定name数据项 --!>
     姓名：<input x-field="name" />
+    <!-- 绑定sexy数据项 --!>
     性别：<input type="radio" x-field="sexy" value="M" />男
     	 <input x-field="sexy" type="radio" value="F" />女
+    <!-- 绑定married数据项 --!>
     已婚：<input type="checkbox" x-field="married" yes-value="1" no-value="0" />
+    <!-- 绑定edu数据项，并使用x-field指令生成多个option --!>
     学历：<select x-field="edu">
     		<option x-repeat={{edus}} value="{{eduId}}">{{eduName}}</option>
     	 </select>
-    简介:<textarea x-field='intro'></textarea>
 </div>
+```
 
+```
 data(){
     return{
     name: 'nodom',
@@ -756,119 +846,6 @@ data(){
     }
 } 
 ```
-
-### 指令元素（Element）
-
-指令元素和指令的使用效果类似，使用方法有一些不同。
-
-#### module元素
-
-module元素用于表示该元素为一个模块容器，module指向模块类会作为子模块渲染到该元素内。使用前先创建所需要的moduleA，然后把模块名作为标签名进行使用。
-
-#### 模板代码
-
-```
-<ModuleA xxx='333'>
-        <h3 style='color:gold'>
-              我自动作为solot节点
-        </h3>
-</ModuleA>
-```
-
-#### for元素
-
-#### recur元素
-
-recur元素和recur指令的功能一样，都用于递归，能够实现一层包一层的结构，在使用时，注意数据中的层次关系即可。
-
-##### 模版代码
-
-```
-<recur cond='items' name='r1' class='secondct'>
-		<for cond={{items}} >
-				<div class='second'>id is:{{id}}-{{title}}</div>
-				<recur ref='r1' />
-		</for>
-</recur>
-```
-
-##### js代码
-
-```
-data(){
-	return{
-		ritem2:{
-						items:[
-							{
-								title:'aaa',
-								id:1,
-								items:[{
-									id:1,
-									title:'aaa1',
-									items:[
-										{title:'aaa12',id:12},
-										{title:'aaa11',id:11,items:[
-											{title:'aaa111',id:111},
-											{title:'aaa112',id:112}
-										]},
-										{title:'aaa13',id:13}
-									]}
-	}
-	]
-	}
-	}
-}
-```
-
-#### if/elseif/else/endif元素
-
-- 单个if标签：if标签用于条件判断，需要设置cond属性用于添加条件，当条件为真时渲染该节点，否则隐藏并执行endif。
-- if/else标签：当if标签条件为假时，渲染else标签并执行endif。
-- if/elseif/else标签：elseif需要设置cond属性。当if标签条件为假时，进行后续的elseif标签的条件判断，当某个条件为真时，则渲染该节点，并执行endif。如果所有elseif标签的条件都为假，则渲染else标签然后执行endif。
-- endif标签：结束上一个条件判断。
-
-##### 模板代码
-
-```
-<div>
-	<div>单个if指令</div>
-    <div>如果discount<0.8，显示价格</div>
-    <if cond={{discount < 0.8}}>价格：{{price}}</if>
-    <endif/>
-</div>
-
-<div>
-	<div>完整的if/else指令</div>
-    <div>如果age<18，显示未成年，否则显示成年</div>
-    <if cond={{age<18}}>年龄：{{age}}，未成年</if>
-    <else>年龄：{{age}}，成年</else>
-    <endif/>
-</div>
-
-<div>
-	<div>if elseif else</div>
-    根据不同分数显示不同等级，<60不及格，60-69及格，70-79中等，80-89良好，>=90优秀
-    <if cond={{grade<60}}>不及格</if>
-    <elseif cond={{grade>60 && grade<70}}> 及格 </elseif>
-    <elseif cond={{grade>70 && grade<80}}> 中等 </elseif>
-    <elseif cond={{grade>80 && grade<90}}> 良好 </elseif>
-    <else> 优秀 </else>
-    <endif/>
-</div>
-
-data(){
-    return {
-        discount: 0.7,
-        price: 200,
-        age: 20,
-        grade: 73,
-    }
-}
-```
-
-
-
-
 
 ### 列表
 
@@ -1716,7 +1693,58 @@ class Module1 extends Module {
 }
 ```
 
+### Cache
 
+Nodom提供了缓存功能，缓存空间是一个Object，以key-value的形式存储在内存中；
+
+- key的类型是string，支持多级数据分割，例如：China.captial；
+- value支持任意类型的数据。
+
+用户可以自行选择将常用的内容存储在缓存空间，例子如下：
+
+```javascript
+GlobalCache.set("China.captial","北京")
+```
+
+根据键名从缓存中读取数据，例子如下：
+
+```javascript
+GlobalCache.get("China.captial")
+```
+
+根据键名从缓存中移除，例子如下：
+
+```javascript
+GlobalCache.remove("China.captial")
+```
+
+另外，还提供将指令实例，指令参数，表达式实例，事件实例，事件参数，渲染树虚拟dom，html节点，dom参数进行操作。具体使用参考API文档。
+
+对渲染树虚拟dom的操作如下所示。
+
+将渲染树虚拟dom存储在内存中：
+
+```javascript
+// 引入模块
+import { ObjectManager } from '../dist/nodom.js'
+let om = new ObjectManager(module)
+```
+
+```javascript
+om.saveElement(dom)
+```
+
+根据提供的键名获取内存中对应的渲染树虚拟dom：
+
+```javascript
+om.getElement(key)
+```
+
+根据提供的键名将对应的渲染树虚拟dom从内存中移除：
+
+```javascript
+om.removeElement(key)
+```
 
 ### 自定义
 
