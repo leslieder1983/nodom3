@@ -12,7 +12,7 @@
     "build": "rollup -c"
   },
   "unpkg": "dist/nodom.js",
-  "author": "",
+  "author": "weblabsw",
   "license": "MIT",
   "browser": "dist/nodom.js",
   "devDependencies": {
