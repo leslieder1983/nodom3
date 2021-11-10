@@ -9,17 +9,16 @@ export class ModuleA extends Module{
                     <p>模块A的内容</p>
                     <slot></slot>
                 </div>
-            `
-        }else if(props.temp){
-            return `
+            `;
+		} else if (props.temp) {
+			return `
                 <div>
                     <h1>props传模版</h1>
                     ${props.temp}
                 </div>
-            `
-            
-        }else{
-            return `
+            `;
+		} else {
+			return `
                 <div class='modulea'>
                     <div>这是外部数据name:{{n}}</div>
                     <for  cond={{rows}}>

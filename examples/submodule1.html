@@ -62,26 +62,27 @@
                     </modulea>
                 </div>
             `;
-        }
-        data(){
-            return {
-                xxx:1,
-                rows:[
-                    {id:1,name:'nodom'},
-                    {id:2,name:'noomi'},
-                    {id:3,name:'relaen'}
-                ]
-            }
-        }
-        add(model){
-            model.rows.push({id:4,name:'weblab'});
-            console.log(model.rows);
-        }
+			}
+			data() {
+				return {
+					xxx: 1,
+					rows: [
+						{ id: 1, name: "nodom" },
+						{ id: 2, name: "noomi" },
+						{ id: 3, name: "relaen" },
+					],
+				};
+			}
+			add(model) {
+				model.rows.push({ id: 4, name: "weblab" });
+				console.log(model.rows);
+			}
 
-        change1(model){
-            model.xxx = 2;
-        }
-    }
-    nodom(Module1,'div');
-</script>
+			change1(model) {
+				// model.xxx = 2;
+				console.log(this);
+			}
+		}
+		nodom(Module1, "div");
+	</script>
 </html>

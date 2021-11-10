@@ -1,11 +1,10 @@
-import {Module} from '../../dist/nodom.js'
-import {ModuleA} from './modulea.js'
-import {ModuleB} from './moduleb.js'
-import {ModuleC} from './modulec.js'
-import {ModuleD} from './moduled.js'
-export class ModuleMain extends Module{
-    template(){
-        return `
+import { Module } from "../../dist/nodom.js";
+// import {ModuleB} from './moduleb.js'
+// import {ModuleC} from './modulec.js'
+// import {ModuleD} from './moduled.js'
+export class ModuleMain extends Module {
+	template() {
+		return `
             <div>
             
                 <button e-click='change'>change</button>
@@ -49,22 +48,19 @@ export class ModuleMain extends Module{
                     <mod-d x-repeat={{rows}} />
                 </mod-a>
            </div>
-        `
-    }
-    data(){
-        return{
-            show:true,
-            x:{
-                y:123
-            },
-            y:'hello world!',
-            name:'yanglei',
-            rows:[
-                {name:'yang'},
-                {name:'lei'},
-            ]
-        }
-    }
+        `;
+	}
+	data() {
+		return {
+			show: true,
+			x: {
+				y: 123,
+			},
+			y: "hello world!",
+			name: "yanglei",
+			rows: [{ name: "yang" }, { name: "lei" }],
+		};
+	}
 
     getData(){
         // return {
@@ -88,7 +84,7 @@ export class ModuleMain extends Module{
                 <p>这是传递的子模版111</p>
                 <div x-repeat={{rows}}>{{name}}</div>
             `;
-        return`
+		return `
             <p>这是传递的子模版222</p>
             <div>name is: {{name}}</div>
         `

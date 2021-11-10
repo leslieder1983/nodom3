@@ -1,14 +1,13 @@
 import { Directive } from "../core/directive";
-import { VirtualDom } from "../core/virtualdom";
 import { NEvent } from "../core/event";
 import { Model } from "../core/model";
 import { Module } from "../core/module";
 import { ModuleFactory } from "../core/modulefactory";
-import { createDirective} from "../core/nodom";
+import { createDirective } from "../core/nodom";
 import { Renderer } from "../core/renderer";
 import { Router } from "../core/router";
 import { Util } from "../core/util";
-import { ModelManager } from "../core/modelmanager";
+import { VirtualDom } from "../core/virtualdom";
 
 export default (function () {
 
@@ -27,11 +26,11 @@ export default (function () {
      */
     createDirective(
         'module',
-        function(module:Module,dom:VirtualDom,src:VirtualDom){
+        function (module: Module, dom: VirtualDom, src: VirtualDom) {
             let m: Module;
             //存在moduleId，表示已经渲染过，不渲染
-            let mid = dom.getParam(module,'moduleId');
-            let handle:boolean = true;
+            let mid = dom.getParam(module, 'moduleId');
+            let handle: boolean = true;
             if (mid) {
                 m = ModuleFactory.get(mid);
                 handle = !dom.getProp('renderOnce');
@@ -42,32 +41,25 @@ export default (function () {
                 }
                 mid = m.id;
                 //保留modelId
-                dom.setParam(module,'moduleId',mid);
-                module.addChild(m);
-                //共享当前dom的model给子模块
-                if(dom.hasProp('useDomModel')){
-                    m.model = dom.model;
-                    //绑定model到子模块，共享update,watch方法
-                    ModelManager.bindToModule(m.model,m);
-                    dom.delProp('useDomModel');
-                }
+                // src.subModuleId = mid;
+                dom.setParam(module, 'moduleId', mid);
             }
             //保存到dom上，提升渲染性能
             dom.subModuleId = mid;
-            
-            if(handle){ //需要处理
+
+            if (handle) { //需要处理
                 //设置props，如果改变了props，启动渲染
-                let o:any = {};
-                if(dom.props){
-                    for(let p of dom.props){
-                        if(p[0][0] === '$'){ //数据
-                            if(!o.$data){
+                let o: any = {};
+                if (dom.props) {
+                    for (let p of dom.props) {
+                        if (p[0][0] === '$') { //数据
+                            if (!o.$data) {
                                 o.$data = {};
                             }
                             o.$data[p[0].substr(1)] = p[1];
                             //删除属性
                             dom.delProp(p[0]);
-                        }else{
+                        } else {
                             o[p[0]] = p[1];
                         }
                     }
@@ -85,7 +77,7 @@ export default (function () {
      */
     createDirective(
         'model',
-        function(module:Module,dom:VirtualDom,src:VirtualDom){
+        function (module: Module, dom: VirtualDom, src: VirtualDom) {
             let model: Model = dom.model.$get(this.value);
             if (model) {
                 dom.model = model;
@@ -101,30 +93,22 @@ export default (function () {
      */
     createDirective(
         'repeat',
-        function(module:Module,dom:VirtualDom,src:VirtualDom){
+        function (module: Module, dom: VirtualDom, src: VirtualDom) {
             let rows = this.value;
             // 无数据，不渲染
             if (!Util.isArray(rows) || rows.length === 0) {
                 return false;
             }
-            //索引名
-            const idxName = src.getProp('$index');
             const parent = dom.parent;
             //禁用该指令
             this.disabled = true;
             //避免在渲染时对src设置了model，此处需要删除
             delete src.model;
             for (let i = 0; i < rows.length; i++) {
-                if(idxName){
-                    rows[i][idxName] = i;
-                }
+                rows[i].$index = i;
                 //渲染一次-1，所以需要+1
                 src.staticNum++;
-                let d = Renderer.renderDom(module,src,rows[i],parent,rows[i].$key);
-                //删除$index属性
-                if(idxName){
-                    d.delProp('$index');    
-                }
+                Renderer.renderDom(module, src, rows[i], parent, rows[i].$key);
             }
             //启用该指令
             this.disabled = false;
@@ -149,45 +133,45 @@ export default (function () {
      */
     createDirective(
         'recur',
-        function(module:Module,dom:VirtualDom,src:VirtualDom){
+        function (module: Module, dom: VirtualDom, src: VirtualDom) {
             //递归节点存放容器
-            if(dom.hasProp('ref')){
+            if (dom.hasProp('ref')) {
                 //如果出现在repeat中，src为单例，需要在使用前清空子节点，避免沿用上次的子节点
                 src.children = [];
                 //递归存储名
                 const name = '$recurs.' + (dom.getProp('ref') || 'default');
                 let node = module.objectManager.get(name);
-                if(!node){
+                if (!node) {
                     return true;
                 }
                 let model = dom.model;
                 let cond = node.getDirective('recur');
                 let m = model[cond.value];
                 //不存在子层数组，不再递归
-                if(!m){
+                if (!m) {
                     return true;
                 }
                 //克隆，后续可以继续用
                 let node1 = node.clone();
-                let key:string;
-                if(!Array.isArray(m)){  //recur子节点不为数组，依赖子层数据
+                let key: string;
+                if (!Array.isArray(m)) {  //recur子节点不为数组，依赖子层数据
                     node1.model = m;
                     key = m.$key;
-                    Util.setNodeKey(node1,key,true);
-                }else{
+                    Util.setNodeKey(node1, key, true);
+                } else {
                     key = dom.model.$key
                 }
-                
+
                 src.children = [node1];
-            }else { //递归节点
+            } else { //递归节点
                 let data = dom.model[this.value];
-                if(!data){
+                if (!data) {
                     return true;
                 }
                 //递归名，默认default
                 const name = '$recurs.' + (dom.getProp('name') || 'default');
-                if(!module.objectManager.get(name)){
-                    module.objectManager.set(name,src.clone());
+                if (!module.objectManager.get(name)) {
+                    module.objectManager.set(name, src.clone());
                 }
             }
             return true;
@@ -200,8 +184,8 @@ export default (function () {
      * 描述：条件指令
      */
     createDirective('if',
-        function(module:Module,dom:VirtualDom,src:VirtualDom){
-            dom.parent.setParam(module,'$if',this.value);
+        function (module: Module, dom: VirtualDom, src: VirtualDom) {
+            dom.parent.setParam(module, '$if', this.value);
             return this.value;
         },
         5
@@ -213,9 +197,9 @@ export default (function () {
      */
     createDirective(
         'else',
-        function(module:Module,dom:VirtualDom,src:VirtualDom){
+        function (module: Module, dom: VirtualDom, src: VirtualDom) {
             //如果前面的if/elseif值为true，则隐藏，否则显示
-            return dom.parent.getParam(module,'$if') === false;
+            return dom.parent.getParam(module, '$if') === false;
         },
         5
     );
@@ -223,16 +207,16 @@ export default (function () {
     /**
      * elseif 指令
      */
-    createDirective('elseif', 
-        function(module:Module,dom:VirtualDom,src:VirtualDom){
-            let v = dom.parent.getParam(module,'$if');
-            if(v === true){
+    createDirective('elseif',
+        function (module: Module, dom: VirtualDom, src: VirtualDom) {
+            let v = dom.parent.getParam(module, '$if');
+            if (v === true) {
                 return false;
-            }else{
-                if(!this.value){
+            } else {
+                if (!this.value) {
                     return false;
-                }else{
-                    dom.parent.setParam(module,'$if',true);
+                } else {
+                    dom.parent.setParam(module, '$if', true);
                 }
             }
             return true;
@@ -243,10 +227,10 @@ export default (function () {
     /**
      * elseif 指令
      */
-     createDirective(
-         'endif', 
-        function(module:Module,dom:VirtualDom,src:VirtualDom){
-            dom.parent.removeParam(module,'$if');
+    createDirective(
+        'endif',
+        function (module: Module, dom: VirtualDom, src: VirtualDom) {
+            dom.parent.removeParam(module, '$if');
             return true;
         },
         5
@@ -258,36 +242,92 @@ export default (function () {
      */
     createDirective(
         'show',
-        function(module:Module,dom:VirtualDom,src:VirtualDom){
+        function (module: Module, dom: VirtualDom, src: VirtualDom) {
             return this.value;
         },
         5
     );
 
     /**
+     * 指令名 data
+     * 描述：从当前模块获取数据并用于子模块，dom带module指令时有效
+     */
+    // createDirective('data',
+    //     function(module:Module,dom:VirtualDom,src:VirtualDom){
+    //         if (typeof this.value !== 'object' || !dom.hasDirective('module')){
+    //             return;
+    //         }
+    //         let mdlDir:Directive = dom.getDirective(module,'module');
+    //         let mid = mdlDir.getParam(module,dom,'moduleId');
+    //         if(!mid){
+    //             return;
+    //         }
+    //         let obj = this.value;
+    //         //子模块
+    //         let subMdl = ModuleFactory.get(mid);
+    //         //子model
+    //         let m: Model = subMdl.model;
+    //         let model = dom.model;
+    //         Object.getOwnPropertyNames(obj).forEach(p => {
+    //             //字段名
+    //             let field;
+    //             // 反向修改
+    //             let reverse = false;
+    //             if (Array.isArray(obj[p])) {
+    //                 field = obj[p][0];
+    //                 if (obj[p].length > 1) {
+    //                     reverse = obj[p][1];
+    //                 }
+    //                 //删除reverse，只保留字段
+    //                 obj[p] = field;
+    //             } else {
+    //                 field = obj[p];
+    //             }
+
+    //             let d = model.$get(field);
+    //             //数据赋值
+    //             if (d !== undefined) {
+    //                 //对象直接引用，需将model绑定到新模块
+    //                 if(typeof d === 'object'){
+    //                     ModelManager.bindToModule(d,mid);
+    //                 }
+    //                 m[p] = d;
+    //             }
+    //             //反向处理（对象无需进行反向处理）
+    //             if (reverse && typeof d !== 'object') {
+    //                 m.$watch(p, function (model1,ov, nv) {
+    //                     model.$set(field, nv);
+    //                 });
+    //             }
+    //         });
+    //     },
+    //     9
+    // );
+
+    /**
      * 指令名 field
      * 描述：字段指令
      */
     createDirective('field',
-        function(module:Module,dom:VirtualDom,src:VirtualDom){
+        function (module: Module, dom: VirtualDom, src: VirtualDom) {
             const me = this;
             const type: string = dom.getProp('type') || 'text';
             const tgname = dom.tagName.toLowerCase();
             const model = dom.model;
-            
+
             if (!model) {
                 return true;
             }
 
             let dataValue = model.$get(this.value);
-            
+
             if (type === 'radio') {
                 let value = dom.getProp('value');
                 if (dataValue == value) {
-                    dom.setProp('checked',true);
-                    dom.setAsset('checked','checked');
+                    dom.setProp('checked', true);
+                    dom.setAsset('checked', 'checked');
                 } else {
-                    dom.setAsset('checked',false);
+                    dom.setAsset('checked', false);
                     dom.delProp('checked');
                 }
             } else if (type === 'checkbox') {
@@ -295,25 +335,25 @@ export default (function () {
                 let yv = dom.getProp('yes-value');
                 //当前值为yes-value
                 if (dataValue == yv) {
-                    dom.setProp('value',yv);
-                    dom.setAsset('checked','checked');
+                    dom.setProp('value', yv);
+                    dom.setAsset('checked', 'checked');
                 } else { //当前值为no-value
-                    dom.setProp('value',dom.getProp('no-value'));
-                    dom.setAsset('checked',false);
+                    dom.setProp('value', dom.getProp('no-value'));
+                    dom.setAsset('checked', false);
                 }
             } else if (tgname === 'select') { //下拉框
-                dom.setAsset('value',dataValue);
-                dom.setProp('value',dataValue);
+                dom.setAsset('value', dataValue);
+                dom.setProp('value', dataValue);
             } else {
-                let v = (dataValue!==undefined && dataValue!==null)?dataValue:'';
-                dom.setAsset('value',v);
-                dom.setProp('value',v);
+                let v = (dataValue !== undefined && dataValue !== null) ? dataValue : '';
+                dom.setAsset('value', v);
+                dom.setProp('value', v);
             }
 
             //初始化
-            if(!this.getParam(module,dom,'inited')){
+            if (!this.getParam(module, dom, 'inited')) {
                 dom.addEvent(new NEvent('change',
-                    function(model,dom){
+                    function (model, dom) {
                         let el = <any>module.getNode(dom.key);
                         if (!el) {
                             return;
@@ -333,7 +373,7 @@ export default (function () {
                                 v = undefined;
                             }
                         }
-                        
+
                         //修改字段值,需要处理.运算符
                         let temp = this;
                         let arr = field.split('.')
@@ -348,12 +388,12 @@ export default (function () {
                         }
                         //修改value值，该节点不重新渲染
                         if (type !== 'radio') {
-                            dom.setProp('value',v);
+                            dom.setProp('value', v);
                             el.value = v;
                         }
                     }
                 ));
-                this.setParam(module,dom,'inited',true);
+                this.setParam(module, dom, 'inited', true);
             }
             return true;
         },
@@ -364,31 +404,31 @@ export default (function () {
      * route指令
      */
     createDirective('route',
-        function(module:Module,dom:VirtualDom,src:VirtualDom){
-            if(!this.value){
+        function (module: Module, dom: VirtualDom, src: VirtualDom) {
+            if (!this.value) {
                 return true;
             }
             //a标签需要设置href
             if (dom.tagName.toLowerCase() === 'a') {
-                dom.setProp('href','javascript:void(0)');
+                dom.setProp('href', 'javascript:void(0)');
             }
-            dom.setProp('path',this.value);
+            dom.setProp('path', this.value);
             //有激活属性
             if (dom.hasProp('active')) {
                 let acName = dom.getProp('active');
                 dom.delProp('active');
                 //active 转expression
                 Router.addActiveField(module, this.value, dom.model, acName);
-                if(this.value.startsWith(Router.currentPath) && dom.model[acName]){
+                if (this.value.startsWith(Router.currentPath) && dom.model[acName]) {
                     Router.go(this.value);
                 }
             }
-            
+
             //添加click事件,避免重复创建事件对象，创建后缓存
-            let event:NEvent = module.objectManager.get('$routeClickEvent');
-            if(!event){
+            let event: NEvent = module.objectManager.get('$routeClickEvent');
+            if (!event) {
                 event = new NEvent('click',
-                    (model,dom, e) => {
+                    (model, dom, e) => {
                         let path = dom.getProp('path');
                         if (!path) {
                             let dir: Directive = dom.getDirective('route');
@@ -400,7 +440,7 @@ export default (function () {
                         Router.go(path);
                     }
                 );
-                module.objectManager.set('$routeClickEvent',event);
+                module.objectManager.set('$routeClickEvent', event);
             }
             dom.addEvent(event);
             return true;
@@ -411,7 +451,7 @@ export default (function () {
      * 增加router指令
      */
     createDirective('router',
-        function(module:Module,dom:VirtualDom,src:VirtualDom){
+        function (module: Module, dom: VirtualDom, src: VirtualDom) {
             Router.routerKeyMap.set(module.id, dom.key);
             return true;
         }
@@ -422,19 +462,20 @@ export default (function () {
      * 用于模块中，可实现同名替换
      */
     createDirective('slot',
-        function(module:Module,dom:VirtualDom,src:VirtualDom){
+        function (module: Module, dom: VirtualDom, src: VirtualDom) {
+            // const parent = dom.parent;
             this.value = this.value || 'default';
             let mid = dom.parent.subModuleId;
             //父dom有module指令，表示为替代节点，替换子模块中的对应的slot节点；否则为子模块定义slot节点
-            if(mid){
+            if (mid) {
                 let m = ModuleFactory.get(mid);
-                if(m){
+                if (m) {
                     //缓存当前替换节点
-                    m.objectManager.set('$slots.' + this.value,{dom:src.clone(),model:dom.model});
+                    m.objectManager.set('$slots.' + this.value, { rendered: dom, origin: src.clone() });
                 }
-                //此次不继续渲染，子节点在实际模块中渲染
-                return false;
-            }else{ //源slot节点
+                //设置不添加到dom树
+                dom.dontAddToTree = true;
+            } else { //源slot节点
                 //获取替换节点进行替换
                 let cfg = module.objectManager.get('$slots.' + this.value);
                 if(cfg){
@@ -445,12 +486,6 @@ export default (function () {
                     }
                     //更改渲染子节点
                     src.children = rdom.children;
-                    //非内部渲染,更改model
-                    if(!src.hasProp('innerRender')){ 
-                        for(let c of src.children){
-                            c.model = cfg.model;
-                        }
-                    }
                     module.objectManager.remove('$slots.' + this.value);
                 }
             }
@@ -869,3 +904,9 @@ export default (function () {
         9
     );
 }());
+
+
+
+
+
+

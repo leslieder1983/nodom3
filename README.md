@@ -192,19 +192,31 @@ NoDom以模块为单位进行应用构建，一个应用由单个或多个模块
 ![nodom生命周期](D:\User_zhao\App_file\Google_file\nodom生命周期.jpg)
 
 
-
 ### 模板语法
 
-nodom使用基于HTML语法的模板语法，支持原生的HTML语法。
+nodom采用基于HTML的模板语法。
 
 #### 基础写法
 
 模板的写法遵循两个基本的原则：
 
-- 所有的标签应该闭合，如果时没有内容的标签可以写成自闭合标签的形式；
+- 所有的标签都应该闭合，没有内容的标签可以写成自闭合标签；
+  ```html
+  <!-- 闭合标签 -->
+  <div>Something</div>
+  <!-- 自闭合标签 -->
+  <ModuleA />
+  ```
 - 所有模块的模板都应该有一个根节点。
+  ```html
+  <!-- 外层div作为该模块的根 -->
+    <div> 
+        <!-- 模板代码 -->
+        template code...
+    </div>
+  ```
 
-nodom支持原生HTML写法，例如：
+同样的，Nodom支持原生HTML语法，例如：
 
 ```html
 <span>hello</span>
@@ -216,111 +228,100 @@ nodom支持原生HTML写法，例如：
 
 #### 模块写法
 
-在其他模块里使用定义好的模块，默认使用该模块定义时使用的类名，比如假设我们已经定义了一个模块名为`ModuleA`，在其他模块的模板中使用时我们直接使用他的类名当作标签名：
+在模板里使用之前已经定义好的模块是一个常见的需求，在模板中有两种方式使用已经定义好的模块:
 
-```html
-<ModuleA />
-```
-
-如果你使用了`registModule`API注册模块，并且提供了模块别名，则在模板中可直接使用别名，例如我们使用`registModule(ModuleA,'mod-a')`的方式注册模块，则我们在模板中可以这样写：
-
-```html
-<mod-a />
-```
-
-这两种写法的效果完全一样。
-
+- 使用modules属性注册模块，然后直接使用模块的类名；
+  ```js
+  import {ModuleA} from "moduleA.js"
+  class Main extends Module{
+	  template(){
+	  	return `
+		<div>
+			<!-- 直接使用类名 -->
+			  <ModuleA />
+		</div>
+		`
+	  }
+      ......
+		// 使用modules注册子模块
+      modules = [ModuleA];
+  }
+  ```
+- 使用`registModule`API注册模块，并且使用`registModule`注册模块时的提供的别名。
+  ```js
+  import {registModule} from "nodom.js"
+  import {ModuleA} from "modulea.js"
+	// 给ModuleA起了一个别名mod-a
+  registModule(ModuleA,'mod-a');
+  class ModuleA extends Module{
+      template(){
+	  	return `
+			<div>
+			<!-- 使用别名 -->
+				<mod-a />
+			</div>
+		`
+	  }
+  }
+  ```
+两种写法的效果完全一样。
 
 #### 表达式写法
 
-表达式是实现数据驱动的方式之一，它可以在静态的模板中插入动态的值。
-考虑这样一个场景我们需要在页面上显示欢迎信息，并且带上名字，我们会这样写：
+表达式是实现数据绑定的方式之一。
+
+比如在构建用户欢迎界面的时候：
 
 ```html
-<span>Hello,Bob!</span>
+......
+
+<h1>Hello,Bob!</h1>
+
+......
 ```
 
-但是如果换一个人，这样写可能就不太合适，这样写不论是谁都只会显示的“Hello，Bob!”,于是我们可以使用表达式来替换后面的名字：
+这样页面会显示`Hello，Bob！`的欢迎信息，但用户如果不是`Bob`，如上模板构建的界面只会显示Bob的欢迎信息，如果需要显示不同用户的欢迎信息，需要我们将`userName`绑定到模板中，实现动态渲染用户名：
 
 ```HTML
-<span>Hello,{{ name }}!</span>
+<h1>Hello,{{ userName }}!</h1>
 
-// model.name = 'Joe';
+// model.userName = 'Joe';
 ```
 
-这样nodom就会去当前模块实例的model里去寻找名为`name`的property的值，并且用它替换`{{ name }}`。比如这里，我们显示的就是“Hello，Joe！”，于是我们就可以通过改变`name`的值来做到动态渲染后面的人名。
+这样Nodom就会去当前模块实例的`model`里去寻找为`userName`的值，并且用它替换`{{ userName }}`。这样我们就能够通过操作`userName`的值来显示不同用户的欢迎信息。
 
-表达式不仅可以解析model里的属性，而且完整的支持了**JavaScript的表达式**。例如，如下的表达式写法都是合法的：
 
-```html
-{{ count + 1 }} 
 
-{{ flag ? "flag is true" : "flag is false" }}
-
-{{ arr.reverse().join('-') }}
-```
-
-但下面的写法时不会被表达式解析的：
-
-```html
-<!-- 控制流不会被解析，使用三元表达式可以代替 -->
-{{ if(flag) {return 'flag is true'} }}
-
-<!-- 这不是合法的JavaScript表达式，这是JavaScript语句 -->
-{{ let flag = true }}
-```
-
-同时在表达式里面可以执行当前模块实例上的方法：
-
-```js
-// getStr是模块实例上的方法
-getStr(){
-	return "Hello，nodom";
-}
-```
-
-```html
-<span>{{ getStr() }}</span>
-```
-
-上面的span会被渲染成为“Hello，nodom”。
-
-表达式还可以传递动态的属性值：
-
-```html
-<div class={{ tigger ? 'cls1' : 'cls2' }}>
-	动态class
-</div>
-```
-
-> 默认属性值需要使用引号包裹（单引号`'`或者双引号`"`均可），但如果将表达式作为属性值，可以不写引号。
+> 默认标签的属性值需要使用引号包裹（单引号`'`或者双引号`"`均可），但如果将表达式作为属性值，可以不写引号。
+>  如：<div class="cls1 cls2" name={{userName}}></div>
 
 关于表达式的详细信息可以阅读本章的表达式章节。
 
 #### 指令写法
 
-nodom的指令一般以`x-`开头，指令一般用来控制模板的行为，比如我们可以通过`x-show`指令来控制一个DOM元素渲染与否。
+Nodom的指令以`x-`开头，指令用来增强模板的功能，比如，`x-show`指令用于控制一个元素是否渲染。
 
 ```html
 <span x-show={{ isShow }}> Hello,nodom!</span>
 ```
 
-`x-show`指令接收`true`或者`false`，我们可以使用表达式将值传给该指令，这里如果表达式返回为`true`，则会渲染该节点，如果为`false`则不会渲染该节点。
+`x-show`指令接收`true`或者`false`，我们可以使用表达式为其传值，如果表达式的值为`true`，则会渲染该元素，如果为`false`则不会渲染该元素。
 
 关于指令的详细信息可以阅读本章的指令与指令元素章节。
 
 #### 事件写法
 
-nodom的事件命名为`e-`+原生事件名不写`on`，例如：
+Nodom的事件命名为`e-`+`原生事件名`，例如：
 
 ```html
-<!-- 原生事件onclick 在nodom中的写法为e-click -->
+<!-- click事件 在nodom中的写法为e-click -->
 <button e-click="confirm">确定</button>
 ```
 
-事件以字符串的形式接收一个模块实例上方法的名字，当事件触发时，nodom会调用该方法。
+事件接收一个模块实例上方法的名，当事件触发时，Nodom会执行该方法。
 
 关于事件绑定的详细信息可以阅读本章的事件绑定章节。
+
 
 ### 表达式
 > 为描述方便,接下来将模块实例中对data函数返回的数据对象做响应式处理后的对象，称为Model，  
@@ -424,9 +425,7 @@ class Hello extends Module{
 
 ### 事件绑定
 
-nodom以`e-` + 原生事件名（不写on）的形式来监听DOM事件，接收一个字符串形式的方法名字，当事件触发的时候，nodom会依据此名字去当前模块的实例方法中找到该方法并且在当前模块的上下文中执行它。用法为`e-click="methodName"`。
-比如：
-
+Nodom使用了专门的事件类`NEvent`来处理Dom事件操作，在模板中以`e-`开头，如：`e-click`、`e-mouseup`等，事件支持所有HTML元素标准事件，接收一个模块实例上的方法名作为事件处理方法。当事件触发的时，Nodom会执行该方法。如：`e-click="methodName"`。具体用法如下：
 ```js
 export class ModuleA extends Module{
 	template(){
@@ -454,14 +453,13 @@ export class ModuleA extends Module{
 
 #### 回调函数的参数
 
-如上个例子所示，回调函数的第一个参数是当前模块实例的model，实际上，回调函数接收了更多的参数：
-
-| 顺序       | 参数                  |
-| ---------- | --------------------- |
-| 第一个参数 | 当前模块实例的model   |
-| 第二个参数 | 事件绑定的虚拟DOM     |
-| 第三个参数 | nodom的事件封装nEvent |
-| 第四个参数 | 原生事件event         |
+与原生事件使用不同，Nodom中不需要指定事件参数，事件方法会自带四个参数，如下：
+| 序号 | 参数名 | 描述                  |
+| ---- | ------ | --------------------- |
+| 1    | model  | dom对应的model        |
+| 2    | dom    | 事件对象对应的虚拟dom |
+| 3    | nEvent | Nodom事件对象         |
+| 4    | e      | html原生事件对象      |
 
 ```js
 	//  事件触发回调。
@@ -472,7 +470,7 @@ export class ModuleA extends Module{
 
 #### 事件修饰符
 
-对于事件，可以在接收的字符串中以`:`分隔的形式添加事件修饰符。
+在传入事件处理方法的时，可以以`:`分隔的形式指定事件修饰符。
 事件处理支持三种修饰符：
 
 | 名字   | 作用             |
@@ -480,7 +478,6 @@ export class ModuleA extends Module{
 | once   | 事件只执行一次   |
 | nopopo | 禁止冒泡         |
 | delg   | 事件代理到父对象 |
-| 用法： |                  |
 
 ```html
 <!-- 事件只执行一次 -->
@@ -1413,13 +1410,20 @@ class Main extends Module{
 }
 ```
 
-### 数据模型model
+### 数据模型(Model)
 
-`model`是实现数据驱动的核心，一个`model`是一个由`Proxy`代理的对象，模块的`model`的数据来源是模块实例的`data()`函数返回的对象。得益于`Proxy`，我们可以实现数据劫持和数据监听，来做到数据改变的时候自动更新渲染。
+`Model`作为模块数据的提供者，绑定到模块的数据模型都由`Model`管理。`Model`是一个由`Proxy`代理的对象，`Model`的数据来源有两个：
+- 模块实例的`data()`函数返回的对象;
+- 父模块通过`$data`方式传入的值。
 
->关于`Proxy`的详细信息你可以参照[Proxy-MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy)。
+`Model`会深层代理内部的`object`类型数据。
 
-在使用的时候，你可以直接把`model`当作对象来操作：
+基于`Proxy`，我们可以实现数据劫持和数据监听，来做到数据改变的时候自动更新渲染。
+> 关于`Proxy`的详细信息你可以参照[Proxy-MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy)。
+
+> Model在管理数据的时候会新增部分以`$`开头的数据项和方法，所以在定义方法和数据时，尽量避免使用`$`开头的数据项和方法名。
+
+在使用的时，可以直接把`Model`当作对象来操作：
 
 ```js
 // 模块的数据来源
@@ -1440,11 +1444,13 @@ changeTitle(model){
 
 ```
 
-`model`对象里的所有的对象都是一个`model`,而每个`model`保有一个模块列表，当`model`内部的数据变化，会引起该`model`的模块列表中所有模块的渲染，默认`model`的模块列表中只有当前模块，如果你通过`$data`的方式从父模块传入了一个`object`给子模块，那么该`object`也会作为一个`model`传入子模块的`model`中，且这个传入的`model`所持有的模块列表中将会有父模块和子模块。由于是引用传值，所以无论是在父还是在子中改变了`object`，都会触发两个模块的渲染。
+#### Model与模块渲染
+
+每个`Model`存有一个模块列表，当`Model`内部的数据变化时，会引起该`Model`的模块列表中所有模块的渲染。默认`Model`的模块列表中只有`Model`所在的模块，如果需要`Model`触发多个模块的渲染，则需要将对应模块添加到`Model`对应的模块列表中(绑定方式查看API ModelManager.bindToModule)。
 
 #### $set()
 
-大多数情况下你都可以使用操作对象的方式来操作`model`，但是nodom还是在`model`上提供了一个`$set()`方法，来应对一些特殊情况，比如你需要往`model`上设置一个深层次的对象。
+Nodom在`Model`上提供了一个`$set()`方法，来应对一些特殊情况。例如,需要往`Model`上设置一个深层次的对象。
 
 ```js
 data(){
@@ -1457,16 +1463,16 @@ data(){
 }
 
 change(model){
-	// 会报错，因为不存在data1为undefined
+	// 会报错，因为data1为undefined
 	model.data1.data2.data3 = { a:'a' };
-	// 使用$set可以避免该问题，如果你没有这么深层次的对象$set会帮你创建。
+	// 使用$set可以避免该问题，如果不存在这么深层次的对象$set会帮你创建。
 	model.$set("data1.data2.data3",{a:'a'});
 }
 ```
 
 #### $watch()
 
-nodom在`model`里提供了`$watch`方法来监视`model`里的数据变化，从而执行你想要执行的操作。
+Nodom在`Model`里提供了`$watch`方法来监视`Model`里的数据变化，当数据变化时执行指定的操作。
 
 ```js
 data(){
@@ -1496,6 +1502,7 @@ unwatch(model){
 }
 
 ```
+
 
 
 
@@ -1766,7 +1773,7 @@ om.removeElement(key)
 
 #### 自定义指令
 
-nodom提供`createDirective`接口来自定义指令。
+Nodom提供`createDirective`接口来自定义指令。
 
 ```javascript
 createDirective(
@@ -1779,18 +1786,25 @@ createDirective(
 
 ```
 
-`createDirective`接收三个参数
+`createDirective`接收的参数列表如下：
 
-- 第一个参数是`name`，`string`类型，指令的名字，使用指令的时候需要在前面加上`x-`;
-- 第二个参数是`handler`，`Function`类型,处理指令逻辑的方法，nodom会给这个方法传三个参数。
-  1. `module`，当前模块的实例；
-  2. `dom`，当前节点本次渲染的虚拟dom节点；
-  3. `src`，当前节点的在originTree中的虚拟dom节点。
-- 第三个参数是`priority`,`number`类型，默认值为10，可以不传，1-10为保留字段，数字越大优先级越低。
+| 序号 | 参数名   | 类型     | 描述                                                               |
+| ---- | -------- | -------- | ------------------------------------------------------------------ |
+| 1    | name     | string   | 指令的名字，使用时需要在前面加上`x-`                               |
+| 2    | handler  | Function | 处理指令逻辑的方法，接收三个参数，参数列表见`handler`参数列表      |
+| 3    | priority | number   | 指令优先级，默认为10，可以不传，1-10为保留字段，数字越大优先级越低 |
+
+`handler`函数接收的参数列表如下:
+
+| 序号 | 参数名 | 类型       | 描述                          |
+| ---- | ------ | ---------- | ----------------------------- |
+| 1    | module | Module     | 当前模块的实例                |
+| 2    | dom    | VirtualDom | 本次渲染的虚拟dom             |
+| 3    | src    | VirtualDom | 该节点在originTree中的虚拟dom |
 
 #### 自定义元素
 
-自定义元素需要继承`DirectiveElement`类，且需要加入在`DirectiveElementManager`中注册。
+自定义元素需要继承`DirectiveElement`类，且需要在`DirectiveElementManager`中注册。
 
 ```javascript
 // 定义自定义元素
@@ -1807,30 +1821,35 @@ class MYELEMENT extends DirectiveElement{
 DirectiveElementManager.add(MYELEMENT);
 ```
 
-定义自定义元素的构造器接收两个参数：
+定义自定义元素的构造器接收的参数列表如下：
 
-- 第一个参数`node`,该自定义元素的虚拟dom节点；
-- 第二个参数`module`,当前模块的实例。
+| 序号 | 参数名 | 描述                      |
+| ---- | ------ | ------------------------- |
+| 1    | node   | 该自定义元素的虚拟Dom节点 |
+| 2    | module | 当前模块实例              |
+
+
+
 
 ### 动画与过渡
 
-我们使用`x-animation`指令管理动画和过渡，该指令接收一个存在于model上的对象，其中包括`tigger`属性和`name`属性。
+Nodom使用`x-animation`指令管理动画和过渡，该指令接收一个存在于`Model`上的对象，其中包括`tigger`属性和`name`属性。
 
 - `name`属性的值就是你过渡或者动画的类名；
 - `tigger`为过渡的触发条件。
 
-过渡分为`enter`和`leave`，触发`enter`还是`leave`由`tigger`的值触发
+过渡分为`enter`和`leave`，触发`enter`还是`leave`由`tigger`的值决定
 
 - `tigger`为`true`，触发`enter`；
 - `tigger`为`false`,触发`leave`。
 
-对于`enter`过渡，需要你提供以`-enter-active`、`-enter-from`、`-enter-to`为后缀的一组类名，当然在传入给`animation`指令的对象中你只需要提供前面的名字，`x-animation`在工作中会自动的为你加上这些后缀。这些规则对于`leave`过渡同理。
+对于`enter`过渡，需要提供以`-enter-active`、`-enter-from`、`-enter-to`为后缀的一组类名，当然在传入给`x-animation`指令的对象中只需要提供前面的名字，`x-animation`在工作时会自动的加上这些后缀。这些规则对于`leave`过渡同理。
 
 `tigger`为`true`时，指令首先会在元素上添加`-enter-from`和`-enter-active`的类名，然后再下一帧开始的时候添加`-enter-to`的类名，同时移除掉`-enter-from`的类名。
 
 `tigger`为`false`时，处理流程完全一样，只不过添加的是以`-leave-from`、`-leave-active`、`-leave-to`为后缀的类名。
 
-下面我们分别举一个过渡和一个动画的例子：
+下面是一个过渡的例子和一个动画的例子：
 
 - `x-animation`管理过渡
 
@@ -1852,7 +1871,6 @@ DirectiveElementManager.add(MYELEMENT);
 	}
 </style>
 ```
-
 ```js
 class Module1 extends Module {
 	template() {
@@ -1878,7 +1896,7 @@ class Module1 extends Module {
 
 - `x-animation`管理动画
 
-> 对于动画，后缀为`-from`和`-to`的类名没有那么重要，如果你对元素在执行动画前后的状态没有要求，那么可以不用提供以这两个后缀结尾的类名，尽管如此，x-animation指令还是会帮你添加这些后缀结尾的类名，以防止其他因素触发了模块的更新导致动画异常触发的情况。（x-animation检测这些类名来判断动画或者过渡的执行状态）
+> 对于动画，后缀为`-from`和`-to`的类名没有那么重要，如果对元素在执行动画前后的状态没有要求，那么可以不用提供以这两个后缀结尾的类名，尽管如此，x-animation指令还是会添加这些后缀结尾的类名，以防止其他因素触发了模块的更新导致动画异常触发的情况。（x-animation检测这些类名来判断该元素动画或者过渡的执行状态）
 
 ```html
 <style>
@@ -1928,7 +1946,7 @@ class Module1 extends Module {
 ```
 
 对于部分常用的过渡效果，我们已经将其封装进入了nodomui.css文件，你只需要全局引入该css文件即可。
-提供的过渡校效果见下表：
+提供的过渡效果见下表：
 
 | name             | 效果                        |
 | ---------------- | --------------------------- |
@@ -1956,8 +1974,6 @@ class Module1 extends Module {
 
 - `before`触发动画/过渡之前。
 - `after`触发动画/过渡之后。
-
-例如上面这个`shape`过渡的例子：
 
 ```js
 class Module1 extends Module {
@@ -1997,20 +2013,20 @@ class Module1 extends Module {
 
 传入`x-animation`指令的对象不止上述提到的这些，还有一些控制参数，下表是所有可以传入的属性所示：
 
-| name           | 作用                                     | 可选值                              | 默认值     | 必填                                |
-| -------------- | ---------------------------------------- | ----------------------------------- | ---------- | ----------------------------------- |
-| tigger         | 触发动画                                 | true/false                          | true       | 是                                  |
-| name           | 过渡/动画名（不包含-enter-active等后缀） | -                                   | 无         | 是                                  |
-| isAppear       | 是否是进入离开过渡/动画                  | true/false                          | true       | 否                                  |
-| type           | 是过渡还是动画                           | 'aniamtion'/'transition'            | transition | 否                                  |
-| duration       | 过渡/动画的执行时间                      | 同css的duration的可选值             | '0s'       | 如果提供的css类里指明了时间则可不填 |
-| delay          | 过渡/动画的延时时间                      | 同css的delay的可选值                | -          | 否                                  |
-| timingFunction | 过渡/动画的时间函数                      | 同css的timingFunction的可选值       | 'ease'     | 否                                  |
-| hooks          | 过渡/动画执行前后钩子函数                | before/after函数或者enter/leave对象 | 无         | 否                                  |
+| name           | 作用                                     | 可选值                              | 默认值       | 必填 |
+| -------------- | ---------------------------------------- | ----------------------------------- | ------------ | ---- |
+| tigger         | 触发动画                                 | true/false                          | true         | 是   |
+| name           | 过渡/动画名（不包含-enter-active等后缀） | -                                   | 无           | 是   |
+| isAppear       | 是否是进入离开过渡/动画                  | true/false                          | true         | 否   |
+| type           | 是过渡还是动画                           | 'aniamtion'/'transition'            | 'transition' | 否   |
+| duration       | 过渡/动画的执行时间                      | 同css的duration的可选值             | ''           | 否   |
+| delay          | 过渡/动画的延时时间                      | 同css的delay的可选值                | '0s'         | 否   |
+| timingFunction | 过渡/动画的时间函数                      | 同css的timingFunction的可选值       | 'ease'       | 否   |
+| hooks          | 过渡/动画执行前后钩子函数                | before/after函数或者enter/leave对象 | 无           | 否   |
 
-#### 进入/离开分开配置
+#### 分别配置`enter`/`leave`
 
-对于一个元素的过渡/动画 我们可以分开配置不同的效果。这样传入`x-animation`指令的对象的写法会又所不同。
+对于一个元素的过渡/动画可以分开配置不同的效果。
 例如：
 
 ```js
@@ -2068,6 +2084,7 @@ class Module1 extends Module {
 	}
 }
 ```
+
 
 
 
