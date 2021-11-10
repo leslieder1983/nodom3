@@ -1716,7 +1716,58 @@ class Module1 extends Module {
 }
 ```
 
+### Cache
 
+Nodom提供了缓存功能，缓存空间是一个Object，以key-value的形式存储在内存中；
+
+- key的类型是string，支持多级数据分割，例如：China.captial；
+- value支持任意类型的数据。
+
+用户可以自行选择将常用的内容存储在缓存空间，例子如下：
+
+```javascript
+GlobalCache.set("China.captial","北京")
+```
+
+根据键名从缓存中读取数据，例子如下：
+
+```javascript
+GlobalCache.get("China.captial")
+```
+
+根据键名从缓存中移除，例子如下：
+
+```javascript
+GlobalCache.remove("China.captial")
+```
+
+另外，还提供将指令实例，指令参数，表达式实例，事件实例，事件参数，渲染树虚拟dom，html节点，dom参数进行操作。具体使用参考API文档。
+
+对渲染树虚拟dom的操作如下所示。
+
+将渲染树虚拟dom存储在内存中：
+
+```javascript
+// 引入模块
+import { ObjectManager } from '../dist/nodom.js'
+let om = new ObjectManager(module)
+```
+
+```javascript
+om.saveElement(dom)
+```
+
+根据提供的键名获取内存中对应的渲染树虚拟dom：
+
+```javascript
+om.getElement(key)
+```
+
+根据提供的键名将对应的渲染树虚拟dom从内存中移除：
+
+```javascript
+om.removeElement(key)
+```
 
 ### 自定义
 
