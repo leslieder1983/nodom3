@@ -8,8 +8,9 @@ export class DirectiveElementManager {
      * 自定义element
      */
     private static elements: Map<string, DirectiveElement> = new Map();
+
     /**
-     * 添加自定义元素类
+     * 添加自定义元素类映射
      * @param clazz  自定义元素类或类数组
      */
     public static add(clazz:any) {
@@ -23,9 +24,9 @@ export class DirectiveElementManager {
     }
 
     /**
-     * 获取自定义元素类
+     * 获取自定义元素
      * @param tagName   元素名
-     * @returns         自定义元素类
+     * @returns         自定义元素
      */
     public static get(tagName: string): any {
         return this.elements.get(tagName.toUpperCase());
@@ -34,7 +35,7 @@ export class DirectiveElementManager {
     /**
      * 是否存在自定义元素
      * @param tagName   元素名
-     * @returns         存在或不存在
+     * @returns         存在(true)/不存在(false)
      */
     public static has(tagName:string):boolean{
         return this.elements.has(tagName.toUpperCase());
