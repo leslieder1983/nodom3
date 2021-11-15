@@ -1,5 +1,5 @@
 /**
- * 存储
+ * NCache模块-存储在内存中
  */
 export class NCache{
     private cacheData:any;
@@ -9,8 +9,8 @@ export class NCache{
     }
 
     /**
-     * 从cache
-     * @param key   键，支持"."
+     * 通过提供的键名从内存中拿到对应的值
+     * @param key   键，支持"."（多级数据分割）
      * @reutrns     值或undefined
      */
     public get(key:string){
@@ -32,7 +32,7 @@ export class NCache{
     }
 
     /**
-     * 保存值
+     * 通过提供的键名和值将其存储在内存中
      * @param key       键 
      * @param value     值
      */
@@ -57,7 +57,7 @@ export class NCache{
     }
 
     /**
-     * 移除键
+     * 通过提供的键名将其移除
      * @param key   键 
      */
     public remove(key:string){

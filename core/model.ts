@@ -43,6 +43,7 @@ export class Model {
                 if (data) {
                     return data;
                 }
+                
                 if (res !== null && typeof res === 'object') {
                     //如果是对象，则返回代理，便于后续激活get set方法                   
                     //判断是否已经代理，如果未代理，则增加代理

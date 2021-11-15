@@ -8,20 +8,21 @@ import { Expression } from "./expression";
  * 全局缓存
  */
 export class GlobalCache{
+    //NCache实例
     private static cache:NCache = new NCache();
 
     /**
-         * 保存到cache
-         * @param key       键，支持"."
-         * @param value     值
-         */
+     * 保存到cache
+     * @param key       键，支持"."（多级数据分割）
+     * @param value     值
+     */
     public static set(key:string,value:any){
         this.cache.set(key,value);
     }
 
     /**
      * 从cache读取
-     * @param key   键，支持"."
+     * @param key   键，支持"."（多级数据分割）
      * @returns     缓存的值或undefined
      */
     public static get(key){
@@ -30,7 +31,7 @@ export class GlobalCache{
 
     /**
      * 从cache移除
-     * @param key   键，支持"."
+     * @param key   键，支持"."（多级数据分割）
      */
     public static remove(key){
         this.cache.remove(key);
@@ -131,7 +132,7 @@ export class GlobalCache{
 
     /**
      * 获取事件实例
-     * @param id        表达式id
+     * @param id        事件id
      * @returns         事件对象
      */
     public static getEvent(id:number):NEvent{
@@ -202,9 +203,10 @@ export class GlobalCache{
     public static saveElement(dom:VirtualDom){
         this.cache.set('$doms.' + dom.key,dom);
     }
+
     /**
      * 获取渲染树虚拟dom
-     * @param key       dom key
+     * @param key       虚拟dom key
      * @returns         dom对象
      */
     public static getElement(key:string):VirtualDom{
@@ -219,27 +221,26 @@ export class GlobalCache{
         this.cache.remove('$doms.' + key);
     }
 
-
     /**
      * 获取key对应的html节点
      * @param key       el key
-     * @returns         html element
+     * @returns         html节点
      */
     public static getNode(key: string): Node {
         return this.cache.get('$doms.' + key + '.$el');
     }
 
     /**
-     * 保存key对应的html node
+     * 保存key对应的html节点
      * @param key       dom key
-     * @param node      node
+     * @param node      节点
      */
     public static saveNode(key:string,node:Node){
         this.cache.set('$doms.' + key + '.$el',node);
     }
 
     /**
-     * 移除保存的节点（包括参数和html dom）
+     * 移除保存的html节点（包括参数和html dom）
      * @param key   dom key
      */
     public static removeSavedNode(key:string){
@@ -249,7 +250,7 @@ export class GlobalCache{
     /**
      * 设置dom参数值
      * @param key       dom key 
-     * @param name       参数名
+     * @param name      参数名
      * @param value     参数值
      */
     public static setElementParam(key:string,name:string,value:any){
@@ -267,7 +268,7 @@ export class GlobalCache{
     }
 
     /**
-     * 移除dom参数
+     * 移除dom参数值
      * @param key       dom key
      * @param name      参数名
      */
@@ -305,7 +306,7 @@ export class GlobalCache{
     }
 
     /**
-     * 清除缓存dom对象
+     * 清除缓存dom对象集
      */
     public static clearSaveDoms(){
         this.remove('$doms');
