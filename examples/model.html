@@ -108,15 +108,19 @@
             }
         }
         
-        changeName(model) {
+        changeName(model,a,b,c) {
             model.name = 'yang';
             model.datas = [{a:3,b:3}];
-            
+            console.log(this);
+            console.log(model);
+            console.log(a);
+            console.log(b);
+            console.log(c);
         }
         onBeforeFirstRender(model){
             model.$watch('datas',(m,oldValue,newValue)=>{
-                console.log(m,oldValue,newValue);
-            });
+                console.log(m,oldValue,newValue)
+            })
         }
     }
 

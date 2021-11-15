@@ -1,24 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+		<title>if_else</title>
+		</head>
 
-<head>
-	<meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-	<title>if_else</title>
-</head>
-
-<body>
-	<div class="view"></div>
-	<p class="codepen" data-height="300" data-default-tab="js,result" data-slug-hash="" data-user="leslieder1983"
-		style="height: 300px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; border: 2px solid; margin: 1em 0; padding: 1em;">
-		<span>See the Pen <a href="https://codepen.io/leslieder1983/pen/YzxExwR">
-				helloworld</a> by kyle (<a href="https://codepen.io/leslieder1983">@leslieder1983</a>)
-			on <a href="https://codepen.io">CodePen</a>.</span>
-	</p>
-	<script async src="https://cpwebassets.codepen.io/assets/embed/ei.js"></script>
-</body>
-<script type='module'>
-	import{nodom,Module} from '../dist/nodom.js'
+	<body>
+		<div class="view"></div> 
+	</body>
+	<script type='module'>
+		import{nodom,Module} from '../dist/nodom.js'
 		class Module1 extends Module{
 			template(){
 				return `
@@ -37,7 +29,7 @@
 							<endif/>
 						</div>
 						
-						<div class='tip>2' name={{aa}}>if elseif else</div>
+						<div class='tip'>if elseif else</div>
 						<div class='code'>
 							<div class='introduce'>
 								根据不同分数显示不同等级，<60不及格，60-69及格，70-79中等，80-89良好，>=90优秀
@@ -51,7 +43,7 @@
 							<else tag='span'> 优秀 </else>
 							<endif/>
 						</div>
-						<button  e-click=change>change</button>
+						<button e-click='change'>change</button>
 						<style>
 							.introduce{
 								color:#666666;
@@ -70,25 +62,24 @@
 							}
 						</style>
 					</div>
-				`
+				`;
 			}
-			data(){
+			data() {
 				return {
 					discount: 0.7,
 					price: 200,
 					age: 20,
 					grade: 73,
-					show: true
-				}
+					show: true,
+				};
 			}
 
-			change(model){
-				console.log('ddd');
+			change(model) {
+				console.log("ddd");
 				model.discount = 0.85;
 				model.age = 10;
 			}
 		}
-    	nodom(Module1,'div');
+		nodom(Module1, "div");
 	</script>
-
 </html>

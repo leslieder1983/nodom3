@@ -2,29 +2,27 @@ import {Module,registModule} from '../../dist/nodom.js'
 import {ModuleB} from './moduleb.js'
 export class ModuleA extends Module{
     template(props){
-       this.change=props?.add;
         if(props.p1){
             return `
-                <div class='modulea' style='color:red' tem={{'<div>{{name}}</div>'}}>
+                <div  class='modulea' style='color:red'>
                     <div>这是子模块A</div>
                     <p>模块A的内容</p>
                     <slot></slot>
                 </div>
-            `
-        }else if(props.temp){
-            return `
+            `;
+		} else if (props.temp) {
+			return `
                 <div>
                     <h1>props传模版</h1>
                     ${props.temp}
                 </div>
-            `
-            
-        }else{
-            return `
+            `;
+		} else {
+			return `
                 <div class='modulea'>
                     <div>这是外部数据name:{{n}}</div>
-                    <for cond={{rows}}>
-                        <slot name='xx' innerRender>
+                    <for  cond={{rows}}>
+                        <slot innerRender>
                             hello plug
                         </slot>
                     </for>
@@ -49,12 +47,12 @@ export class ModuleA extends Module{
     }
     changeX2(model){
         model.x2='hello';
+        console.log(model);
     }
     onBeforeFirstRender(){
         // console.log(this);
     }
     onBeforeRender(model){
-        console.log('我渲染啦');
         if(!this.props || !this.props.$data){
             return;
         }
@@ -65,4 +63,4 @@ export class ModuleA extends Module{
     }
 }
 
-  registModule(ModuleA,'mod-a');
+registModule(ModuleA,'mod-a');

@@ -1,5 +1,5 @@
-import { DirectiveElement } from "../core/directiveelement";
-import { DirectiveElementManager } from "../core/directiveelementmanager";
+import { DefineElement } from "../core/defineelement";
+import { DefineElementManager } from "../core/defineelementmanager";
 import { NError } from "../core/error";
 import { NodomMessage } from "../core/nodom";
 import { VirtualDom } from "../core/virtualdom";
@@ -10,7 +10,7 @@ import { GlobalCache } from "../core/globalcache";
 /**
  * module 元素
  */
-class MODULE extends DirectiveElement{
+class MODULE extends DefineElement{
     constructor(node: VirtualDom,module:Module){
         super(node,module);
         //类名
@@ -27,7 +27,7 @@ class MODULE extends DirectiveElement{
  * for 元素
  * 描述：用于重复生成多个同类型节点
  */
-class FOR extends DirectiveElement{
+class FOR extends DefineElement{
     constructor(node: VirtualDom,module:Module){
         super(node,module);
         //条件
@@ -48,7 +48,7 @@ class FOR extends DirectiveElement{
  * 递归元素
  * 描述：生成树形节点，实现嵌套结构
  */
-class RECUR extends DirectiveElement{
+class RECUR extends DefineElement{
     constructor(node: VirtualDom,module:Module){
         super(node,module);
         //条件
@@ -65,7 +65,7 @@ class RECUR extends DirectiveElement{
  * IF 元素
  * 描述：用于条件判断
  */
-class IF extends DirectiveElement{
+class IF extends DefineElement{
     constructor(node: VirtualDom,module:Module){
         super(node,module);
         //条件
@@ -81,10 +81,7 @@ class IF extends DirectiveElement{
     }
 }
 
-/**
- * ELSE 元素
- */
-class ELSE extends DirectiveElement{
+class ELSE extends DefineElement{
     constructor(node: VirtualDom,module:Module){
         super(node,module);
         node.addDirective(new Directive('else',null));
@@ -95,7 +92,7 @@ class ELSE extends DirectiveElement{
  * ELSEIF 元素
  * 描述：用于条件判断
  */
-class ELSEIF extends DirectiveElement{
+class ELSEIF extends DefineElement{
     constructor(node: VirtualDom,module:Module){
         super(node,module);
         //条件
@@ -115,7 +112,7 @@ class ELSEIF extends DirectiveElement{
  * ENDIF 元素
  * 描述：用于结束条件判断
  */
-class ENDIF extends DirectiveElement{
+class ENDIF extends DefineElement{
     constructor(node: VirtualDom,module:Module){
         super(node,module);
         node.addDirective(new Directive('endif',null));
@@ -126,7 +123,7 @@ class ENDIF extends DirectiveElement{
  * SLOT 元素
  * 描述：替代器，替换同名节点
  */
-class SLOT extends DirectiveElement{
+class SLOT extends DefineElement{
     constructor(node: VirtualDom,module:Module){
         super(node,module);
         //条件
@@ -136,4 +133,4 @@ class SLOT extends DirectiveElement{
     }
 }
 
-DirectiveElementManager.add([MODULE,FOR,IF,RECUR,ELSE,ELSEIF,ENDIF,SLOT]);
+DefineElementManager.add([MODULE,FOR,IF,RECUR,ELSE,ELSEIF,ENDIF,SLOT]);
