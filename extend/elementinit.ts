@@ -25,6 +25,7 @@ class MODULE extends DefineElement{
 
 /**
  * for 元素
+ * 描述：用于重复生成多个同类型节点
  */
 class FOR extends DefineElement{
     constructor(node: VirtualDom,module:Module){
@@ -45,6 +46,7 @@ class FOR extends DefineElement{
 
 /**
  * 递归元素
+ * 描述：生成树形节点，实现嵌套结构
  */
 class RECUR extends DefineElement{
     constructor(node: VirtualDom,module:Module){
@@ -61,6 +63,7 @@ class RECUR extends DefineElement{
 
 /**
  * IF 元素
+ * 描述：用于条件判断
  */
 class IF extends DefineElement{
     constructor(node: VirtualDom,module:Module){
@@ -84,8 +87,10 @@ class ELSE extends DefineElement{
         node.addDirective(new Directive('else',null));
     }
 }
+
 /**
  * ELSEIF 元素
+ * 描述：用于条件判断
  */
 class ELSEIF extends DefineElement{
     constructor(node: VirtualDom,module:Module){
@@ -102,8 +107,10 @@ class ELSEIF extends DefineElement{
         node.addDirective(new Directive('elseif',cond));
     }
 }
+
 /**
  * ENDIF 元素
+ * 描述：用于结束条件判断
  */
 class ENDIF extends DefineElement{
     constructor(node: VirtualDom,module:Module){
@@ -113,7 +120,8 @@ class ENDIF extends DefineElement{
 }
 
 /**
- * 替代器
+ * SLOT 元素
+ * 描述：替代器，替换同名节点
  */
 class SLOT extends DefineElement{
     constructor(node: VirtualDom,module:Module){
