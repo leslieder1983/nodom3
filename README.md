@@ -189,16 +189,16 @@ Nodom以模块为单位进行应用构建，一个应用由单个或多个模块
 
 开发者可以在模块定义时提供一些特殊的方法（这些方法Nodom在执行时会传入一个参数，为模块实例的根Model。this指向为模块实例），模块在特定的时刻Nodom就会去执行这些方法，下表包含所有的生命周期钩子函数：
 
-| 事件名                    | 描述                     | 参数  |   this指向   |
-| :------------------------ | :----------------------- | :---: | :----------: |
-| onBeforeRender            | 渲染前执行事件           | Model | 当前模块实例 |
-| onBeforeFirstRender       | 首次渲染前执行事件       | Model | 当前模块实例 |
-| onBeforeFirstRenderToHTML | 首次渲染到html执行事件   | Model | 当前模块实例 |
-| onFirstRender             | 执行首次渲染后事件       | Model | 当前模块实例 |
-| onBeforeRenderToHtml      | 增量渲染到html前执行事件 | Model | 当前模块实例 |
-| onRender                  | 执行每次渲染后事件       | Model | 当前模块实例 |
-| beforeUnActive            | 模块取消激活前执行事件   | Model | 当前模块实例 |
-| unActive                  | 模块从HTML卸载前执行事件 | Model | 当前模块实例 |
+|          事件名           |           描述           | 参数  |   this指向   |
+| :-----------------------: | :----------------------: | :---: | :----------: |
+|      onBeforeRender       |      渲染前执行事件      | Model | 当前模块实例 |
+|    onBeforeFirstRender    |    首次渲染前执行事件    | Model | 当前模块实例 |
+| onBeforeFirstRenderToHTML |  首次渲染到html执行事件  | Model | 当前模块实例 |
+|       onFirstRender       |    执行首次渲染后事件    | Model | 当前模块实例 |
+|   onBeforeRenderToHtml    | 增量渲染到html前执行事件 | Model | 当前模块实例 |
+|         onRender          |    执行每次渲染后事件    | Model | 当前模块实例 |
+|      beforeUnActive       |  模块取消激活前执行事件  | Model | 当前模块实例 |
+|         unActive          | 模块从HTML卸载前执行事件 | Model | 当前模块实例 |
 
 具体用法如下：
 
@@ -498,12 +498,12 @@ export class ModuleA extends Module{
 与原生事件使用不同，Nodom中不需要指定事件参数，事件方法会自带四个参数。参数如下所示：
 
 
-| 序号 | 参数名 | 描述                  |
-| ---- | ------ | --------------------- |
-| 1    | model  | dom对应的model        |
-| 2    | dom    | 事件对象对应的虚拟dom |
-| 3    | nEvent | Nodom事件对象         |
-| 4    | event  | html原生事件对象      |
+| 序号 | 参数名 |         描述          |
+| :--: | :----: | :-------------------: |
+|  1   | model  |    dom对应的model     |
+|  2   |  dom   | 事件对象对应的虚拟dom |
+|  3   | nEvent |     Nodom事件对象     |
+|  4   | event  |   html原生事件对象    |
 
 代码如下：
 ```js
@@ -518,11 +518,11 @@ export class ModuleA extends Module{
 在传入事件处理方法的时，可以以`:`分隔的形式指定事件修饰符。
 事件处理支持三种修饰符：
 
-| 名字   | 作用             |
-| ------ | ---------------- |
-| once   | 事件只执行一次   |
-| nopopo | 禁止冒泡         |
-| delg   | 事件代理到父对象 |
+|  名字  |       作用       |
+| :----: | :--------------: |
+|  once  |  事件只执行一次  |
+| nopopo |     禁止冒泡     |
+|  delg  | 事件代理到父对象 |
 
 ```html
 <!-- 事件只执行一次 -->
@@ -1832,19 +1832,19 @@ createDirective(
 
 `createDirective`接收的参数列表如下：
 
-| 序号 | 参数名   | 类型     | 描述                                                               |
-| ---- | -------- | -------- | ------------------------------------------------------------------ |
-| 1    | name     | string   | 指令的名字，使用时需要在前面加上`x-`                               |
-| 2    | handler  | Function | 处理指令逻辑的方法，接收三个参数，参数列表见`handler`参数列表      |
-| 3    | priority | number   | 指令优先级，默认为10，可以不传，1-10为保留字段，数字越大优先级越低 |
+| 序号 |  参数名  |   类型   |                             描述                             |
+| :--: | :------: | :------: | :----------------------------------------------------------: |
+|  1   |   name   |  string  |             指令的名字，使用时需要在前面加上`x-`             |
+|  2   | handler  | Function | 处理指令逻辑的方法，接收三个参数，参数列表见`handler`参数列表 |
+|  3   | priority |  number  | 指令优先级，默认为10，可以不传，1-10为保留字段，数字越大优先级越低 |
 
 `handler`函数接收的参数列表如下:
 
-| 序号 | 参数名 | 类型       | 描述                          |
-| ---- | ------ | ---------- | ----------------------------- |
-| 1    | module | Module     | 当前模块的实例                |
-| 2    | dom    | VirtualDom | 本次渲染的虚拟dom             |
-| 3    | src    | VirtualDom | 该节点在originTree中的虚拟dom |
+| 序号 | 参数名 |    类型    |             描述              |
+| :--: | :----: | :--------: | :---------------------------: |
+|  1   | module |   Module   |        当前模块的实例         |
+|  2   |  dom   | VirtualDom |       本次渲染的虚拟dom       |
+|  3   |  src   | VirtualDom | 该节点在originTree中的虚拟dom |
 
 #### 自定义元素
 
@@ -1867,10 +1867,10 @@ DirectiveElementManager.add(MYELEMENT);
 
 定义自定义元素的构造器接收的参数列表如下：
 
-| 序号 | 参数名 | 描述                      |
-| ---- | ------ | ------------------------- |
-| 1    | node   | 该自定义元素的虚拟Dom节点 |
-| 2    | module | 当前模块实例              |
+| 序号 | 参数名 |           描述            |
+| :--: | :----: | :-----------------------: |
+|  1   |  node  | 该自定义元素的虚拟Dom节点 |
+|  2   | module |       当前模块实例        |
 
 
 
@@ -2055,16 +2055,16 @@ class Module1 extends Module {
 
 传入`x-animation`指令的对象不止上述提到的这些，还有一些控制参数，下表是所有可以传入的属性所示：
 
-| name           | 作用                      | 可选值                              | 默认值       | 必填 |
-| -------------- | ------------------------- | ----------------------------------- | ------------ | ---- |
-| tigger         | 触发动画                  | true/false                          | true         | 是   |
-| name           | 过渡/动画名（不包含后缀） | -                                   | 无           | 是   |
-| isAppear       | 是否是进入离开过渡/动画   | true/false                          | true         | 否   |
-| type           | 是过渡还是动画            | 'aniamtion'/'transition'            | 'transition' | 否   |
-| duration       | 过渡/动画的执行时间       | 同css的duration的可选值             | ''           | 否   |
-| delay          | 过渡/动画的延时时间       | 同css的delay的可选值                | '0s'         | 否   |
-| timingFunction | 过渡/动画的时间函数       | 同css的timingFunction的可选值       | 'ease'       | 否   |
-| hooks          | 过渡/动画执行前后钩子函数 | before/after函数或者enter/leave对象 | 无           | 否   |
+|      name      |           作用            |               可选值                |    默认值    | 必填 |
+| :------------: | :-----------------------: | :---------------------------------: | :----------: | :--: |
+|     tigger     |         触发动画          |             true/false              |     true     |  是  |
+|      name      | 过渡/动画名（不包含后缀） |                  -                  |      无      |  是  |
+|    isAppear    |  是否是进入离开过渡/动画  |             true/false              |     true     |  否  |
+|      type      |      是过渡还是动画       |      'aniamtion'/'transition'       | 'transition' |  否  |
+|    duration    |    过渡/动画的执行时间    |       同css的duration的可选值       |      ''      |  否  |
+|     delay      |    过渡/动画的延时时间    |        同css的delay的可选值         |     '0s'     |  否  |
+| timingFunction |    过渡/动画的时间函数    |    同css的timingFunction的可选值    |    'ease'    |  否  |
+|     hooks      | 过渡/动画执行前后钩子函数 | before/after函数或者enter/leave对象 |      无      |  否  |
 
 #### 分别配置`enter`/`leave`
 
