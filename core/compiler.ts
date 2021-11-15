@@ -38,37 +38,28 @@ export class Compiler {
         const me = this;
         // 清理comment
         srcStr = srcStr.replace(/\<\!\-\-[\s\S]*?\-\-\>/g,'');
-        
         // 正则式分解标签和属性
         const regWhole = /((?<!\\)'[\s\S]*?(?<!\\)')|((?<!\\)"[\s\S]*?(?<!\\)")|((?<!\\)`[\s\S]*?(?<!\\)`)|({{{*)|(}*}})|([\w$-]+(\s*=)?)|(<\s*[a-zA-Z][a-zA-Z0-9-_]*)|(\/?>)|(<\/\s*[a-zA-Z][a-zA-Z0-9-_]*>)/g;
         //属性名正则式
         const propReg = /^[a-zA-Z_$][$-\w]*?\s*?=?$/;
-
         //不可见字符正则式
         const regSpace = /^[\s\n\r\t\v]+$/;
         //dom数组
         let domArr = [];
-        
         //已闭合的tag，与domArr对应
         let closedTag = [];
-
         //文本开始index
         let txtStartIndex = 0;
-        
         //属性值
         let propName:string;
         //pre标签标志
         let isPreTag:boolean = false;
-        
         //template计数器
         let templateCount = 0;
-
         //模版开始index
         let templateStartIndex = 0;
-
         //当前标签名
         let tagName:string;
-
         //表达式开始index
         let exprStartIndex = 0;
         //表达式计数器
@@ -79,19 +70,19 @@ export class Compiler {
         let result;
         while((result = regWhole.exec(srcStr)) !== null){
             let re = result[0];
-            
-            if(re.startsWith('{{')){  //表达式开始符号
+            if(templateCount ===0 && re.startsWith('{{')){  //表达式开始符号
                 //整除2个数
                 if(exprCount === 0){ //表达式开始
                     exprStartIndex = result.index;
                 }
                 exprCount += re.length/2 | 0;  
-            }else if(re.endsWith('}}')){  //表达式结束
+            }else if(templateCount ===0 && re.endsWith('}}')){  //表达式结束
                 exprCount -= re.length/2 | 0;
                 if(exprCount === 0){
                     finishExpr();
                 }
-            }else if(exprCount===0){   //不在表达式中
+            }
+            else if(exprCount===0){   //不在表达式中
                 if(re[0] === '<'){ //标签
                     if(templateCount === 0){ //模版内部不编译
                         //处理文本
@@ -102,6 +93,7 @@ export class Compiler {
                     }else{ //标签开始
                         tagName = re.substr(1).trim().toLowerCase();
                         txtStartIndex = undefined;
+                        console.log(tagName,templateCount);
                         if(templateCount===0){  //非模版中
                             isPreTag = (tagName === 'pre');
                             //新建dom节点
@@ -153,9 +145,12 @@ export class Compiler {
                     if(tag !== 'template'){ //非template不处理
                         return;
                     }
+                    console.log(tag,templateCount)
                     if(--templateCount === 0){ //template结束
                         let d1 = domArr[domArr.length-1];
                         d1.setProp('template',srcStr.substring(templateStartIndex,result.index).trim());
+                    }else{  //嵌套template，尚未到最外层template，不处理
+                        return;
                     }
                 }else{ //普通节点
                     let finded = false;
@@ -175,7 +170,6 @@ export class Compiler {
                         throw new NError('wrongTemplate');
                     }
                 }
-                
             }
             //设置标签关闭
             let ele = domArr[domArr.length-1];
@@ -250,7 +244,6 @@ export class Compiler {
             const s = srcStr.substring(exprStartIndex+2,regWhole.lastIndex-2);
             exprCount = 0;
             exprStartIndex = 0;
-            
             //新建表达式
             let expr = new Expression(me.module,s);
             if(dom && dom.tagName){ //标签
@@ -273,7 +266,6 @@ export class Compiler {
             }
             txt = me.preHandleText(txt);
             setTxtDom(txt);
-            
         }
 
         /**
