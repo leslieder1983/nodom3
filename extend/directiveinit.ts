@@ -865,7 +865,6 @@ export default (function () {
                 return [width, height];
             }
         },
-
         9
     );
 }());
