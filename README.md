@@ -573,7 +573,7 @@ model指令改变了数据层级，则如何用外层的数据呢，NoDom支持�
 
 模板代码
 
-```
+```html
 <div x-model="user"> <!-- 绑定数据 --!>
     顾客信息：
     <div x-model="name">
@@ -583,14 +583,14 @@ model指令改变了数据层级，则如何用外层的数据呢，NoDom支持�
 </div>
 ```
 
-```
+```javascript
 data(){ 
 	return{ 
 		user: { 
 			name: { firstName: 'Xiaoming', lastName: 'Zhang' } 
 		} 
-	} 
-} 
+	}
+}
 ```
 
 #### Repeat 指令
@@ -603,7 +603,7 @@ Repeat指令用于给按照绑定的数组数据生成多个dom节点，每个do
 
 模板代码
 
-```
+```html
 <!-- 绑定数组数据 --!>
 <div x-repeat={{foods1}}>
     编号：{{$index+1}}，菜名：{{name}}，价格：{{price}}
@@ -614,21 +614,23 @@ Repeat指令用于给按照绑定的数组数据生成多个dom节点，每个do
 </div>
 ```
 
-```
+```javascript
 data(){
- 	foods1:[{
-         name: '夫妻肺片',
-         price: 25,
-         rows:[{title:'芹菜',weight:100},{title:'猪头肉',weight:200}]}, 
-         {
-            name: '京酱肉丝',
-            price: 22,
-            rows:[{title:'瘦肉',weight:100},{title:'葱',weight:200}]},
-          {
-            name: '糖醋里脊',
-            price: 20,
-            rows:[{title:'排骨',weight:200}]}
-]}
+ 	return{
+        foods1:[
+            {name: '夫妻肺片',price: 25,rows:[
+                 {title:'芹菜',weight:100},
+                 {title:'猪头肉',weight:200}
+             ]}, 
+             {name: '京酱肉丝',price: 22,rows:[
+                 {title:'瘦肉',weight:100},
+                 {title:'葱',weight:200}
+             ]},
+             {name: '糖醋里脊',price: 20,rows:[
+                 {title:'排骨',weight:200}
+             ]}
+        ]}
+    }
 }
 ```
 
@@ -636,21 +638,21 @@ data(){
 
 recur指令生成树形节点，能够实现嵌套结构，在使用时，注意数据中的层次关系即可。recur也可以通过使用recur元素来实现嵌套结构。
 
-```
+```html
 <!-- 绑定数组数据 --!>
 <div x-recur='ritem'>
-			<span class="{{cls}}">{{title}}</span>
-			<recur ref/>
+    <span class="{{cls}}">{{title}}</span>
+    <recur ref/>
 </div>
 <recur cond='items' name='r1' class='secondct'>
-		<for cond={{items}} >
-				<div class='second'>id is:{{id}}-{{title}}</div>
-				<recur ref='r1' />
-		</for>
+    <for cond={{items}} >
+        <div class='second'>id is:{{id}}-{{title}}</div>
+        <recur ref='r1' />
+    </for>
 </recur>
 ```
 
-```
+```javascript
 data(){
     ritem: {
        title: "第一层",
@@ -661,9 +663,9 @@ data(){
           ritem: {
              title: "第三层",
              cls: "cls3"
-         		 }
-              }
-     },
+          },
+       },
+    },
     ritem2:{
 		items:[{
 				title:'aaa',
@@ -691,7 +693,7 @@ data(){
 
 模板代码
 
-```
+```html
 <div>
 	<!--  --!>
     <div>如果discount<0.8，显示价格</div>
@@ -705,7 +707,7 @@ data(){
 </div>
 ```
 
-```
+```javascript
 data(){
     return {
         discount: 0.7,
@@ -720,7 +722,7 @@ data(){
 
 模板代码
 
-```
+```html
 <div>
 	<!-- 单个if指令 --!>
     <div>如果discount<0.8，显示价格</div>
@@ -755,7 +757,7 @@ data(){
 </div>
 ```
 
-```
+```javascript
 data(){
     return {
         discount: 0.7,
@@ -772,13 +774,13 @@ show指令用于显示或隐藏视图，如果指令对应的条件为true，则
 
 模板代码
 
-```
+```html
 <div>
     <div x-show={{show}}>价格：{{price}}</div>
 </div>
 ```
 
-```
+```javascript
 data(){
     return{
         show:true,
@@ -793,7 +795,7 @@ module指令用于表示该元素为一个模块容器，module指向模块类�
 
 模版代码
 
-```
+```html
 class ModuleA extends Module{ 
 	template(){ return `
     <div>这是我的moduleA</div>`}
@@ -813,7 +815,7 @@ nodom(ModuleA,'div')
 
 模板代码
 
-```
+```html
 <div>
 	<!-- 绑定name数据项 --!>
     姓名：<input x-field="name" />
@@ -829,7 +831,7 @@ nodom(ModuleA,'div')
 </div>
 ```
 
-```
+```javascript
 data(){
     return{
     name: 'nodom',
