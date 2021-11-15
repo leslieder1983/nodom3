@@ -105,7 +105,10 @@ export class VirtualDom {
      * @param key       key
      */
     constructor(tag?: string,key?:string) {
-        this.key = key || (Util.genId()+'');
+        this.tagName = tag; //标签
+        if(key){
+            this.key = key;
+        }
         if(tag){
             this.tagName = tag;
         }
@@ -114,6 +117,7 @@ export class VirtualDom {
     /**
      * 移除多个指令
      * @param directives 	待删除的指令类型数组或指令类型
+     * @returns             如果虚拟dom上的指令集为空，则返回void
      */
     public removeDirectives(directives: string[]) {
         if(!this.directives){
@@ -129,6 +133,7 @@ export class VirtualDom {
     /**
      * 移除指令
      * @param directive 	待删除的指令类型名
+     * @returns             如果虚拟dom上的指令集为空，则返回void
      */
     public removeDirective(directive: string) {
         if(!this.directives){
@@ -148,6 +153,7 @@ export class VirtualDom {
      * 添加指令
      * @param directive     指令对象
      * @param sort          是否排序
+     * @returns             如果虚拟dom上的指令集不为空，且指令集中已经存在传入的指令对象，则返回void
      */
     public addDirective(directive: Directive, sort?: boolean) {
         if(!this.directives){
@@ -164,6 +170,7 @@ export class VirtualDom {
 
     /**
      * 指令排序
+     * @returns           如果虚拟dom上指令集为空，则返回void
      */
     public sortDirective(){
         if(!this.directives){
@@ -179,7 +186,7 @@ export class VirtualDom {
     /**
      * 是否有某个类型的指令
      * @param typeName 	    指令类型名
-     * @returns             true/false
+     * @returns             如果指令集不为空，且含有传入的指令类型名则返回true，否则返回false
      */
     public hasDirective(typeName:string): boolean {
         return this.directives && this.directives.findIndex(item => item.type.name === typeName) !== -1;
@@ -189,7 +196,7 @@ export class VirtualDom {
      * 获取某个类型的指令
      * @param module            模块
      * @param directiveType 	指令类型名
-     * @returns                 指令对象
+     * @returns                 如果指令集为空，则返回void；否则返回指令类型名等于传入参数的指令对象
      */
     public getDirective(directiveType:string): Directive {
         if(!this.directives){
@@ -200,6 +207,7 @@ export class VirtualDom {
 
     /**
      * 添加子节点
+     * @param dom     子节点
      */
     public add(dom:VirtualDom){
         if(!this.children){
@@ -210,7 +218,7 @@ export class VirtualDom {
     /**
      * 是否存在某个class
      * @param cls   classname
-     * @return      true/false
+     * @returns     如果含有传入的classname，则返回true；否则返回false
      */
     public hasClass(cls: string): boolean {
         let clazz = this.getProp('class');
@@ -262,6 +270,7 @@ export class VirtualDom {
     /**
      * 查询style
      * @param styStr style字符串
+     * @returns      如果没有style属性，则返回false；如果style属性值中包含传入的参数则返回true
      */
     public hasStyle(styStr: string) {
         let styleStr = this.getProp('style');
@@ -294,7 +303,8 @@ export class VirtualDom {
 
     /**
      * 删除style
-     * @param styStr style字符串
+     * @param styStr style字符串、
+     * @returns      如果没有style属性则返回void
      */
     public removeStyle(styStr: string) {
         let styleStr = this.getProp('style');
@@ -316,6 +326,7 @@ export class VirtualDom {
      * 是否拥有属性
      * @param propName  属性名
      * @param isExpr    是否只检查表达式属性
+     * @returns         如果属性集含有传入的属性名返回true，否则返回false
      */
     public hasProp(propName: string) {
         if(this.props){
@@ -327,6 +338,7 @@ export class VirtualDom {
      * 获取属性值
      * @param propName  属性名
      * @param isExpr    是否只获取表达式属性
+     * @returns         传入属性名的value
      */
     public getProp(propName: string,isExpr?:boolean) {
         if(this.props){
@@ -348,7 +360,8 @@ export class VirtualDom {
 
     /**
      * 删除属性
-     * @param props     属性名或属性名数组 
+     * @param props     属性名或属性名数组
+     * @returns         如果虚拟dom上的属性集为空，则返回void
      */
     public delProp(props: string | string[]) {
         if(!this.props){
@@ -380,6 +393,7 @@ export class VirtualDom {
     /**
      * 删除asset
      * @param assetName     asset name
+     * @returns             如果虚拟dom上的直接属性集为空，则返回void
      */
     public delAsset(assetName: string) {
         if(!this.assets){
@@ -501,6 +515,7 @@ export class VirtualDom {
     /**
      * 克隆
      * @param changeKey     是否更改key，如果为true，则生成的节点用新的key
+     * @returns dist        克隆出来的虚拟dom
      */
      public clone(): VirtualDom {
         let dst: VirtualDom = new VirtualDom(this.tagName,this.key);
