@@ -169,14 +169,14 @@ Nodom基于模块进行应用搭建，一个应用由单个或多个模块组成
 
 主要支持开发者参与模块的各个环节。
 
-| 事件名                    | 描述                     | 参数  | this指向 |
-| :------------------------ | :----------------------- | :---: | :------: |
-| onBeforeRender            | 渲染前执行事件           | model |  module  |
-| onBeforeFirstRender       | 首次渲染前执行事件       | model |  module  |
-| onBeforeFirstRenderToHTML | 首次渲染到html执行事件   | model |  module  |
-| onFirstRender             | 执行首次渲染后事件       | model |  module  |
-| onBeforeRenderToHtml      | 增量渲染到html前执行事件 | model |  module  |
-| onRender                  | 执行每次渲染后事件       | model |  module  |
+|          事件名           |           描述           | 参数  | this指向 |
+| :-----------------------: | :----------------------: | :---: | :------: |
+|      onBeforeRender       |      渲染前执行事件      | model |  module  |
+|    onBeforeFirstRender    |    首次渲染前执行事件    | model |  module  |
+| onBeforeFirstRenderToHTML |  首次渲染到html执行事件  | model |  module  |
+|       onFirstRender       |    执行首次渲染后事件    | model |  module  |
+|   onBeforeRenderToHtml    | 增量渲染到html前执行事件 | model |  module  |
+|         onRender          |    执行每次渲染后事件    | model |  module  |
 
 #### 
 
@@ -518,11 +518,11 @@ export class ModuleA extends Module{
 对于事件，可以在接收的字符串中以`:`分隔的形式添加事件修饰符。
 事件处理支持三种修饰符：
 
-| 名字   | 作用             |
-| ------ | ---------------- |
-| once   | 事件只执行一次   |
-| nopopo | 禁止冒泡         |
-| delg   | 事件代理到父对象 |
+|  名字  |       作用       |
+| :----: | :--------------: |
+|  once  |  事件只执行一次  |
+| nopopo |     禁止冒泡     |
+|  delg  | 事件代理到父对象 |
 | 用法： |                  |
 
 ```html
@@ -548,21 +548,21 @@ export class ModuleA extends Module{
 
 目前NoDom支持以下几个指令:
 
-| 指令名 | 指令优先级 | 指令描述                           |
-| ------ | ---------- | ---------------------------------- |
-| model  | 1          | 绑定数据                           |
-| repeat | 2          | 按照绑定的数组数据生成多个相同节点 |
-| recur  | 2          | 生成嵌套结构                       |
-| if     | 5          | 条件判断                           |
-| else   | 5          | 条件判断                           |
-| elseif | 5          | 条件判断                           |
-| endif  | 5          | 结束判断                           |
-| show   | 5          | 显示视图                           |
-| slot   | 5          | 插槽                               |
-| module | 8          | 加载模块                           |
-| field  | 10         | 双向数据绑定                       |
-| route  | 10         | 路由跳转                           |
-| router | 10         | 路由占位                           |
+| 指令名 | 指令优先级 |              指令描述              |
+| :----: | :--------: | :--------------------------------: |
+| model  |     1      |              绑定数据              |
+| repeat |     2      | 按照绑定的数组数据生成多个相同节点 |
+| recur  |     2      |            生成嵌套结构            |
+|   if   |     5      |              条件判断              |
+|  else  |     5      |              条件判断              |
+| elseif |     5      |              条件判断              |
+| endif  |     5      |              结束判断              |
+|  show  |     5      |              显示视图              |
+|  slot  |     5      |                插槽                |
+| module |     8      |              加载模块              |
+| field  |     10     |            双向数据绑定            |
+| route  |     10     |              路由跳转              |
+| router |     10     |              路由占位              |
 
 
 
@@ -654,34 +654,32 @@ recur指令生成树形节点，能够实现嵌套结构，在使用时，注意
 
 ```javascript
 data(){
-    ritem: {
-       title: "第一层",
-       cls: "cls1",
-       ritem: {
-          title: "第二层",
-          cls: "cls2",
-          ritem: {
-             title: "第三层",
-             cls: "cls3"
-          },
-       },
-    },
-    ritem2:{
-		items:[{
-				title:'aaa',
-				id:1,
-				items:[{
-					id:1,
-					title:'aaa1',
-					items:[{
-						title:'aaa12',id:12},{
-						title:'aaa11',id:11,items:[
-						{title:'aaa111',id:111},
-						{title:'aaa112',id:112}]},
-						{title:'aaa13',id:13}]}
-	}
-	]
-	}      
+    return{
+        ritem: {
+            title: "第一层",
+            cls: "cls1",
+            ritem: {
+                title: "第二层",
+                cls: "cls2",
+                ritem: {
+                    title: "第三层",
+                    cls: "cls3",
+                },
+            },
+        },
+        ritem1: {
+            cls: "cls1",
+            items: [{ title: "数据11" }, { title: "数据12" }],
+            ritem1: {
+                cls: "cls2",
+                items: [{ title: "数据21" }, { title: "数据22" }],
+                ritem1: {
+                    cls: "cls3",
+                    items: [{ title: "数据31" }, { title: "数据32" }, { title: "数据33" }],
+                },
+            },
+        },
+    }
 }
 ```
 
@@ -1916,17 +1914,17 @@ class Module1 extends Module {
 对于部分常用的过渡效果，我们已经将其封装进入了nodomui.css文件，你只需要全局引入该css文件即可。
 提供的过渡校效果见下表：
 
-| name             | 效果                        |
-| ---------------- | --------------------------- |
-| fade             | 渐入渐出                    |
-| scale-fixtop     | 固定上面缩放                |
-| scale-fixleft    | 固定左边缩放                |
-| scale-fixbottom  | 固定底边缩放                |
-| scale-fixright   | 固定右边缩放                |
+|       name       |            效果             |
+| :--------------: | :-------------------------: |
+|       fade       |          渐入渐出           |
+|   scale-fixtop   |        固定上面缩放         |
+|  scale-fixleft   |        固定左边缩放         |
+| scale-fixbottom  |        固定底边缩放         |
+|  scale-fixright  |        固定右边缩放         |
 | scale-fixcenterX | 固定以X轴为对称轴往中间缩放 |
 | scale-fixcenterY | 固定以Y轴为对称轴往中间缩放 |
-| fold-height      | 折叠高度                    |
-| fold-width       | 折叠宽度                    |
+|   fold-height    |          折叠高度           |
+|    fold-width    |          折叠宽度           |
 
 #### 进入/离开动画
 
@@ -1983,16 +1981,16 @@ class Module1 extends Module {
 
 传入`x-animation`指令的对象不止上述提到的这些，还有一些控制参数，下表是所有可以传入的属性所示：
 
-| name           | 作用                                     | 可选值                              | 默认值     | 必填                                |
-| -------------- | ---------------------------------------- | ----------------------------------- | ---------- | ----------------------------------- |
-| tigger         | 触发动画                                 | true/false                          | true       | 是                                  |
-| name           | 过渡/动画名（不包含-enter-active等后缀） | -                                   | 无         | 是                                  |
-| isAppear       | 是否是进入离开过渡/动画                  | true/false                          | true       | 否                                  |
-| type           | 是过渡还是动画                           | 'aniamtion'/'transition'            | transition | 否                                  |
-| duration       | 过渡/动画的执行时间                      | 同css的duration的可选值             | '0s'       | 如果提供的css类里指明了时间则可不填 |
-| delay          | 过渡/动画的延时时间                      | 同css的delay的可选值                | -          | 否                                  |
-| timingFunction | 过渡/动画的时间函数                      | 同css的timingFunction的可选值       | 'ease'     | 否                                  |
-| hooks          | 过渡/动画执行前后钩子函数                | before/after函数或者enter/leave对象 | 无         | 否                                  |
+|      name      |                   作用                   |               可选值                |   默认值   |                必填                 |
+| :------------: | :--------------------------------------: | :---------------------------------: | :--------: | :---------------------------------: |
+|     tigger     |                 触发动画                 |             true/false              |    true    |                 是                  |
+|      name      | 过渡/动画名（不包含-enter-active等后缀） |                  -                  |     无     |                 是                  |
+|    isAppear    |         是否是进入离开过渡/动画          |             true/false              |    true    |                 否                  |
+|      type      |              是过渡还是动画              |      'aniamtion'/'transition'       | transition |                 否                  |
+|    duration    |           过渡/动画的执行时间            |       同css的duration的可选值       |    '0s'    | 如果提供的css类里指明了时间则可不填 |
+|     delay      |           过渡/动画的延时时间            |        同css的delay的可选值         |     -      |                 否                  |
+| timingFunction |           过渡/动画的时间函数            |    同css的timingFunction的可选值    |   'ease'   |                 否                  |
+|     hooks      |        过渡/动画执行前后钩子函数         | before/after函数或者enter/leave对象 |     无     |                 否                  |
 
 #### 进入/离开分开配置
 
