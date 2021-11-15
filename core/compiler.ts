@@ -9,11 +9,6 @@ import { ModuleFactory } from "./modulefactory";
 
 export class Compiler {
     /**
-     * element Id
-     */
-    private elementId:number;
-
-    /**
      * 模块
      */
     private module:Module;
@@ -23,7 +18,6 @@ export class Compiler {
      * @param module 
      */
     constructor(module:Module){
-        this.elementId = 0;
         this.module = module;
     }
     /**
@@ -43,26 +37,26 @@ export class Compiler {
     private compileTemplate(srcStr:string):VirtualDom{
         const me = this;
         // 清理comment
-        const regExp = /\<\!\-\-[\s\S]*?\-\-\>/g;
-        srcStr = srcStr.replace(regExp,'');
+        srcStr = srcStr.replace(/\<\!\-\-[\s\S]*?\-\-\>/g,'');
         
         // 正则式分解标签和属性
-        // const regTag = /(?<!{{[^}}]*)(?:<(\/?)\s*?([a-zA-Z][a-zA-Z0-9-_]*)([\s\S]*?)(\/?)(?<!=)>)(?![^{{]*}})/g;  //标签完全识别版本
-        const regTag = /((?<!\\)'[\s\S]*?(?<!\\)')|((?<!\\)"[\s\S]*?(?<!\\)")|((?<!\\)`[\s\S]*?(?<!\\)`)|({{[\S\s]*?\}{0,2}\s*}})|([\w$-]+(\s*=)?)|(<\s*[a-zA-Z][a-zA-Z0-9-_]*)|(\/?>)|(<\/\s*[a-zA-Z][a-zA-Z0-9-_]*>)/g;
-        
+        const regWhole = /((?<!\\)'[\s\S]*?(?<!\\)')|((?<!\\)"[\s\S]*?(?<!\\)")|((?<!\\)`[\s\S]*?(?<!\\)`)|({{{*)|(}*}})|([\w$-]+(\s*=)?)|(<\s*[a-zA-Z][a-zA-Z0-9-_]*)|(\/?>)|(<\/\s*[a-zA-Z][a-zA-Z0-9-_]*>)/g;
+        //属性名正则式
+        const propReg = /^[a-zA-Z_$][$-\w]*?\s*?=?$/;
+
+        //不可见字符正则式
+        const regSpace = /^[\s\n\r\t\v]+$/;
         //dom数组
         let domArr = [];
         
         //已闭合的tag，与domArr对应
         let closedTag = [];
 
-        //标签结束的index
-        let lastIndex = 0;
+        //文本开始index
+        let txtStartIndex = 0;
         
         //属性值
         let propName:string;
-        //属性名正则式
-        const propReg = /^[a-zA-Z_$][$-\w]*?\s*?=?$/;
         //pre标签标志
         let isPreTag:boolean = false;
         
@@ -75,56 +69,76 @@ export class Compiler {
         //当前标签名
         let tagName:string;
 
+        //表达式开始index
+        let exprStartIndex = 0;
+        //表达式计数器
+        let exprCount = 0;
         //当前dom节点
         let dom;
         //正则式匹配结果
         let result;
-        while((result = regTag.exec(srcStr)) !== null){
+        while((result = regWhole.exec(srcStr)) !== null){
             let re = result[0];
-            if(re[0] === '<'){ //标签
-                if(templateCount === 0){ //模版内部不编译
-                    //处理文本
-                    let txt = this.handleText(srcStr.substring(lastIndex,result.index),isPreTag);
-                    if(txt){
-                        domArr.push(txt);
-                        closedTag.push(false);
-                    }
+            
+            if(re.startsWith('{{')){  //表达式开始符号
+                //整除2个数
+                if(exprCount === 0){ //表达式开始
+                    exprStartIndex = result.index;
                 }
-                if(re[1] === '/'){ //标签结束
-                    finishTag(re);
-                }else{ //标签开始
-                    tagName = re.substr(1).trim().toLowerCase();
-                    if(templateCount===0){  //非模版中
-                        isPreTag = (tagName === 'pre');
-                        //新建dom节点
-                        dom = new VirtualDom(tagName,this.genKey());    
-                        domArr.push(dom);
-                        closedTag.push(false);
-                    }
+                exprCount += re.length/2 | 0;  
+            }else if(re.endsWith('}}')){  //表达式结束
+                exprCount -= re.length/2 | 0;
+                if(exprCount === 0){
+                    finishExpr();
                 }
-            }else if(re === '>'){ //标签头结束
-                finishTagHead();
-            }else if(re === '/>'){ //标签结束
-                finishTag();
-            }else if(dom){ //属性
-                //当前在模版内，不处理属性
-                if(templateCount>0){
-                    continue;
-                }
-                if(propReg.test(re)){
-                    if(propName){ //propName=无值 情况，当无值处理
-                        handleProp();
+            }else if(exprCount===0){   //不在表达式中
+                if(re[0] === '<'){ //标签
+                    if(templateCount === 0){ //模版内部不编译
+                        //处理文本
+                        handleText(srcStr.substring(txtStartIndex,result.index));
                     }
-                    if(re.endsWith('=')){ //属性带=，表示后续可能有值
-                        propName = re.substring(0,re.length-1).trim();
-                    }else{ //只有属性，无属性值
-                        propName = re;
-                        handleProp();
+                    if(re[1] === '/'){ //标签结束
+                        finishTag(re);
+                    }else{ //标签开始
+                        tagName = re.substr(1).trim().toLowerCase();
+                        txtStartIndex = undefined;
+                        if(templateCount===0){  //非模版中
+                            isPreTag = (tagName === 'pre');
+                            //新建dom节点
+                            dom = new VirtualDom(tagName,this.genKey());    
+                            domArr.push(dom);
+                            closedTag.push(false);
+                        }
                     }
-                }else if(propName){ //属性值
-                    handleProp(re);
+                }else if(re === '>'){ //标签头结束
+                    finishTagHead();
+                }else if(re === '/>'){ //标签结束
+                    finishTag();
+                }else if(dom&&dom.tagName){ //属性
+                    //当前在模版内，不处理属性
+                    if(templateCount>0){
+                        continue;
+                    }
+                    if(propReg.test(re)){
+                        if(propName){ //propName=无值 情况，当无值处理
+                            handleProp();
+                        }
+                        if(re.endsWith('=')){ //属性带=，表示后续可能有值
+                            propName = re.substring(0,re.length-1).trim();
+                        }else{ //只有属性，无属性值
+                            propName = re;
+                            handleProp();
+                        }
+                    }else if(propName){ //属性值
+                        handleProp(re);
+                    }
                 }
             }
+        }
+
+        //异常情况
+        if(domArr.length>1 || exprCount!==0 || templateCount!==0){
+            throw new NError('wrongTemplate');
         }
         return domArr[0];
 
@@ -171,7 +185,9 @@ export class Compiler {
             me.handleSlot(ele);
             dom = undefined;
             propName = undefined;
-            lastIndex = regTag.lastIndex;
+            txtStartIndex = regWhole.lastIndex;
+            exprCount = 0;
+            exprStartIndex = 0;
             // ele.allModelField = allModelField;    
         }
 
@@ -181,16 +197,18 @@ export class Compiler {
         function finishTagHead(){
             if(tagName === 'template'){  //模版标签
                 if(templateCount === 0){  //模版最开始，需要记录模版开始位置
-                    templateStartIndex = regTag.lastIndex;
+                    templateStartIndex = regWhole.lastIndex;
                 }
                 //嵌套template中的计数
                 templateCount++;
             }
             if(dom){
-                lastIndex = regTag.lastIndex;
+                txtStartIndex = regWhole.lastIndex;
             }
             dom = undefined;
             propName = undefined;
+            exprCount = 0;
+            exprStartIndex = 0;
         }
 
         /**
@@ -201,17 +219,11 @@ export class Compiler {
             if(!dom || !propName){
                 return;
             }
-            let allModelField:boolean;
             if(value){
                 let r;
                 //去掉字符串两端
                 if(((r=/((?<=^')(.*?)(?='$))|((?<=^")(.*?)(?="$)|((?<=^`)(.*?)(?=`$)))/.exec(value)) !== null)){
                     value = r[0].trim();
-                }
-                //表达式编译
-                if(/^\{\{[\S\s]*\}\}$/.test(value)){
-                    value = me.compileExpression(value,dom)[0];
-                    allModelField = value.allModelField;
                 }
             }
             //指令
@@ -224,6 +236,69 @@ export class Compiler {
                 dom.setProp(propName, value);
             }
             propName = undefined;
+            
+        }
+
+        /**
+         * 处理表达式
+         */
+        function finishExpr(){
+            //处理表达式前的文本
+            if(txtStartIndex>0 && exprStartIndex>txtStartIndex){
+                handleText(srcStr.substring(txtStartIndex,exprStartIndex));
+            }
+            const s = srcStr.substring(exprStartIndex+2,regWhole.lastIndex-2);
+            exprCount = 0;
+            exprStartIndex = 0;
+            
+            //新建表达式
+            let expr = new Expression(me.module,s);
+            if(dom && dom.tagName){ //标签
+                handleProp(expr);
+            }else{ //文本节点
+                setTxtDom(expr);
+                //文本节点，移动txt节点开始位置
+                txtStartIndex = regWhole.lastIndex;
+            }
+        }
+
+
+        /**
+         * 编译txt为文本节点
+         * @param txt 文本串
+         */
+        function handleText(txt:string):VirtualDom {
+            if(txt==='' || !isPreTag && regSpace.test(txt)){ //非pre 标签且全为不可见字符，不处理
+                return;
+            }
+            txt = me.preHandleText(txt);
+            setTxtDom(txt);
+            
+        }
+
+        /**
+         * 新建文本节点
+         */
+        function setTxtDom(txt){
+            if(!dom){
+                dom = new VirtualDom(null,me.genKey());
+                domArr.push(dom);
+                closedTag.push(false);
+            }
+            if(dom.expressions){
+                dom.expressions.push(txt);
+            }else{
+                if(typeof txt === 'string'){ //字符串
+                    dom.textContent = txt;
+                }else{ //表达式
+                    if(dom.textContent){ //之前的文本进数组
+                        dom.expressions = [dom.textContent,txt];
+                        delete dom.textContent;
+                    }else{
+                        dom.expressions = [txt];
+                    }
+                }  
+            }
         }
     }
     
@@ -260,31 +335,7 @@ export class Compiler {
         }
     }
 
-    /**
-     * 编译txt为文本节点
-     * @param txt 文本串
-     * @param isPre     是否
-     */
-    private handleText(txt:string,isPre:boolean):VirtualDom {
-        let ele;
-        if(!isPre){
-            txt = txt.trim();
-            if(txt === ''){
-                return;
-            }
-            ele = new VirtualDom(null,this.genKey());
-            txt = this.preHandleText(txt);
-            if(/\{\{[\s\S]+\}\}/.test(txt)){  //检查是否含有表达式
-                ele.expressions = <any[]>this.compileExpression(txt,ele);
-            }else{
-                ele.textContent = txt;
-            }
-        }else{
-            ele = new VirtualDom(null,this.genKey());
-            ele.textContent = txt;
-        }
-        return ele;
-    }
+    
     /**
      * 处理表达式串
      * @param exprStr   含表达式的串
