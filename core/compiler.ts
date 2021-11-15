@@ -70,59 +70,68 @@ export class Compiler {
         let result;
         while((result = regWhole.exec(srcStr)) !== null){
             let re = result[0];
-            if(templateCount ===0 && re.startsWith('{{')){  //表达式开始符号
-                //整除2个数
-                if(exprCount === 0){ //表达式开始
-                    exprStartIndex = result.index;
-                }
-                exprCount += re.length/2 | 0;  
-            }else if(templateCount ===0 && re.endsWith('}}')){  //表达式结束
-                exprCount -= re.length/2 | 0;
-                if(exprCount === 0){
-                    finishExpr();
+            //不在模版中
+            if(templateCount === 0){
+                if(re.startsWith('{{')){  //表达式开始符号
+                    //整除2个数
+                    if(exprCount === 0){ //表达式开始
+                        exprStartIndex = result.index;
+                    }
+                    exprCount += re.length/2 | 0;  
+                }else if(re.endsWith('}}')){  //表达式结束
+                    exprCount -= re.length/2 | 0;
+                    if(exprCount === 0){
+                        handleExpr();
+                    }
                 }
             }
-            else if(exprCount===0){   //不在表达式中
-                if(re[0] === '<'){ //标签
-                    if(templateCount === 0){ //模版内部不编译
+            //不在表达式中
+            if(exprCount === 0){
+                if(templateCount === 0){ //不在模版中
+                    if(re[0] === '<'){ //标签
                         //处理文本
                         handleText(srcStr.substring(txtStartIndex,result.index));
-                    }
-                    if(re[1] === '/'){ //标签结束
-                        finishTag(re);
-                    }else{ //标签开始
-                        tagName = re.substr(1).trim().toLowerCase();
-                        txtStartIndex = undefined;
-                        console.log(tagName,templateCount);
-                        if(templateCount===0){  //非模版中
+                        if(re[1] === '/'){ //标签结束
+                            finishTag(re);
+                        }else{ //标签开始
+                            tagName = re.substr(1).trim().toLowerCase();
+                            txtStartIndex = undefined;
                             isPreTag = (tagName === 'pre');
                             //新建dom节点
                             dom = new VirtualDom(tagName,this.genKey());    
                             domArr.push(dom);
                             closedTag.push(false);
                         }
-                    }
-                }else if(re === '>'){ //标签头结束
-                    finishTagHead();
-                }else if(re === '/>'){ //标签结束
-                    finishTag();
-                }else if(dom&&dom.tagName){ //属性
-                    //当前在模版内，不处理属性
-                    if(templateCount>0){
-                        continue;
-                    }
-                    if(propReg.test(re)){
-                        if(propName){ //propName=无值 情况，当无值处理
-                            handleProp();
+                    }else if(re === '>'){ //标签头结束
+                        finishTagHead();
+                    }else if(re === '/>'){ //标签结束
+                        finishTag();
+                    }else if(dom&&dom.tagName){ //属性
+                        if(propReg.test(re)){
+                            if(propName){ //propName=无值 情况，当无值处理
+                                handleProp();
+                            }
+                            if(re.endsWith('=')){ //属性带=，表示后续可能有值
+                                propName = re.substring(0,re.length-1).trim();
+                            }else{ //只有属性，无属性值
+                                propName = re;
+                                handleProp();
+                            }
+                        }else if(propName){ //属性值
+                            handleProp(re);
                         }
-                        if(re.endsWith('=')){ //属性带=，表示后续可能有值
-                            propName = re.substring(0,re.length-1).trim();
-                        }else{ //只有属性，无属性值
-                            propName = re;
-                            handleProp();
+                    }
+                }else if(re[0] === '<'){ //模版串中的元素开始或结束
+                    if(re[1] === '/'){
+                        //template 结束且是最外层的template，则处理template
+                        if(re.substring(2,re.length-1).trim().toLowerCase() === 'template' && --templateCount === 0){ 
+                            domArr[domArr.length-1].setProp('template',srcStr.substring(templateStartIndex,result.index).trim());
                         }
-                    }else if(propName){ //属性值
-                        handleProp(re);
+                    }else{ 
+                        //template开始，计数器+1
+                        if(re.substr(1).trim().toLowerCase() === 'template'){ 
+                            templateCount++;
+                        }
                     }
                 }
             }
@@ -140,37 +149,25 @@ export class Compiler {
          */
         function finishTag(ftag?:string){
             if(ftag){
-                let tag = ftag.substring(2,ftag.length-1).toLowerCase();
-                if(templateCount>0){
-                    if(tag !== 'template'){ //非template不处理
-                        return;
-                    }
-                    console.log(tag,templateCount)
-                    if(--templateCount === 0){ //template结束
-                        let d1 = domArr[domArr.length-1];
-                        d1.setProp('template',srcStr.substring(templateStartIndex,result.index).trim());
-                    }else{  //嵌套template，尚未到最外层template，不处理
-                        return;
-                    }
-                }else{ //普通节点
-                    let finded = false;
-                    //反向查找
-                    for(let i=domArr.length-1;i>=0;i--){
-                        if(!closedTag[i] && domArr[i].tagName === tag){
-                            domArr[i].children = domArr.slice(i+1);
-                            //删除后续节点
-                            domArr.splice(i+1);
-                            //标注该节点已闭合
-                            closedTag.splice(i+1);
-                            finded = true;
-                            break;
-                        }
-                    }
-                    if(!finded){
-                        throw new NError('wrongTemplate');
+                let finded = false;
+                const tag = ftag.substring(2,ftag.length-1).trim().toLowerCase();
+                //反向查找
+                for(let i=domArr.length-1;i>=0;i--){
+                    if(!closedTag[i] && domArr[i].tagName === tag){
+                        domArr[i].children = domArr.slice(i+1);
+                        //删除后续节点
+                        domArr.splice(i+1);
+                        //标注该节点已闭合
+                        closedTag.splice(i+1);
+                        finded = true;
+                        break;
                     }
                 }
+                if(!finded){
+                    throw new NError('wrongTemplate');
+                }
             }
+            
             //设置标签关闭
             let ele = domArr[domArr.length-1];
             closedTag[closedTag.length-1] = true;
@@ -236,7 +233,7 @@ export class Compiler {
         /**
          * 处理表达式
          */
-        function finishExpr(){
+        function handleExpr(){
             //处理表达式前的文本
             if(txtStartIndex>0 && exprStartIndex>txtStartIndex){
                 handleText(srcStr.substring(txtStartIndex,exprStartIndex));
@@ -253,15 +250,17 @@ export class Compiler {
                 //文本节点，移动txt节点开始位置
                 txtStartIndex = regWhole.lastIndex;
             }
+            //设置所有字段都在model内标识
+            dom.allModelField = expr.allModelField;
         }
 
 
         /**
-         * 编译txt为文本节点
+         * 处理txt为文本节点
          * @param txt 文本串
          */
         function handleText(txt:string):VirtualDom {
-            if(txt==='' || !isPreTag && regSpace.test(txt)){ //非pre 标签且全为不可见字符，不处理
+            if(txt === '' || !isPreTag && regSpace.test(txt)){ //非pre 标签且全为不可见字符，不处理
                 return;
             }
             txt = me.preHandleText(txt);
@@ -270,6 +269,7 @@ export class Compiler {
 
         /**
          * 新建文本节点
+         * @param txt   文本串
          */
         function setTxtDom(txt){
             if(!dom){
@@ -325,41 +325,6 @@ export class Compiler {
             }
             slotCt.add(c);
         }
-    }
-
-    
-    /**
-     * 处理表达式串
-     * @param exprStr   含表达式的串
-     * @return          处理后的字符串和表达式数组
-     */
-    public compileExpression(exprStr: string,dom:VirtualDom):string|any[]{
-        if(!exprStr){
-            return;
-        }
-        let reg: RegExp = /\{\{[\s\S]+?\}?\s*\}\}/g;
-        let retA = new Array();
-        let re: RegExpExecArray;
-        let oIndex: number = 0;
-        while ((re = reg.exec(exprStr)) !== null) {
-            let ind = re.index;
-            //字符串
-            if (ind > oIndex) {
-                let s = exprStr.substring(oIndex, ind);
-                retA.push(s);
-            }
-            //实例化表达式对象
-            let exp = new Expression(this.module,re[0].substring(2, re[0].length - 2));
-            dom.allModelField = exp.allModelField;
-            //加入数组
-            retA.push(exp);
-            oIndex = ind + re[0].length;
-        }
-        //最后的字符串
-        if (oIndex < exprStr.length - 1) {
-            retA.push(exprStr.substr(oIndex));
-        }
-        return retA;
     }
 
     /**

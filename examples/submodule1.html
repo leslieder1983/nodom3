@@ -16,7 +16,7 @@
         template(props){
             return `
                 <div class='modulea'>
-                    <slot/>
+                    <slot innerRender/>
                 </div>
             `
         }
@@ -40,7 +40,7 @@
         }
         data(){
             return{
-                rows:[{name:'nodom'},{name:'noomi'},{name:'relaen'}]
+                rows:[{name:'nodom1'},{name:'noomi1'},{name:'relaen1'}]
             }
         }
     }
@@ -53,7 +53,7 @@
                 <div>
                     <button e-click='add'>add</button>
                     <button e-click='change1'>change1</button>
-                    <div>name is:{{o2.name}}</div>
+                    <div>name is:{{name}}</div>
                     <!--useDomModel表示用当前dom对应的model直接覆盖子模块的model-->
                     <modulea>
                         <for cond={{rows}}>
@@ -66,6 +66,7 @@
         data(){
             return {
                 xxx:1,
+                name:'outer',
                 rows:[
                     {id:1,name:'nodom'},
                     {id:2,name:'noomi'},

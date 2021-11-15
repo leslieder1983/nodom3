@@ -43,8 +43,7 @@
 		let reg = /(?<!{{[^}}]*)(?:<(\/?)\s*?([a-zA-Z][a-zA-Z0-9-_]*)([\s\S]*?)(\/?)(?<!{{[^}}]*)(?<!=)>)(?![^{{]*}})/g;
 		let str2 = `{{asda}}<div a b='b' c={{c}} d='{{d}}' e={{"<div>{{'asd{{<ppp>}}'}}</div>"}}>{{ asdas }}`;
 
-		// let str = `{{abc}}  <div a b='b' c="{{c}}" d={{d}} e={{'<div>{{ name }}</div>'}}>{{asdas}}</div>`;
-
+		
 		console.log(str2.match(reg));
 	</script>
 </html>
