@@ -216,16 +216,16 @@ change(model,Vdom,Nevent,event){
 
 开发者可以在模块定义时提供一些特殊的方法（这些方法Nodom在执行时会传入一个参数，为模块实例的根Model。this指向为模块实例），模块在特定的时刻Nodom就会去执行这些方法，下表包含所有的生命周期钩子函数：
 
-| 事件名                    | 描述                     | 参数  |   this指向   |
-| :------------------------ | :----------------------- | :---: | :----------: |
-| onBeforeRender            | 渲染前执行事件           | Model | 当前模块实例 |
-| onBeforeFirstRender       | 首次渲染前执行事件       | Model | 当前模块实例 |
-| onBeforeFirstRenderToHTML | 首次渲染到html执行事件   | Model | 当前模块实例 |
-| onFirstRender             | 执行首次渲染后事件       | Model | 当前模块实例 |
-| onBeforeRenderToHtml      | 增量渲染到html前执行事件 | Model | 当前模块实例 |
-| onRender                  | 执行每次渲染后事件       | Model | 当前模块实例 |
-| beforeUnActive            | 模块取消激活前执行事件   | Model | 当前模块实例 |
-| unActive                  | 模块从HTML卸载前执行事件 | Model | 当前模块实例 |
+|          事件名           |           描述           | 参数  |   this指向   |
+| :-----------------------: | :----------------------: | :---: | :----------: |
+|      onBeforeRender       |      渲染前执行事件      | Model | 当前模块实例 |
+|    onBeforeFirstRender    |    首次渲染前执行事件    | Model | 当前模块实例 |
+| onBeforeFirstRenderToHTML |  首次渲染到html执行事件  | Model | 当前模块实例 |
+|       onFirstRender       |    执行首次渲染后事件    | Model | 当前模块实例 |
+|   onBeforeRenderToHtml    | 增量渲染到html前执行事件 | Model | 当前模块实例 |
+|         onRender          |    执行每次渲染后事件    | Model | 当前模块实例 |
+|      beforeUnActive       |  模块取消激活前执行事件  | Model | 当前模块实例 |
+|         unActive          | 模块从HTML卸载前执行事件 | Model | 当前模块实例 |
 
 具体用法如下：
 
@@ -525,12 +525,12 @@ export class ModuleA extends Module{
 与原生事件使用不同，Nodom中不需要指定事件参数，事件方法会自带四个参数。参数如下所示：
 
 
-| 序号 | 参数名 | 描述                  |
-| ---- | ------ | --------------------- |
-| 1    | model  | dom对应的model        |
-| 2    | dom    | 事件对象对应的虚拟dom |
-| 3    | nEvent | Nodom事件对象         |
-| 4    | event  | html原生事件对象      |
+| 序号 | 参数名 |         描述          |
+| :--: | :----: | :-------------------: |
+|  1   | model  |    dom对应的model     |
+|  2   |  dom   | 事件对象对应的虚拟dom |
+|  3   | nEvent |     Nodom事件对象     |
+|  4   | event  |   html原生事件对象    |
 
 代码如下：
 ```js
@@ -545,11 +545,11 @@ export class ModuleA extends Module{
 在传入事件处理方法的时，可以以`:`分隔的形式指定事件修饰符。
 事件处理支持三种修饰符：
 
-| 名字   | 作用             |
-| ------ | ---------------- |
-| once   | 事件只执行一次   |
-| nopopo | 禁止冒泡         |
-| delg   | 事件代理到父对象 |
+|  名字  |       作用       |
+| :----: | :--------------: |
+|  once  |  事件只执行一次  |
+| nopopo |     禁止冒泡     |
+|  delg  | 事件代理到父对象 |
 
 ```html
 <!-- 事件只执行一次 -->
@@ -574,21 +574,21 @@ export class ModuleA extends Module{
 
 目前NoDom支持以下几个指令:
 
-| 指令名 | 指令优先级 | 指令描述                           |
-| ------ | ---------- | ---------------------------------- |
-| model  | 1          | 绑定数据                           |
-| repeat | 2          | 按照绑定的数组数据生成多个相同节点 |
-| recur  | 2          | 生成嵌套结构                       |
-| if     | 5          | 条件判断                           |
-| else   | 5          | 条件判断                           |
-| elseif | 5          | 条件判断                           |
-| endif  | 5          | 结束判断                           |
-| show   | 5          | 显示视图                           |
-| slot   | 5          | 插槽                               |
-| module | 8          | 加载模块                           |
-| field  | 10         | 双向数据绑定                       |
-| route  | 10         | 路由跳转                           |
-| router | 10         | 路由占位                           |
+| 指令名 | 指令优先级 |              指令描述              |
+| :----: | :--------: | :--------------------------------: |
+| model  |     1      |              绑定数据              |
+| repeat |     2      | 按照绑定的数组数据生成多个相同节点 |
+| recur  |     2      |            生成嵌套结构            |
+|   if   |     5      |              条件判断              |
+|  else  |     5      |              条件判断              |
+| elseif |     5      |              条件判断              |
+| endif  |     5      |              结束判断              |
+|  show  |     5      |              显示视图              |
+|  slot  |     5      |                插槽                |
+| module |     8      |              加载模块              |
+| field  |     10     |            双向数据绑定            |
+| route  |     10     |              路由跳转              |
+| router |     10     |              路由占位              |
 
 
 
@@ -599,7 +599,7 @@ model指令改变了数据层级，则如何用外层的数据呢，NoDom支持�
 
 模板代码
 
-```
+```html
 <div x-model="user"> <!-- 绑定数据 --!>
     顾客信息：
     <div x-model="name">
@@ -609,14 +609,14 @@ model指令改变了数据层级，则如何用外层的数据呢，NoDom支持�
 </div>
 ```
 
-```
+```javascript
 data(){ 
 	return{ 
 		user: { 
 			name: { firstName: 'Xiaoming', lastName: 'Zhang' } 
 		} 
-	} 
-} 
+	}
+}
 ```
 
 #### Repeat 指令
@@ -629,7 +629,7 @@ Repeat指令用于给按照绑定的数组数据生成多个dom节点，每个do
 
 模板代码
 
-```
+```html
 <!-- 绑定数组数据 --!>
 <div x-repeat={{foods1}}>
     编号：{{$index+1}}，菜名：{{name}}，价格：{{price}}
@@ -640,21 +640,23 @@ Repeat指令用于给按照绑定的数组数据生成多个dom节点，每个do
 </div>
 ```
 
-```
+```javascript
 data(){
- 	foods1:[{
-         name: '夫妻肺片',
-         price: 25,
-         rows:[{title:'芹菜',weight:100},{title:'猪头肉',weight:200}]}, 
-         {
-            name: '京酱肉丝',
-            price: 22,
-            rows:[{title:'瘦肉',weight:100},{title:'葱',weight:200}]},
-          {
-            name: '糖醋里脊',
-            price: 20,
-            rows:[{title:'排骨',weight:200}]}
-]}
+ 	return{
+        foods1:[
+            {name: '夫妻肺片',price: 25,rows:[
+                 {title:'芹菜',weight:100},
+                 {title:'猪头肉',weight:200}
+             ]}, 
+             {name: '京酱肉丝',price: 22,rows:[
+                 {title:'瘦肉',weight:100},
+                 {title:'葱',weight:200}
+             ]},
+             {name: '糖醋里脊',price: 20,rows:[
+                 {title:'排骨',weight:200}
+             ]}
+        ]}
+    }
 }
 ```
 
@@ -662,50 +664,48 @@ data(){
 
 recur指令生成树形节点，能够实现嵌套结构，在使用时，注意数据中的层次关系即可。recur也可以通过使用recur元素来实现嵌套结构。
 
-```
+```html
 <!-- 绑定数组数据 --!>
 <div x-recur='ritem'>
-			<span class="{{cls}}">{{title}}</span>
-			<recur ref/>
+    <span class="{{cls}}">{{title}}</span>
+    <recur ref/>
 </div>
 <recur cond='items' name='r1' class='secondct'>
-		<for cond={{items}} >
-				<div class='second'>id is:{{id}}-{{title}}</div>
-				<recur ref='r1' />
-		</for>
+    <for cond={{items}} >
+        <div class='second'>id is:{{id}}-{{title}}</div>
+        <recur ref='r1' />
+    </for>
 </recur>
 ```
 
-```
+```javascript
 data(){
-    ritem: {
-       title: "第一层",
-       cls: "cls1",
-       ritem: {
-          title: "第二层",
-          cls: "cls2",
-          ritem: {
-             title: "第三层",
-             cls: "cls3"
-         		 }
-              }
-     },
-    ritem2:{
-		items:[{
-				title:'aaa',
-				id:1,
-				items:[{
-					id:1,
-					title:'aaa1',
-					items:[{
-						title:'aaa12',id:12},{
-						title:'aaa11',id:11,items:[
-						{title:'aaa111',id:111},
-						{title:'aaa112',id:112}]},
-						{title:'aaa13',id:13}]}
-	}
-	]
-	}      
+    return{
+        ritem: {
+            title: "第一层",
+            cls: "cls1",
+            ritem: {
+                title: "第二层",
+                cls: "cls2",
+                ritem: {
+                    title: "第三层",
+                    cls: "cls3",
+                },
+            },
+        },
+        ritem1: {
+            cls: "cls1",
+            items: [{ title: "数据11" }, { title: "数据12" }],
+            ritem1: {
+                cls: "cls2",
+                items: [{ title: "数据21" }, { title: "数据22" }],
+                ritem1: {
+                    cls: "cls3",
+                    items: [{ title: "数据31" }, { title: "数据32" }, { title: "数据33" }],
+                },
+            },
+        },
+    }
 }
 ```
 
@@ -717,7 +717,7 @@ data(){
 
 模板代码
 
-```
+```html
 <div>
 	<!--  --!>
     <div>如果discount<0.8，显示价格</div>
@@ -731,7 +731,7 @@ data(){
 </div>
 ```
 
-```
+```javascript
 data(){
     return {
         discount: 0.7,
@@ -746,7 +746,7 @@ data(){
 
 模板代码
 
-```
+```html
 <div>
 	<!-- 单个if指令 --!>
     <div>如果discount<0.8，显示价格</div>
@@ -781,7 +781,7 @@ data(){
 </div>
 ```
 
-```
+```javascript
 data(){
     return {
         discount: 0.7,
@@ -798,13 +798,13 @@ show指令用于显示或隐藏视图，如果指令对应的条件为true，则
 
 模板代码
 
-```
+```html
 <div>
     <div x-show={{show}}>价格：{{price}}</div>
 </div>
 ```
 
-```
+```javascript
 data(){
     return{
         show:true,
@@ -845,7 +845,7 @@ class ModuleA extendsModule{
 
 模板代码
 
-```
+```html
 <div>
 	<!-- 绑定name数据项 --!>
     姓名：<input x-field="name" />
@@ -861,7 +861,7 @@ class ModuleA extendsModule{
 </div>
 ```
 
-```
+```javascript
 data(){
     return{
     name: 'nodom',
@@ -1859,19 +1859,19 @@ createDirective(
 
 `createDirective`接收的参数列表如下：
 
-| 序号 | 参数名   | 类型     | 描述                                                               |
-| ---- | -------- | -------- | ------------------------------------------------------------------ |
-| 1    | name     | string   | 指令的名字，使用时需要在前面加上`x-`                               |
-| 2    | handler  | Function | 处理指令逻辑的方法，接收三个参数，参数列表见`handler`参数列表      |
-| 3    | priority | number   | 指令优先级，默认为10，可以不传，1-10为保留字段，数字越大优先级越低 |
+| 序号 |  参数名  |   类型   |                             描述                             |
+| :--: | :------: | :------: | :----------------------------------------------------------: |
+|  1   |   name   |  string  |             指令的名字，使用时需要在前面加上`x-`             |
+|  2   | handler  | Function | 处理指令逻辑的方法，接收三个参数，参数列表见`handler`参数列表 |
+|  3   | priority |  number  | 指令优先级，默认为10，可以不传，1-10为保留字段，数字越大优先级越低 |
 
 `handler`函数接收的参数列表如下:
 
-| 序号 | 参数名 | 类型       | 描述                          |
-| ---- | ------ | ---------- | ----------------------------- |
-| 1    | module | Module     | 当前模块的实例                |
-| 2    | dom    | VirtualDom | 本次渲染的虚拟dom             |
-| 3    | src    | VirtualDom | 该节点在originTree中的虚拟dom |
+| 序号 | 参数名 |    类型    |             描述              |
+| :--: | :----: | :--------: | :---------------------------: |
+|  1   | module |   Module   |        当前模块的实例         |
+|  2   |  dom   | VirtualDom |       本次渲染的虚拟dom       |
+|  3   |  src   | VirtualDom | 该节点在originTree中的虚拟dom |
 
 #### 自定义元素
 
@@ -1894,10 +1894,10 @@ DirectiveElementManager.add(MYELEMENT);
 
 定义自定义元素的构造器接收的参数列表如下：
 
-| 序号 | 参数名 | 描述                      |
-| ---- | ------ | ------------------------- |
-| 1    | node   | 该自定义元素的虚拟Dom节点 |
-| 2    | module | 当前模块实例              |
+| 序号 | 参数名 |           描述            |
+| :--: | :----: | :-----------------------: |
+|  1   |  node  | 该自定义元素的虚拟Dom节点 |
+|  2   | module |       当前模块实例        |
 
 
 
@@ -2019,17 +2019,17 @@ class Module1 extends Module {
 对于部分常用的过渡效果，我们已经将其封装进入了nodomui.css文件，你只需要全局引入该css文件即可。
 提供的过渡效果见下表：
 
-| name             | 效果                        |
-| ---------------- | --------------------------- |
-| fade             | 渐入渐出                    |
-| scale-fixtop     | 固定上面缩放                |
-| scale-fixleft    | 固定左边缩放                |
-| scale-fixbottom  | 固定底边缩放                |
-| scale-fixright   | 固定右边缩放                |
+|       name       |            效果             |
+| :--------------: | :-------------------------: |
+|       fade       |          渐入渐出           |
+|   scale-fixtop   |        固定上面缩放         |
+|  scale-fixleft   |        固定左边缩放         |
+| scale-fixbottom  |        固定底边缩放         |
+|  scale-fixright  |        固定右边缩放         |
 | scale-fixcenterX | 固定以X轴为对称轴往中间缩放 |
 | scale-fixcenterY | 固定以Y轴为对称轴往中间缩放 |
-| fold-height      | 折叠高度                    |
-| fold-width       | 折叠宽度                    |
+|   fold-height    |          折叠高度           |
+|    fold-width    |          折叠宽度           |
 
 #### 进入/离开动画
 
@@ -2082,16 +2082,16 @@ class Module1 extends Module {
 
 传入`x-animation`指令的对象不止上述提到的这些，还有一些控制参数，下表是所有可以传入的属性所示：
 
-| name           | 作用                      | 可选值                              | 默认值       | 必填 |
-| -------------- | ------------------------- | ----------------------------------- | ------------ | ---- |
-| tigger         | 触发动画                  | true/false                          | true         | 是   |
-| name           | 过渡/动画名（不包含后缀） | -                                   | 无           | 是   |
-| isAppear       | 是否是进入离开过渡/动画   | true/false                          | true         | 否   |
-| type           | 是过渡还是动画            | 'aniamtion'/'transition'            | 'transition' | 否   |
-| duration       | 过渡/动画的执行时间       | 同css的duration的可选值             | ''           | 否   |
-| delay          | 过渡/动画的延时时间       | 同css的delay的可选值                | '0s'         | 否   |
-| timingFunction | 过渡/动画的时间函数       | 同css的timingFunction的可选值       | 'ease'       | 否   |
-| hooks          | 过渡/动画执行前后钩子函数 | before/after函数或者enter/leave对象 | 无           | 否   |
+|      name      |           作用            |               可选值                |    默认值    | 必填 |
+| :------------: | :-----------------------: | :---------------------------------: | :----------: | :--: |
+|     tigger     |         触发动画          |             true/false              |     true     |  是  |
+|      name      | 过渡/动画名（不包含后缀） |                  -                  |      无      |  是  |
+|    isAppear    |  是否是进入离开过渡/动画  |             true/false              |     true     |  否  |
+|      type      |      是过渡还是动画       |      'aniamtion'/'transition'       | 'transition' |  否  |
+|    duration    |    过渡/动画的执行时间    |       同css的duration的可选值       |      ''      |  否  |
+|     delay      |    过渡/动画的延时时间    |        同css的delay的可选值         |     '0s'     |  否  |
+| timingFunction |    过渡/动画的时间函数    |    同css的timingFunction的可选值    |    'ease'    |  否  |
+|     hooks      | 过渡/动画执行前后钩子函数 | before/after函数或者enter/leave对象 |      无      |  否  |
 
 #### 分别配置`enter`/`leave`
 
