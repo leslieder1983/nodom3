@@ -143,9 +143,30 @@ Nodom以模块为单位进行应用构建，一个应用由单个或多个模块
 
 模块定义需要继承Nodom提供的模块基类Module。
 
+```javascript
+class Module1 extends Nodom.Module
+```
+
 定义模块时，为提升模块重用性，通过template()方法返回字符串形式（建议使用模板字符串）的模板代码，作为模块的视图描述。
 
+```javascript
+template(){
+	return `<div>Hello,Nodom
+    		</div>`
+}
+```
+
 通过data()方法返回模块所需的数据对象，Nodom再对其做响应式处理，响应式处理后的数据对象，Nodom称为Model对象，并存储在模块实例中。
+
+```javascript
+data(){
+	return {
+		name:'nodom',
+		}
+}	
+```
+
+
 
 > 为了描述方便，随后的章节中，我们将响应式处理后的对象称为Model。一个Model中还可能包含其它Model对象。Model实际是对原始数据对象进行代理拦截的`Proxy`对象。
 >
@@ -154,6 +175,12 @@ Nodom以模块为单位进行应用构建，一个应用由单个或多个模块
 还可以自定义模块方法，经过Nodom事件处理机制的模块方法，其this指向当前模块实例。  
 
 方法参数由Nodom自动传入，依次为：`Model`,`事件触发的虚拟Dom`,`Nodom封装事件NEvent`,`原生事件对象Event`。  
+
+```javascript
+change(model,Vdom,Nevent,event){
+   Mmodel.name='nodom3';
+}   
+```
 
 不由Nodom事件触发的模块方法则不会受影响。
 
@@ -177,7 +204,7 @@ Nodom以模块为单位进行应用构建，一个应用由单个或多个模块
 				}
 			}	
             //自定义模块方法,有以下四个参数：Model,虚拟Dom,Nodom封装事件，原生事件
-			change(model,Vdom,Nevent,event){M
+			change(model,Vdom,Nevent,event){
 				model.name='nodom3';
 			}    
 		}
