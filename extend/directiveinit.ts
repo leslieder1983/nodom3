@@ -73,7 +73,8 @@ export default (function () {
     );
 
     /**
-     *  model指令
+     * model 指令
+     * 描述：用于给试图绑定数据
      */
     createDirective(
         'model',
@@ -88,8 +89,8 @@ export default (function () {
     );
 
     /**
-     * 指令名 repeat
-     * 描述：重复指令
+     * repeat 指令
+     * 描述：用户重复生成多个同类节点
      */
     createDirective(
         'repeat',
@@ -180,7 +181,7 @@ export default (function () {
     );
 
     /**
-     * 指令名 if
+     * if 指令 
      * 描述：条件指令
      */
     createDirective('if',
@@ -192,7 +193,7 @@ export default (function () {
     );
 
     /**
-     * 指令名 else
+     * else 指令
      * 描述：else指令
      */
     createDirective(
@@ -206,6 +207,7 @@ export default (function () {
 
     /**
      * elseif 指令
+     * 描述：条件指令
      */
     createDirective('elseif',
         function (module: Module, dom: VirtualDom, src: VirtualDom) {
@@ -237,8 +239,8 @@ export default (function () {
     );
 
     /**
-     * 指令名 show
-     * 描述：显示指令
+     * show指令 
+     * 描述：显示指令，用于显示视图
      */
     createDirective(
         'show',
@@ -401,7 +403,7 @@ export default (function () {
     );
 
     /**
-     * route指令
+     * route 指令
      */
     createDirective('route',
         function (module: Module, dom: VirtualDom, src: VirtualDom) {
@@ -459,7 +461,7 @@ export default (function () {
 
     /**
      * 插头指令
-     * 用于模块中，可实现同名替换
+     * 描述：用于模块中，可实现同名替换
      */
     createDirective('slot',
         function (module: Module, dom: VirtualDom, src: VirtualDom) {

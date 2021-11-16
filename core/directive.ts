@@ -17,7 +17,7 @@ export  class Directive {
     public id:number;
 
     /**
-     * 指令类型，指令管理器中定义
+     * 指令类型
      */
     public type:DirectiveType;
     
@@ -27,12 +27,12 @@ export  class Directive {
     public value:any;
     
     /**
-     * 表达式id
+     * 表达式
      */
     public expression:Expression;
 
     /**
-     * 禁用
+     * 禁用指令
      */
     public disabled:boolean;
     /**
@@ -109,7 +109,7 @@ export  class Directive {
     }
 
     /**
-     * 克隆
+     * 克隆当前指令
      */
     public clone():Directive{
         let d = new Directive();
