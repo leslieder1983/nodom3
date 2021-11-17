@@ -1138,68 +1138,64 @@ getFood(arr) {
 + `<for>`标签最终渲染的标签为`<div>`
 + 不要将`<for>`标签和`x-repeat`指令一起使用。
 
-### 虚拟Dom		
+### 虚拟DOM
 
-Nodom通过js对象的方式实现对真实Dom的映射，通过虚拟Dom树的比对更新，达到最小操作真实Dom的目的。
+虚拟dom相较于真实dom很大的提高了开发效率，优化了用户的体验，同时提升了页面渲染的性能。
 
-#### tagName属性
+#### Nodom中的虚拟dom的结构如下：
 
 ```typescript
+{
 /**
- * 元素名，如div
+ * 元素名，例如<div></div>标签，tagName为div；<span></span>的tagName为span
  */
 public tagName: string;
-```
-
-#### key属性
-
-Nodom中虚拟dom的key是唯一的标识，对节点的操作时提供并保证正确的位置，也可以通过key来获取虚拟dom中的值
-
-```typescript
+    
 /**
- * key，整颗虚拟dom树唯一
+ * Nodom中虚拟DOM的key是唯一的标识，对节点进行操作时提供正确的位置，获取对应的真实dom
  */
-public key: string;
-```
+public key: string
 
-#### model属性
-
-```typescript
 /**
- * 绑定模型
+ * 绑定事件模型，在方法中可以传入model参数来获得模型中的值
  */
 public model: Model;
-```
-
-```typescript
-public static renderDom(module:Module,src:VirtualDom,model:Model,parent?:VirtualDom,key?:string):VirtualDom{
-    //节点自带model优先级高
-    model = src.model?src.model:model;
-    let dst:VirtualDom = new VirtualDom(src.tagName,key?src.key+'_'+key:src.key);
-```
-
-#### AddEvent()方法			
-
-添加事件时，可以使用Nodom虚拟dom中的addEvent方法，如果这个事件已经添加，将不再进行添加操作
-
-```typescript
-public addEvent(event: NEvent) {
-    if(!this.events){
-        this.events = new Map();
-    }
-    if(!this.events.has(event.name)){
-        this.events.set(event.name, [event.id]);
-    }else{
-        let arr = this.events.get(event.name);
-        //已添加的事件，不再添加
-        if(arr.indexOf(event.id) === -1){
-            arr.push(event.id);
-        }
-    }
+    
+/**
+ * 移除多个指令
+ * @param directives 	待删除的指令类型数组或指令类型
+ */
+public removeDirectives(directives: string[]) {
+   	
 }
 ```
 
-虚拟dom经过diff找出最小差异，批量进行patch，无需手动操作dom元素，极大的提高了页面性能。同时虚拟dom是JS的对象，有利于进行跨平台操作。
+#### 属性
+
+| **属性**   | **类型**              | **定义**                                                     |
+| :--------- | --------------------- | :----------------------------------------------------------- |
+| tagName    | string                | 标签名如<div></div>的他给Name为'div'                         |
+| key        | string                | 是唯一的标识符，也可以通过key来获取虚拟dom的值               |
+| model      | Model                 | 绑定Model                                                    |
+| directives | Directive[]           | 指令集合，是一个数组用来存放各个指令                         |
+| events     | Map<string, number[]> | 事件的集合，同时一个事件可以绑定多个事件方法对象             |
+| staticNum  | number                | 静态标识数，初始为0，大于0时每次做比较都减一直到等于0，当小于0时不进行处理 |
+| children   | Array<VirtualDom>     | 子节点数组，在进行对子节点的操作，如add()，会将子节点加到子节点数组中 |
+| ......     |                       |                                                              |
+
+#### 虚拟dom的加速器“Diff”
+
+在虚拟dom的操作中，diff算法起到了关键的作用，而Nodom通过DiffTool中的比较节点方法（**compare**）来得出需要修改的最小单位，再更新视图，减少了dom操作，达到提高性能的目的。
+
+#### compare
+
+在原始的diff算法中需要循环递归遍历节点依次进行比较，虽然比起没有diff算法之前有所优化，依旧效率比较低，**compare**方法对此做了一些改变。
+
+在**compare**方法中有三个参数分别是**src**（待比较节点）、**dst**（被比较节点）、**changeArr**（增删改的节点数组）三个参数。**compare**方法在节点开始比较前根据节点类型的不同有不同的策略。相应方法解决相应类型问题,在子节点的对比中也有子节点对比策略。在进行新旧节点的**compare**操作后，若节点会提前移动，则跳过这个节点从而减少移动操作，然后**sameKey**方法会确定一遍**src**和**dst**是否有相同key来确定是否还能减少不必要的移动次数。当有新增节点或删除节点时则对**children**数组进行相应操作，最后进行真实dom的渲染结束。
+
+#### 总结
+
+虚拟dom通过找出最小差异，达到最小次数操作dom目的。同时虚拟DOM是JS的对象，有利于进行跨平台操作。
 
 ## 深入
 
