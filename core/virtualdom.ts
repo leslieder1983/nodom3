@@ -104,16 +104,11 @@ export class VirtualDom {
      * @param tag       标签名
      * @param key       key
      */
-<<<<<<< HEAD
     constructor(tag?: string,key?:string) {
         this.tagName = tag; //标签
         if(key){
             this.key = key;
         }
-=======
-    constructor(tag?: string,key?:string,module?:Module) {
-        this.key = key || ((module?module.getDomKeyId():Util.genId()) + '');
->>>>>>> 9a5ad9b7c0dd86604b039cb673db0a21d18b4b7f
         if(tag){
             this.tagName = tag;
         }

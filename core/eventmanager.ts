@@ -41,7 +41,7 @@ export class EventManager {
             for (let ii = 0; ii < arr.length; ii++) {
                 const ev: NEvent = module.objectManager.getEvent(arr[ii]);
                 //处理外部事件，如果有外部事件，则移除改事件
-                if (this.handleExtendEvent(module, dom, ev)) {
+                if (this.handleExtendEvent(dom, ev)) {
                     arr.splice(ii--, 1);
                     continue;
                 }
@@ -216,12 +216,11 @@ export class EventManager {
 
     /**
      * 处理外部事件
-     * @param module    模块 
      * @param dom       dom节点
      * @param event     事件对象
      * @returns         如果有是外部事件，则返回true，否则返回false
      */
-    private static handleExtendEvent(module: Module, dom: VirtualDom, event: NEvent): boolean {
+    private static handleExtendEvent(dom: VirtualDom, event: NEvent): boolean {
         let evts = this.get(event.name);
         if (!evts) {
             return false;
