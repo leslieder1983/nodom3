@@ -1695,11 +1695,11 @@ class Main extends Module{
 }
 ```
 
-### Css支持
+### CSS支持
 
-​	**Nodom对Css提供额外的支持。**
+​	**Nodom对CSS提供额外的支持。**
 
-* 在模板代码中的 `<style></style>` 标签中直接写入Css样式，示例代码如下：
+* 在模板代码中的 `<style></style>` 标签中直接写入CSS样式，示例代码如下：
 
 ```js
 class Module1 extends Module {
@@ -1717,7 +1717,7 @@ class Module1 extends Module {
 }
 ```
 
-* 在模板代码中的 `<style></style>` 标签中的通过表达式调用函数返回Css样式代码串，示例代码如下：
+* 在模板代码中的 `<style></style>` 标签中通过表达式调用函数返回CSS样式代码串，示例代码如下：
 
 ```js
 class Module1 extends Module {
@@ -1737,7 +1737,7 @@ class Module1 extends Module {
 }
 ```
 
-* 在模块模板中的 `<style></style>` 标签中通过@import url('css url路径')引入Css样式文件，示例代码如下：
+* 在模板代码中的 `<style></style>` 标签中通过@import url('CSS url路径')引入CSS样式文件，示例代码如下：
 
 ```js
 class Module1 extends Module {
@@ -1754,7 +1754,7 @@ class Module1 extends Module {
 }
 ```
 
-* 在模块模板代码中需要样式的节点中直接写Css样式，示例代码如下：
+* 对模板代码中需要样式的节点直接写行内样式，示例代码如下：
 
 ```js
 class Module1 extends Module {
@@ -1770,7 +1770,7 @@ class Module1 extends Module {
 
 **scope属性** 
 
-​	给节点添加该属性后，Nodom会自动在Css选择器前加前置名。使Css样式的作用域限定在当前模块内，不会污染其它模块。
+​	给节点添加该属性后，Nodom会自动在CSS选择器前加前置名。使CSS样式的作用域限定在当前模块内，不会污染其它模块。
 
 ​	示例代码如下：
 
