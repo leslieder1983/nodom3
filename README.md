@@ -285,15 +285,17 @@ Nodom采用基于HTML的模板语法。
     </div>
   ```
 
-同样的，Nodom支持原生HTML语法，例如：
-
+Nodom支持原生的HTML语法，如：
 ```html
 <span>hello</span>
 
-<div class="cls1 cls2"> <p> Something </p> </div>
+<div class="cls1 cls2"> 
+    <p> Something </p> 
+</div>
 
 ......
 ```
+在原生HTML语法的基础上，Nodom扩展了模块，表达式，事件，指令等语法。
 
 #### 模块写法
 
@@ -357,7 +359,7 @@ Nodom采用基于HTML的模板语法。
 // model.userName = 'Joe';
 ```
 
-这样Nodom就会去当前模块实例的`model`里去寻找为`userName`的值，并且用它替换`{{ userName }}`。这样就能够通过操作`userName`的值来显示不同用户的欢迎信息。
+这样Nodom就会去当前模块实例的`Model`里去寻找为`userName`的值，并且用它替换`{{ userName }}`。这样就能够通过操作`userName`的值来显示不同用户的欢迎信息。
 
 
 
@@ -376,7 +378,7 @@ Nodom的指令以`x-`开头，指令用来增强模板的功能，比如，`x-sh
 
 `x-show`指令接收`true`或者`false`，可以使用表达式为其传值，如果表达式的值为`true`，则会渲染该元素，如果为`false`则不会渲染该元素。
 
-关于指令的详细信息可以阅读本章的指令与指令元素章节。
+关于指令的详细信息可以阅读本章的指令与自定义元素章节。
 
 #### 事件写法
 
@@ -387,7 +389,7 @@ Nodom的事件命名为`e-`+`原生事件名`，例如：
 <button e-click="confirm">确定</button>
 ```
 
-事件接收一个模块实例上方法的名，当事件触发时，Nodom会执行该方法。
+事件接收一个模块实例上的方法名，当事件触发时，Nodom会执行该方法。
 
 关于事件绑定的详细信息可以阅读本章的事件绑定章节。
 
@@ -526,7 +528,7 @@ export class ModuleA extends Module{
 
 
 | 序号 | 参数名 |         描述          |
-| :--: | :----: | :-------------------: |
+|:----:|:------:|:---------------------:|
 |  1   | model  |    dom对应的model     |
 |  2   |  dom   | 事件对象对应的虚拟dom |
 |  3   | nEvent |     Nodom事件对象     |
@@ -542,11 +544,11 @@ export class ModuleA extends Module{
 
 #### 事件修饰符
 
-在传入事件处理方法的时，可以以`:`分隔的形式指定事件修饰符。
+在传入事件处理方法的时，允许以`:`分隔的形式传入指定事件修饰符。
 事件处理支持三种修饰符：
 
 |  名字  |       作用       |
-| :----: | :--------------: |
+|:------:|:----------------:|
 |  once  |  事件只执行一次  |
 | nopopo |     禁止冒泡     |
 |  delg  | 事件代理到父对象 |
@@ -1517,7 +1519,7 @@ changeTitle(model){
 > Model在管理数据的时候会新增部分以`$`开头的数据项和方法，所以在定义方法和数据时，尽量避免使用`$`开头的数据项和方法名。
 #### Model与模块渲染
 
-每个`Model`存有一个模块列表，当`Model`内部的数据变化时，会引起该`Model`的模块列表中所有模块的渲染。默认`Model`的模块列表中只有`Model`所在的模块，如果需要`Model`触发多个模块的渲染，则需要将对应模块添加到`Model`对应的模块列表中(绑定方式查看API ModelManager.bindToModule)。
+每个`Model`存有一个模块列表，当`Model`内部的数据变化时，会引起该`Model`的模块列表中所有模块的渲染。一个`Model`的模块列表中默认只有初始化该`Model`的模块，如果需要该`Model`触发多个模块的渲染，则要将`需要触发渲染的模块`添加到该`Model`对应的模块列表中(`Model`与模块的绑定请查看API ModelManager.bindToModule)。
 
 #### $set()
 
@@ -1859,27 +1861,27 @@ createDirective(
 
 `createDirective`接收的参数列表如下：
 
-| 序号 |  参数名  |   类型   |                             描述                             |
-| :--: | :------: | :------: | :----------------------------------------------------------: |
-|  1   |   name   |  string  |             指令的名字，使用时需要在前面加上`x-`             |
-|  2   | handler  | Function | 处理指令逻辑的方法，接收三个参数，参数列表见`handler`参数列表 |
+| 序号 |  参数名  |   类型   |                                描述                                |
+|:----:|:--------:|:--------:|:------------------------------------------------------------------:|
+|  1   |   name   |  string  |                指令的名字，使用时需要在前面加上`x-`                |
+|  2   | handler  | Function |   处理指令逻辑的方法，接收三个参数，参数列表见`handler`参数列表    |
 |  3   | priority |  number  | 指令优先级，默认为10，可以不传，1-10为保留字段，数字越大优先级越低 |
 
 `handler`函数接收的参数列表如下:
 
 | 序号 | 参数名 |    类型    |             描述              |
-| :--: | :----: | :--------: | :---------------------------: |
+|:----:|:------:|:----------:|:-----------------------------:|
 |  1   | module |   Module   |        当前模块的实例         |
 |  2   |  dom   | VirtualDom |       本次渲染的虚拟dom       |
 |  3   |  src   | VirtualDom | 该节点在originTree中的虚拟dom |
 
 #### 自定义元素
 
-自定义元素需要继承`DirectiveElement`类，且需要在`DirectiveElementManager`中注册。
+自定义元素需要继承`DefineElement`类，且需要在`DefineElementManager`中注册。
 
 ```javascript
 // 定义自定义元素
-class MYELEMENT extends DirectiveElement{
+class MYELEMENT extends DefineElement{
 	constructor(node,module){
         super(node,module);
         
@@ -1889,16 +1891,15 @@ class MYELEMENT extends DirectiveElement{
 	
 // 注册自定义元素
 // add 接收一个自定义类或者自定义类数组
-DirectiveElementManager.add(MYELEMENT);
+DefineElementManager.add(MYELEMENT);
 ```
 
 定义自定义元素的构造器接收的参数列表如下：
 
 | 序号 | 参数名 |           描述            |
-| :--: | :----: | :-----------------------: |
+|:----:|:------:|:-------------------------:|
 |  1   |  node  | 该自定义元素的虚拟Dom节点 |
 |  2   | module |       当前模块实例        |
-
 
 
 
@@ -2020,7 +2021,7 @@ class Module1 extends Module {
 提供的过渡效果见下表：
 
 |       name       |            效果             |
-| :--------------: | :-------------------------: |
+|:----------------:|:---------------------------:|
 |       fade       |          渐入渐出           |
 |   scale-fixtop   |        固定上面缩放         |
 |  scale-fixleft   |        固定左边缩放         |
@@ -2082,16 +2083,16 @@ class Module1 extends Module {
 
 传入`x-animation`指令的对象不止上述提到的这些，还有一些控制参数，下表是所有可以传入的属性所示：
 
-|      name      |           作用            |               可选值                |    默认值    | 必填 |
-| :------------: | :-----------------------: | :---------------------------------: | :----------: | :--: |
-|     tigger     |         触发动画          |             true/false              |     true     |  是  |
-|      name      | 过渡/动画名（不包含后缀） |                  -                  |      无      |  是  |
-|    isAppear    |  是否是进入离开过渡/动画  |             true/false              |     true     |  否  |
-|      type      |      是过渡还是动画       |      'aniamtion'/'transition'       | 'transition' |  否  |
-|    duration    |    过渡/动画的执行时间    |       同css的duration的可选值       |      ''      |  否  |
-|     delay      |    过渡/动画的延时时间    |        同css的delay的可选值         |     '0s'     |  否  |
-| timingFunction |    过渡/动画的时间函数    |    同css的timingFunction的可选值    |    'ease'    |  否  |
-|     hooks      | 过渡/动画执行前后钩子函数 | before/after函数或者enter/leave对象 |      无      |  否  |
+|      name      |                   作用                   |               可选值                |    默认值    | 必填 |
+|:--------------:|:----------------------------------------:|:-----------------------------------:|:------------:|:----:|
+|     tigger     |                 触发动画                 |             true/false              |     true     |  是  |
+|      name      | 过渡/动画名（不包含-enter-active等后缀） |                  -                  |      无      |  是  |
+|    isAppear    |         是否是进入离开过渡/动画          |             true/false              |     true     |  否  |
+|      type      |              是过渡还是动画              |      'aniamtion'/'transition'       | 'transition' |  否  |
+|    duration    |           过渡/动画的执行时间            |       同css的duration的可选值       |      ''      |  否  |
+|     delay      |           过渡/动画的延时时间            |        同css的delay的可选值         |     '0s'     |  否  |
+| timingFunction |           过渡/动画的时间函数            |    同css的timingFunction的可选值    |    'ease'    |  否  |
+|     hooks      |        过渡/动画执行前后钩子函数         | before/after函数或者enter/leave对象 |      无      |  否  |
 
 #### 分别配置`enter`/`leave`
 
