@@ -1810,11 +1810,29 @@ GlobalCache.get("China.captial")
 GlobalCache.remove("China.captial")
 ```
 
-另外，还提供将指令实例，指令参数，表达式实例，事件实例，事件参数，渲染树虚拟dom，html节点，dom参数进行操作。具体使用参考API文档。
+另外，还提供对以下对象在内存中进行存储、获取和移除等操作。
 
-对渲染树虚拟dom的操作如下所示。
++ 指令实例
 
-将渲染树虚拟dom存储在内存中：
++ 指令参数
+
++ 表达式实例
+
++ 事件实例
+
++ 事件参数
+
++ 虚拟dom
+
++ html节点
+
++ dom参数
+
+具体使用参考API文档。
+
+对虚拟dom的操作如下所示：
+
+将虚拟dom存储在内存中，例子如下：
 
 ```javascript
 // 引入模块
@@ -1826,13 +1844,13 @@ let om = new ObjectManager(module)
 om.saveElement(dom)
 ```
 
-根据提供的键名获取内存中对应的渲染树虚拟dom：
+根据提供的键名获取内存中对应的虚拟dom，例子如下：
 
 ```javascript
 om.getElement(key)
 ```
 
-根据提供的键名将对应的渲染树虚拟dom从内存中移除：
+根据提供的键名将对应的虚拟dom从内存中移除，例子如下：
 
 ```javascript
 om.removeElement(key)
