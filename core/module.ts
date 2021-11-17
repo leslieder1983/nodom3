@@ -215,20 +215,6 @@ export class Module {
         //渲染为html element
         let el:any = Renderer.renderToHtml(this,this.renderTree,null,true);
         if(this.replaceContainer){ //替换
-            ['style','class'].forEach(item=>{
-                let c = this.container.getAttribute(item);
-                if(!c){
-                    return;
-                }
-                c = c.trim();
-                let c1 = el.getAttribute(item) || '';
-                if(item==='style'){
-                    c += (c.endsWith(';')?'':';') + c1;
-                }else{
-                    c += ' ' + c1;
-                }
-                el.setAttribute(item,c);
-            });
             Util.replaceNode(this.container,el);
         }else{
             //清空子元素
