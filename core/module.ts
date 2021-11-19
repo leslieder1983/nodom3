@@ -216,6 +216,7 @@ export class Module {
         let el:any = Renderer.renderToHtml(this,this.renderTree,null,true);
         if(this.replaceContainer){ //替换
             Util.replaceNode(this.container,el);
+            this.container = el;
         }else{
             //清空子元素
             Util.empty(this.container);

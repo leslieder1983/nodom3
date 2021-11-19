@@ -222,7 +222,7 @@ export class Compiler {
                 //不排序
                 dom.addDirective(new Directive(propName.substr(2), value));
             } else if (propName.startsWith("e-")) { //事件
-                dom.addEvent(new NEvent(propName.substr(2), value));
+                dom.addEvent(new NEvent(me.module,propName.substr(2), value));
             } else { //普通属性
                 dom.setProp(propName, value);
             }

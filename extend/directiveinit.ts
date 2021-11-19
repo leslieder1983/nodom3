@@ -312,7 +312,7 @@ export default (function () {
 
             //初始化
             if(!this.getParam(module,dom,'inited')){
-                dom.addEvent(new NEvent('change',
+                dom.addEvent(new NEvent(module,'change',
                     function(model,dom){
                         let el = <any>module.getNode(dom.key);
                         if (!el) {
@@ -387,7 +387,7 @@ export default (function () {
             //添加click事件,避免重复创建事件对象，创建后缓存
             let event:NEvent = module.objectManager.get('$routeClickEvent');
             if(!event){
-                event = new NEvent('click',
+                event = new NEvent(module,'click',
                     (model,dom, e) => {
                         let path = dom.getProp('path');
                         if (!path) {

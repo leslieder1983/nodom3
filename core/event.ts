@@ -11,7 +11,14 @@ import { Util } from "./util";
  * @since       1.0
  */
 export class NEvent {
+    /**
+     * 事件id
+     */
     public id: number;
+    /**
+     * 事件所属模块
+     */
+    public module:Module;
     /**
      * 事件名
      */
@@ -51,8 +58,9 @@ export class NEvent {
      *                      如果为函数，则替代第三个参数
      * @param handler       事件执行函数，如果方法不在module methods中定义，则可以直接申明，eventStr第一个参数失效，即eventStr可以是":delg:nopopo..."
      */
-    constructor(eventName: string, eventStr?: string | Function, handler?: Function) {
+    constructor(module:Module,eventName: string, eventStr?: string | Function, handler?: Function) {
         this.id = Util.genId();
+        this.module = module;
         this.name = eventName;
         
         GlobalCache.saveEvent(this);

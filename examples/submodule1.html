@@ -59,6 +59,7 @@
                         <for cond={{rows}}>
                             <ModuleB style='font-size:18px;' useDomModel/>
                         </for>
+                        <button e-click='clickBtn'>clickBtn</button>
                     </modulea>
                 </div>
             `;
@@ -77,6 +78,10 @@
         add(model){
             model.rows.push({id:4,name:'weblab'});
             console.log(model.rows);
+        }
+
+        clickBtn(model,dom){
+            console.log(this,model);
         }
 
         change1(model){

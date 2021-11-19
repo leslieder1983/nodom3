@@ -1,6 +1,6 @@
 {
-  "name": "nodom-develop",
-  "version": "3.0.0",
+  "name": "nodom3",
+  "version": "0.0.1",
   "private": true,
   "main": "index.ts",
   "directories": {
@@ -26,5 +26,6 @@
   "repository": {
     "type": "git"
   },
-  "description": "nodom是一款基于数据驱动的web mvvm框架。 用于搭建单页应用(SPA)，目前发展到3.3版本。 插件也在同步更新中。"
+  "description": "nodom是一款基于数据驱动的web mvvm框架。 用于搭建单页应用(SPA)，目前发展到3.3版本。 插件也在同步更新中。",
+  "dependencies": {}
 }
