@@ -1,0 +1,7 @@
+1 在nodom3目录下 执行tsc指令
+2 npm link, 可以查看系统node_modules目录下是否存在nodom3，如果存在，可以先删除
+3 到新项目下，npm link nodom3，执行前可以清理一下node_modules目录
+
+
+引入方式 
+import { registModule,Module } from "../node_modules/nodom3";
