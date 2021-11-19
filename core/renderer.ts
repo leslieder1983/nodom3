@@ -76,10 +76,6 @@ export class Renderer {
         if(src.tagName){
             if(!dst.notChange){
                 handleProps();
-                let r = handleDirectives();
-                if(!r){
-                    return;
-                }
                 //处理style，如果为style，则不处理assets和events
                 if(!CssManager.handleStyleDom(module,src,Renderer.currentModuleRoot,src.getProp('scope') === 'this')){
                     //assets
@@ -96,6 +92,9 @@ export class Renderer {
                             dst.setEvent(p[0],p[1].slice(0));
                         }
                     }
+                }
+                if(!handleDirectives()){
+                    return;
                 }
             }
             // 子节点
@@ -238,8 +237,6 @@ export class Renderer {
                 }
             }
             
-            //如果存储node，则不需要key
-            // el.setAttribute('key', dom.key);
             //把el引用与key关系存放到cache中
             module.saveNode(dom.key,el);
 

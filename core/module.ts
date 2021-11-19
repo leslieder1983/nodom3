@@ -221,6 +221,7 @@ export class Module {
         let el:any = Renderer.renderToHtml(this,this.renderTree,null,true);
         if(this.replaceContainer){ //替换
             Util.replaceNode(this.container,el);
+            this.getParent().saveNode(this.srcDom.key,el);
         }else{
             //清空子元素
             Util.empty(this.container);
@@ -253,12 +254,12 @@ export class Module {
      */
     public active() {
         Renderer.add(this);
-        for(let id of this.children){
-            let m = ModuleFactory.get(id);
-            if(m){
-                m.active();
-            }
-        }
+        // for(let id of this.children){
+        //     let m = ModuleFactory.get(id);
+        //     if(m){
+        //         m.active();
+        //     }
+        // }
     }
 
     /**
@@ -406,11 +407,13 @@ export class Module {
     /**
      * 设置props
      * @param props     属性值
+     * @param dom       子模块对应节点
      */
     public setProps(props:any,dom:VirtualDom){
         let change:boolean = false;
         //保留数据
         let dataObj = props.$data;
+        
         //属性对比不对data进行对比，删除数据属性
         delete props.$data;
         if(!this.props){
@@ -488,7 +491,7 @@ export class Module {
         }
         
         //清理dom相关
-        this.objectManager.clearSaveDoms();
+        // this.objectManager.clearSaveDoms();
         //清理指令
         this.objectManager.clearDirectives();
         //清理表达式

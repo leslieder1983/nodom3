@@ -15,7 +15,7 @@
     class ModuleA extends Module{
         template(props){
             return `
-                <div class='modulea'>
+                <div class='modulea' ${props.style?'style="' + props.style + '"':''}>
                     <slot innerRender/>
                 </div>
             `
@@ -33,7 +33,7 @@
     class ModuleB extends Module{
         template(props){
             return `
-                <div>
+                <div >
                     <div>id is:{{id}},name is:<span style='color:red;font-weight:bold;padding-left:10px'>{{name}}</span></div>
                 </div>
             `
@@ -93,12 +93,12 @@
 
         template(props){
             return `
-                <div>
+                <div >
                     <button e-click='add'>add</button>
                     <button e-click='change1'>change1</button>
                     <div>name is:{{name}}</div>
                     <!--useDomModel表示用当前dom对应的model直接覆盖子模块的model-->
-                    <modulea>
+                    <modulea style={{style}}>
                         <for cond={{rows}}>
                             <ModuleB style='font-size:18px;' useDomModel/>
                         </for>
@@ -111,6 +111,7 @@
             return {
                 xxx:1,
                 name:'outer',
+                style:'width:800px',
                 rows:[
                     {id:1,name:'nodom'},
                     {id:2,name:'noomi'},
@@ -129,6 +130,7 @@
 
         change1(model){
             model.xxx = 2;
+            model.style='background:#ccc'
         }
     }
     nodom(Module1,'div');
