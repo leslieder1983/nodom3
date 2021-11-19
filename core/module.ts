@@ -105,6 +105,11 @@ export class Module {
     public replaceContainer:boolean;
 
     /**
+     * 来源dom，子模块对应dom
+     */
+    public srcDom:VirtualDom;
+
+    /**
      * 生成dom时的keyid，每次编译置0
      */
     domKeyId:number;
@@ -216,7 +221,6 @@ export class Module {
         let el:any = Renderer.renderToHtml(this,this.renderTree,null,true);
         if(this.replaceContainer){ //替换
             Util.replaceNode(this.container,el);
-            this.container = el;
         }else{
             //清空子元素
             Util.empty(this.container);
@@ -403,7 +407,7 @@ export class Module {
      * 设置props
      * @param props     属性值
      */
-    public setProps(props:any){
+    public setProps(props:any,dom:VirtualDom){
         let change:boolean = false;
         //保留数据
         let dataObj = props.$data;
@@ -442,8 +446,8 @@ export class Module {
                 }
             }
         }
-        
         this.props = props;
+        this.srcDom = dom;
         if(change){ //有改变，进行编译并激活
             this.compile();
             this.active();
@@ -460,6 +464,17 @@ export class Module {
         const str = this.template(this.props);
         if(str){
             this.originTree = new Compiler(this).compile(str);
+            //事件传递
+            if(this.srcDom && this.srcDom.events){
+                if(!this.originTree.events){
+                    this.originTree.events = new Map();
+                }
+                for(let p of this.srcDom.events){
+                    if(!this.originTree.events.has(p[0])){  //子模块已存在的事件不处理
+                        this.originTree.events.set(p[0],p[1]);
+                    }
+                }
+            }
         }
     }
     /**

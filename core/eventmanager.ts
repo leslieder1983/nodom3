@@ -2,6 +2,7 @@ import { Module } from "./module";
 import { VirtualDom } from "./virtualdom";
 import { NEvent } from "./event";
 import { Util } from "./util";
+import { GlobalCache } from "./globalcache";
 /**
  * 事件管理器
  */

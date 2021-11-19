@@ -73,7 +73,7 @@ export default (function () {
                     }
                 }
                 //传递给模块
-                m.setProps(o);
+                m.setProps(o,src);
             }
             return true;
         },

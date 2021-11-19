@@ -185,7 +185,6 @@ export  class ObjectManager {
                 this.cache.set('$events.' + id,ev);
                 return ev.$instance;
             }
-            
         }
         return ev;
     }

@@ -45,8 +45,51 @@
         }
     }
 
+    class UIButton extends Module{
+        /**
+         * 模版函数
+         * @param props     父模块传递的属性值 
+         * @returns         模版字符串
+         */
+        template(props){
+            let arr = ['ui-btn'];
+            //size
+            arr.push('ui-btn-' + (props.size||'normal'));
+            //icon
+            if(props.icon){
+                arr.push('ui-icon-' + props.icon);
+                arr.push('ui-btn-' + (props.iconPos||'left'));
+            }
+            
+            //无背景
+            if(props.nobg === 'true'){
+                arr.push('ui-btn-nobg');
+            }else{
+                //theme
+                if(props.theme){
+                    arr.push('ui-btn-' + props.theme);
+                }
+            }
+
+            if(!props.title){
+                arr.push('ui-btn-notext');
+                props.title = '';
+            }
+
+            //从模版带来的class
+            if(props.class){
+                arr.push(props.class);
+            }
+            return  `
+                <button class='${arr.join(" ")}' ${props.style?'style="' + props.style + '"':''}>
+                    ${props.title}
+                </button>
+            `;
+        }
+    }
+
     class Module1 extends Module{
-        modules=[ModuleA,ModuleB];
+        modules=[ModuleA,ModuleB,UIButton];
 
         template(props){
             return `
@@ -59,7 +102,7 @@
                         <for cond={{rows}}>
                             <ModuleB style='font-size:18px;' useDomModel/>
                         </for>
-                        <button e-click='clickBtn'>clickBtn</button>
+                        <uibutton e-click='clickBtn' title='clickBtn' />
                     </modulea>
                 </div>
             `;

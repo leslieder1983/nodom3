@@ -242,16 +242,21 @@ export class Renderer {
             // el.setAttribute('key', dom.key);
             //把el引用与key关系存放到cache中
             module.saveNode(dom.key,el);
-            //asset
-            if(dom.assets && dom.assets.size>0){
-                for (let p in dom.assets) {
-                    el[p] = p[1];
+
+            //非子模块才处理
+            if(!dom.subModuleId){
+                //asset
+                if(dom.assets && dom.assets.size>0){
+                    for (let p in dom.assets) {
+                        el[p] = p[1];
+                    }
+                }
+                //处理event
+                if(dom.events){
+                    EventManager.bind(module,dom);
                 }
             }
-            //处理event
-            if(dom.events){
-                EventManager.bind(module,dom);
-            }
+            
             return el;
         }
 

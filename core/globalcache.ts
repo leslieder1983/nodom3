@@ -135,6 +135,7 @@ export class GlobalCache{
      * @returns         事件对象
      */
     public static getEvent(id:number):NEvent{
+        console.log(this.cache.get('$events.' + id + '.$instance'));
         return this.cache.get('$events.' + id + '.$instance');
     }
 
