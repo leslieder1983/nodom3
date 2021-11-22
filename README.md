@@ -92,13 +92,15 @@ class HelloWorld extends Module {
  template() {
   return `
   	<div>
- 		helloWorld!
+ 		Hello World!
   	</div>`;
  }
 }
 nodom(HelloWorld, "div");
 </script>
 ```
+
+> @code:base_Start
 
 #### 引入方式
 
@@ -253,7 +255,7 @@ change(model,Vdom,Nevent,event){
 </script>
 ```
 
-
+> @code:base_Modulebase_ModuleLifeCycle
 
 #### 生命周期图示
 
@@ -318,21 +320,25 @@ Nodom支持原生的HTML语法，如：
       modules = [ModuleA];
   }
   ```
+  
+  > @code:Base_TemplateSyntax_ModuleOfWriting
+  
 - 使用`registModule`API注册模块，并且使用`registModule`注册模块时的提供的别名。
+  
   ```js
   import {registModule} from "nodom.js"
-  import {ModuleA} from "modulea.js"
-	// 给ModuleA起了一个别名mod-a
+	import {ModuleA} from "modulea.js"
+  // 给ModuleA起了一个别名mod-a
   registModule(ModuleA,'mod-a');
-  class ModuleA extends Module{
-      template(){
+  class Main extends Module{
+	    template(){
 	  	return `
 			<div>
 			<!-- 使用别名 -->
 				<mod-a />
 			</div>
 		`
-	  }
+    }
   }
   ```
   两种写法的效果完全一样。
@@ -453,7 +459,7 @@ class Hello extends Module{
     constructor(){
         this.name='hello';
         this.getData=function(){
-            return ['星期一'，'星期二'，'星期三'，'星期四''星期五']
+            return ['星期一'，'星期二'，'星期三'，'星期四','星期五']
         }
     }
     data=()=>{
@@ -494,13 +500,14 @@ class Hello extends Module{
 </div>
 ```
 
+> @code:RwZOeZq
+
 ### 事件绑定
 
 Nodom使用了专门的事件类`NEvent`来处理Dom的事件操作，在模板中以`e-`开头，如：`e-click`、`e-mouseup`等。事件支持所有HTML元素标准事件，接收一个模块实例上的方法名作为事件处理方法，如：`e-click="methodName"`，当事件触发的时，Nodom会执行该方法。具体用法如下：
 ```js
 export class ModuleA extends Module{
 	template(){
-	
 		return `
 		<div>
 			<button e-click="addCount">addCount</button>
@@ -518,9 +525,10 @@ export class ModuleA extends Module{
 	addCount(model){
 		model.count++;
 	}
-
 }
 ```
+
+> @code:qBXwQBQ
 
 #### 回调函数的参数
 
@@ -620,6 +628,8 @@ data(){
 	}
 }
 ```
+
+> @code:QWMPJyp
 
 #### Repeat 指令
 
