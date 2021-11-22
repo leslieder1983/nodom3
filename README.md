@@ -92,13 +92,15 @@ class HelloWorld extends Module {
  template() {
   return `
   	<div>
- 		helloWorld!
+ 		Hello World!
   	</div>`;
  }
 }
 nodom(HelloWorld, "div");
 </script>
 ```
+
+> @code:base_Start
 
 #### 引入方式
 
@@ -253,7 +255,7 @@ change(model,Vdom,Nevent,event){
 </script>
 ```
 
-
+> @code:base_Modulebase_ModuleLifeCycle
 
 #### 生命周期图示
 
@@ -285,15 +287,17 @@ Nodom采用基于HTML的模板语法。
     </div>
   ```
 
-同样的，Nodom支持原生HTML语法，例如：
-
+Nodom支持原生的HTML语法，如：
 ```html
 <span>hello</span>
 
-<div class="cls1 cls2"> <p> Something </p> </div>
+<div class="cls1 cls2"> 
+    <p> Something </p> 
+</div>
 
 ......
 ```
+在原生HTML语法的基础上，Nodom扩展了模块，表达式，事件，指令等语法。
 
 #### 模块写法
 
@@ -316,21 +320,25 @@ Nodom采用基于HTML的模板语法。
       modules = [ModuleA];
   }
   ```
+  
+  > @code:Base_TemplateSyntax_ModuleOfWriting
+  
 - 使用`registModule`API注册模块，并且使用`registModule`注册模块时的提供的别名。
+  
   ```js
   import {registModule} from "nodom.js"
-  import {ModuleA} from "modulea.js"
-	// 给ModuleA起了一个别名mod-a
+	import {ModuleA} from "modulea.js"
+  // 给ModuleA起了一个别名mod-a
   registModule(ModuleA,'mod-a');
-  class ModuleA extends Module{
-      template(){
+  class Main extends Module{
+	    template(){
 	  	return `
 			<div>
 			<!-- 使用别名 -->
 				<mod-a />
 			</div>
 		`
-	  }
+    }
   }
   ```
   两种写法的效果完全一样。
@@ -357,7 +365,7 @@ Nodom采用基于HTML的模板语法。
 // model.userName = 'Joe';
 ```
 
-这样Nodom就会去当前模块实例的`model`里去寻找为`userName`的值，并且用它替换`{{ userName }}`。这样就能够通过操作`userName`的值来显示不同用户的欢迎信息。
+这样Nodom就会去当前模块实例的`Model`里去寻找为`userName`的值，并且用它替换`{{ userName }}`。这样就能够通过操作`userName`的值来显示不同用户的欢迎信息。
 
 
 
@@ -376,7 +384,7 @@ Nodom的指令以`x-`开头，指令用来增强模板的功能，比如，`x-sh
 
 `x-show`指令接收`true`或者`false`，可以使用表达式为其传值，如果表达式的值为`true`，则会渲染该元素，如果为`false`则不会渲染该元素。
 
-关于指令的详细信息可以阅读本章的指令与指令元素章节。
+关于指令的详细信息可以阅读本章的指令与自定义元素章节。
 
 #### 事件写法
 
@@ -387,7 +395,7 @@ Nodom的事件命名为`e-`+`原生事件名`，例如：
 <button e-click="confirm">确定</button>
 ```
 
-事件接收一个模块实例上方法的名，当事件触发时，Nodom会执行该方法。
+事件接收一个模块实例上的方法名，当事件触发时，Nodom会执行该方法。
 
 关于事件绑定的详细信息可以阅读本章的事件绑定章节。
 
@@ -451,7 +459,7 @@ class Hello extends Module{
     constructor(){
         this.name='hello';
         this.getData=function(){
-            return ['星期一'，'星期二'，'星期三'，'星期四''星期五']
+            return ['星期一'，'星期二'，'星期三'，'星期四','星期五']
         }
     }
     data=()=>{
@@ -492,13 +500,14 @@ class Hello extends Module{
 </div>
 ```
 
+> @code:RwZOeZq
+
 ### 事件绑定
 
 Nodom使用了专门的事件类`NEvent`来处理Dom的事件操作，在模板中以`e-`开头，如：`e-click`、`e-mouseup`等。事件支持所有HTML元素标准事件，接收一个模块实例上的方法名作为事件处理方法，如：`e-click="methodName"`，当事件触发的时，Nodom会执行该方法。具体用法如下：
 ```js
 export class ModuleA extends Module{
 	template(){
-	
 		return `
 		<div>
 			<button e-click="addCount">addCount</button>
@@ -516,9 +525,10 @@ export class ModuleA extends Module{
 	addCount(model){
 		model.count++;
 	}
-
 }
 ```
+
+> @code:qBXwQBQ
 
 #### 回调函数的参数
 
@@ -526,7 +536,7 @@ export class ModuleA extends Module{
 
 
 | 序号 | 参数名 |         描述          |
-| :--: | :----: | :-------------------: |
+|:----:|:------:|:---------------------:|
 |  1   | model  |    dom对应的model     |
 |  2   |  dom   | 事件对象对应的虚拟dom |
 |  3   | nEvent |     Nodom事件对象     |
@@ -542,11 +552,11 @@ export class ModuleA extends Module{
 
 #### 事件修饰符
 
-在传入事件处理方法的时，可以以`:`分隔的形式指定事件修饰符。
+在传入事件处理方法的时，允许以`:`分隔的形式传入指定事件修饰符。
 事件处理支持三种修饰符：
 
 |  名字  |       作用       |
-| :----: | :--------------: |
+|:------:|:----------------:|
 |  once  |  事件只执行一次  |
 | nopopo |     禁止冒泡     |
 |  delg  | 事件代理到父对象 |
@@ -618,6 +628,8 @@ data(){
 	}
 }
 ```
+
+> @code:QWMPJyp
 
 #### Repeat 指令
 
@@ -1133,69 +1145,64 @@ getFood(arr) {
 + `x-repeat`指令和`<for>`标签中均只能使用对象数组作为数据。
 + 不要将`<for>`标签和`x-repeat`指令一起使用。
 
+### 虚拟DOM
 
-### 虚拟Dom		
+虚拟dom相较于真实dom很大的提高了开发效率，优化了用户的体验，同时提升了页面渲染的性能。
 
-Nodom通过js对象的方式实现对真实Dom的映射，通过虚拟Dom树的比对更新，达到最小操作真实Dom的目的。
-
-#### tagName属性
+#### Nodom中的虚拟dom的结构如下：
 
 ```typescript
+{
 /**
- * 元素名，如div
+ * 元素名，例如<div></div>标签，tagName为div；<span></span>的tagName为span
  */
 public tagName: string;
-```
-
-#### key属性
-
-Nodom中虚拟dom的key是唯一的标识，对节点的操作时提供并保证正确的位置，也可以通过key来获取虚拟dom中的值
-
-```typescript
+    
 /**
- * key，整颗虚拟dom树唯一
+ * Nodom中虚拟DOM的key是唯一的标识，对节点进行操作时提供正确的位置，获取对应的真实dom
  */
-public key: string;
-```
+public key: string
 
-#### model属性
-
-```typescript
 /**
- * 绑定模型
+ * 绑定事件模型，在方法中可以传入model参数来获得模型中的值
  */
 public model: Model;
-```
-
-```typescript
-public static renderDom(module:Module,src:VirtualDom,model:Model,parent?:VirtualDom,key?:string):VirtualDom{
-    //节点自带model优先级高
-    model = src.model?src.model:model;
-    let dst:VirtualDom = new VirtualDom(src.tagName,key?src.key+'_'+key:src.key);
-```
-
-#### AddEvent()方法			
-
-添加事件时，可以使用Nodom虚拟dom中的addEvent方法，如果这个事件已经添加，将不再进行添加操作
-
-```typescript
-public addEvent(event: NEvent) {
-    if(!this.events){
-        this.events = new Map();
-    }
-    if(!this.events.has(event.name)){
-        this.events.set(event.name, [event.id]);
-    }else{
-        let arr = this.events.get(event.name);
-        //已添加的事件，不再添加
-        if(arr.indexOf(event.id) === -1){
-            arr.push(event.id);
-        }
-    }
+    
+/**
+ * 移除多个指令
+ * @param directives 	待删除的指令类型数组或指令类型
+ */
+public removeDirectives(directives: string[]) {
+   	
 }
 ```
 
-虚拟dom经过diff找出最小差异，批量进行patch，无需手动操作dom元素，极大的提高了页面性能。同时虚拟dom是JS的对象，有利于进行跨平台操作。
+#### 属性
+
+| **属性**   | **类型**              | **定义**                                                     |
+| :--------- | --------------------- | :----------------------------------------------------------- |
+| tagName    | string                | 标签名如<div></div>的他给Name为'div'                         |
+| key        | string                | 是唯一的标识符，也可以通过key来获取虚拟dom的值               |
+| model      | Model                 | 绑定Model                                                    |
+| directives | Directive[]           | 指令集合，是一个数组用来存放各个指令                         |
+| events     | Map<string, number[]> | 事件的集合，同时一个事件可以绑定多个事件方法对象             |
+| staticNum  | number                | 静态标识数，初始为0，大于0时每次做比较都减一直到等于0，当小于0时不进行处理 |
+| children   | Array<VirtualDom>     | 子节点数组，在进行对子节点的操作，如add()，会将子节点加到子节点数组中 |
+| ......     |                       |                                                              |
+
+#### 虚拟dom的加速器“Diff”
+
+在虚拟dom的操作中，diff算法起到了关键的作用，而Nodom通过DiffTool中的比较节点方法（**compare**）来得出需要修改的最小单位，再更新视图，减少了dom操作，达到提高性能的目的。
+
+#### compare
+
+在原始的diff算法中需要循环递归遍历节点依次进行比较，虽然比起没有diff算法之前有所优化，依旧效率比较低，**compare**方法对此做了一些改变。
+
+在**compare**方法中有三个参数分别是**src**（待比较节点）、**dst**（被比较节点）、**changeArr**（增删改的节点数组）三个参数。**compare**方法在节点开始比较前根据节点类型的不同有不同的策略。相应方法解决相应类型问题,在子节点的对比中也有子节点对比策略。在进行新旧节点的**compare**操作后，若节点会提前移动，则跳过这个节点从而减少移动操作，然后**sameKey**方法会确定一遍**src**和**dst**是否有相同key来确定是否还能减少不必要的移动次数。当有新增节点或删除节点时则对**children**数组进行相应操作，最后进行真实dom的渲染结束。
+
+#### 总结
+
+虚拟dom通过找出最小差异，达到最小次数操作dom目的。同时虚拟DOM是JS的对象，有利于进行跨平台操作。
 
 ## 深入
 
@@ -1515,7 +1522,7 @@ changeTitle(model){
 > Model在管理数据的时候会新增部分以`$`开头的数据项和方法，所以在定义方法和数据时，尽量避免使用`$`开头的数据项和方法名。
 #### Model与模块渲染
 
-每个`Model`存有一个模块列表，当`Model`内部的数据变化时，会引起该`Model`的模块列表中所有模块的渲染。默认`Model`的模块列表中只有`Model`所在的模块，如果需要`Model`触发多个模块的渲染，则需要将对应模块添加到`Model`对应的模块列表中(绑定方式查看API ModelManager.bindToModule)。
+每个`Model`存有一个模块列表，当`Model`内部的数据变化时，会引起该`Model`的模块列表中所有模块的渲染。一个`Model`的模块列表中默认只有初始化该`Model`的模块，如果需要该`Model`触发多个模块的渲染，则要将`需要触发渲染的模块`添加到该`Model`对应的模块列表中(`Model`与模块的绑定请查看API ModelManager.bindToModule)。
 
 #### $set()
 
@@ -1691,11 +1698,11 @@ class Main extends Module{
 }
 ```
 
-### Css支持
+### CSS支持
 
-​	**Nodom对Css提供额外的支持。**
+​	**Nodom对CSS提供额外的支持。**
 
-* 在模板代码中的 `<style></style>` 标签中直接写入Css样式，示例代码如下：
+* 在模板代码中的 `<style></style>` 标签中直接写入CSS样式，示例代码如下：
 
 ```js
 class Module1 extends Module {
@@ -1713,7 +1720,7 @@ class Module1 extends Module {
 }
 ```
 
-* 在模板代码中的 `<style></style>` 标签中的通过表达式调用函数返回Css样式代码串，示例代码如下：
+* 在模板代码中的 `<style></style>` 标签中通过表达式调用函数返回CSS样式代码串，示例代码如下：
 
 ```js
 class Module1 extends Module {
@@ -1733,7 +1740,7 @@ class Module1 extends Module {
 }
 ```
 
-* 在模块模板中的 `<style></style>` 标签中通过@import url('css url路径')引入Css样式文件，示例代码如下：
+* 在模板代码中的 `<style></style>` 标签中通过@import url('CSS url路径')引入CSS样式文件，示例代码如下：
 
 ```js
 class Module1 extends Module {
@@ -1750,7 +1757,7 @@ class Module1 extends Module {
 }
 ```
 
-* 在模块模板代码中需要样式的节点中直接写Css样式，示例代码如下：
+* 对模板代码中需要样式的节点直接写行内样式，示例代码如下：
 
 ```js
 class Module1 extends Module {
@@ -1766,7 +1773,7 @@ class Module1 extends Module {
 
 **scope属性** 
 
-​	给节点添加该属性后，Nodom会自动在Css选择器前加前置名。使Css样式的作用域限定在当前模块内，不会污染其它模块。
+​	给节点添加该属性后，Nodom会自动在CSS选择器前加前置名。使CSS样式的作用域限定在当前模块内，不会污染其它模块。
 
 ​	示例代码如下：
 
@@ -1810,11 +1817,29 @@ GlobalCache.get("China.captial")
 GlobalCache.remove("China.captial")
 ```
 
-另外，还提供将指令实例，指令参数，表达式实例，事件实例，事件参数，渲染树虚拟dom，html节点，dom参数进行操作。具体使用参考API文档。
+另外，还提供对以下对象在内存中进行存储、获取和移除等操作。
 
-对渲染树虚拟dom的操作如下所示。
++ 指令实例
 
-将渲染树虚拟dom存储在内存中：
++ 指令参数
+
++ 表达式实例
+
++ 事件实例
+
++ 事件参数
+
++ 虚拟dom
+
++ html节点
+
++ dom参数
+
+具体使用参考API文档。
+
+对虚拟dom的操作如下所示：
+
+将虚拟dom存储在内存中，例子如下：
 
 ```javascript
 // 引入模块
@@ -1826,13 +1851,13 @@ let om = new ObjectManager(module)
 om.saveElement(dom)
 ```
 
-根据提供的键名获取内存中对应的渲染树虚拟dom：
+根据提供的键名获取内存中对应的虚拟dom，例子如下：
 
 ```javascript
 om.getElement(key)
 ```
 
-根据提供的键名将对应的渲染树虚拟dom从内存中移除：
+根据提供的键名将对应的虚拟dom从内存中移除，例子如下：
 
 ```javascript
 om.removeElement(key)
@@ -1857,27 +1882,27 @@ createDirective(
 
 `createDirective`接收的参数列表如下：
 
-| 序号 |  参数名  |   类型   |                             描述                             |
-| :--: | :------: | :------: | :----------------------------------------------------------: |
-|  1   |   name   |  string  |             指令的名字，使用时需要在前面加上`x-`             |
-|  2   | handler  | Function | 处理指令逻辑的方法，接收三个参数，参数列表见`handler`参数列表 |
+| 序号 |  参数名  |   类型   |                                描述                                |
+|:----:|:--------:|:--------:|:------------------------------------------------------------------:|
+|  1   |   name   |  string  |                指令的名字，使用时需要在前面加上`x-`                |
+|  2   | handler  | Function |   处理指令逻辑的方法，接收三个参数，参数列表见`handler`参数列表    |
 |  3   | priority |  number  | 指令优先级，默认为10，可以不传，1-10为保留字段，数字越大优先级越低 |
 
 `handler`函数接收的参数列表如下:
 
 | 序号 | 参数名 |    类型    |             描述              |
-| :--: | :----: | :--------: | :---------------------------: |
+|:----:|:------:|:----------:|:-----------------------------:|
 |  1   | module |   Module   |        当前模块的实例         |
 |  2   |  dom   | VirtualDom |       本次渲染的虚拟dom       |
 |  3   |  src   | VirtualDom | 该节点在originTree中的虚拟dom |
 
 #### 自定义元素
 
-自定义元素需要继承`DirectiveElement`类，且需要在`DirectiveElementManager`中注册。
+自定义元素需要继承`DefineElement`类，且需要在`DefineElementManager`中注册。
 
 ```javascript
 // 定义自定义元素
-class MYELEMENT extends DirectiveElement{
+class MYELEMENT extends DefineElement{
 	constructor(node,module){
         super(node,module);
         
@@ -1887,16 +1912,15 @@ class MYELEMENT extends DirectiveElement{
 	
 // 注册自定义元素
 // add 接收一个自定义类或者自定义类数组
-DirectiveElementManager.add(MYELEMENT);
+DefineElementManager.add(MYELEMENT);
 ```
 
 定义自定义元素的构造器接收的参数列表如下：
 
 | 序号 | 参数名 |           描述            |
-| :--: | :----: | :-----------------------: |
+|:----:|:------:|:-------------------------:|
 |  1   |  node  | 该自定义元素的虚拟Dom节点 |
 |  2   | module |       当前模块实例        |
-
 
 
 
@@ -2018,7 +2042,7 @@ class Module1 extends Module {
 提供的过渡效果见下表：
 
 |       name       |            效果             |
-| :--------------: | :-------------------------: |
+|:----------------:|:---------------------------:|
 |       fade       |          渐入渐出           |
 |   scale-fixtop   |        固定上面缩放         |
 |  scale-fixleft   |        固定左边缩放         |
@@ -2080,16 +2104,16 @@ class Module1 extends Module {
 
 传入`x-animation`指令的对象不止上述提到的这些，还有一些控制参数，下表是所有可以传入的属性所示：
 
-|      name      |           作用            |               可选值                |    默认值    | 必填 |
-| :------------: | :-----------------------: | :---------------------------------: | :----------: | :--: |
-|     tigger     |         触发动画          |             true/false              |     true     |  是  |
-|      name      | 过渡/动画名（不包含后缀） |                  -                  |      无      |  是  |
-|    isAppear    |  是否是进入离开过渡/动画  |             true/false              |     true     |  否  |
-|      type      |      是过渡还是动画       |      'aniamtion'/'transition'       | 'transition' |  否  |
-|    duration    |    过渡/动画的执行时间    |       同css的duration的可选值       |      ''      |  否  |
-|     delay      |    过渡/动画的延时时间    |        同css的delay的可选值         |     '0s'     |  否  |
-| timingFunction |    过渡/动画的时间函数    |    同css的timingFunction的可选值    |    'ease'    |  否  |
-|     hooks      | 过渡/动画执行前后钩子函数 | before/after函数或者enter/leave对象 |      无      |  否  |
+|      name      |                   作用                   |               可选值                |    默认值    | 必填 |
+|:--------------:|:----------------------------------------:|:-----------------------------------:|:------------:|:----:|
+|     tigger     |                 触发动画                 |             true/false              |     true     |  是  |
+|      name      | 过渡/动画名（不包含-enter-active等后缀） |                  -                  |      无      |  是  |
+|    isAppear    |         是否是进入离开过渡/动画          |             true/false              |     true     |  否  |
+|      type      |              是过渡还是动画              |      'aniamtion'/'transition'       | 'transition' |  否  |
+|    duration    |           过渡/动画的执行时间            |       同css的duration的可选值       |      ''      |  否  |
+|     delay      |           过渡/动画的延时时间            |        同css的delay的可选值         |     '0s'     |  否  |
+| timingFunction |           过渡/动画的时间函数            |    同css的timingFunction的可选值    |    'ease'    |  否  |
+|     hooks      |        过渡/动画执行前后钩子函数         | before/after函数或者enter/leave对象 |      无      |  否  |
 
 #### 分别配置`enter`/`leave`
 
