@@ -15,24 +15,26 @@
 			template(){
 				return `
                     <div>
-					    vip is:{{d1.vip}}
-						<ul>
-							<li x-repeat={{d1.foods}}>
-								{{name}}
-							</li>
-						</ul>
+					    mapValue is:{{JSON.stringify(value),Math.round(v)}}
                     </div>
                 `;
             }
 
+			data(){
+				return{
+					value:[[1,2][2,3]],
+					v:1.23
+				}
+			}
+
 			onBeforeFirstRender(model){
-				request({
-					url:'../examples/data/data1.json',
-					type:'json'
-				}).then(r=>{
-					model.d1 = r;
-					console.log(r);
-				})
+				// request({
+				// 	url:'../examples/data/data1.json',
+				// 	type:'json'
+				// }).then(r=>{
+				// 	model.d1 = r;
+				// 	console.log(r);
+				// })
 			}
 		}
     	nodom(Module1,'div');

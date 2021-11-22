@@ -2,6 +2,7 @@ import { Module } from "./module";
 import { VirtualDom } from "./virtualdom";
 import { NEvent } from "./event";
 import { Util } from "./util";
+import { GlobalCache } from "./globalcache";
 /**
  * 事件管理器
  */
@@ -42,7 +43,7 @@ export class EventManager{
             for(let ii=0;ii<arr.length;ii++){
                 const ev:NEvent = module.objectManager.getEvent(arr[ii]);
                 //处理外部事件，如果有外部事件，则移除改事件
-                if(this.handleExtendEvent(module,dom,ev)){
+                if(this.handleExtendEvent(ev.module,dom,ev)){
                     arr.splice(ii--,1);
                     continue;
                 }
@@ -128,7 +129,7 @@ export class EventManager{
                 const eid = evts[ii];
                 const ev:NEvent = module.objectManager.getEvent(eid);
                 if(typeof ev.handler === 'string'){
-                    ev.handler = module.getMethod(ev.handler);
+                    ev.handler = ev.module.getMethod(ev.handler);
                 }
                 if(!ev.handler){
                     return;
@@ -153,7 +154,7 @@ export class EventManager{
                                 if(execMap.get(ev.id) === dom1.key){
                                     break;
                                 }
-                                ev.handler.apply(module,[dom1.model, dom1,ev, e]);
+                                ev.handler.apply(ev.module,[dom1.model, dom1,ev, e]);
                                 execMap.set(ev.id,dom1.key);
                                 if(ev.once){
                                     EventManager.unbind(module,dom1,ev);
@@ -163,7 +164,7 @@ export class EventManager{
                         }
                     }
                 }else{
-                    ev.handler.apply(module,[dom.model, dom,ev, e]);
+                    ev.handler.apply(ev.module,[dom.model, dom,ev, e]);
                     //事件只执行一次，从事件数组删除
                     if (ev.once) {
                         EventManager.unbind(module,dom,ev);
@@ -223,7 +224,7 @@ export class EventManager{
             return false;
         }
         for(let key of Object.keys(evts)){
-            let ev = new NEvent(key,evts[key]);
+            let ev = new NEvent(module,key,evts[key]);
             ev.capture = event.capture;
             ev.nopopo = event.nopopo;
             ev.delg = event.delg;

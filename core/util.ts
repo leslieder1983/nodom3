@@ -68,6 +68,7 @@ export class Util {
         this.keyWordMap.set('with',true);
         this.keyWordMap.set('Array',true);
         this.keyWordMap.set('Date',true);
+        this.keyWordMap.set('JSON',true);
         this.keyWordMap.set('Set',true);
         this.keyWordMap.set('Map',true);
         this.keyWordMap.set('eval',true);
