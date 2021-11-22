@@ -595,7 +595,7 @@ export class ModuleA extends Module{
 #### Model 指令
 
 model指令用于给view绑定数据，数据采用层级关系，如:需要使用数据项data1.data2.data3，可以直接使用data1.data2.data3，也可以分2层设置分别设置x-model='data1'，x-model='data2'，然后使用数据项data3。下面的例子中描述了x-model的几种用法。
-model指令改变了数据层级，则如何用外层的数据呢，NoDom支持从根向下查找数据功能，当需要从根数据向下找数据项时，需要使用"$$"
+model指令改变了数据层级，则如何用外层的数据呢，Nodom支持从根向下查找数据功能，当需要从根数据向下找数据项时，需要使用"$$"
 
 模板代码
 
@@ -822,7 +822,7 @@ module指令用于表示该元素为一个模块容器，module指令数据对�
 ```
 <!-- 这里的Title为一个完整的Nodom模块-->
 import Title from './src/dist';
-class ModuleA extendsModule{ 
+class ModuleA extends Module{
 	template(){ 
         return `
         <!-- 将Title模块渲染至当前div-->
