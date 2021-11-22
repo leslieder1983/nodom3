@@ -490,7 +490,7 @@ export class Module {
             return;
         }
         
-        //清理dom相关
+        //清理dom相关，清理后会导致子模块参数丢失，这里不清理
         // this.objectManager.clearSaveDoms();
         //清理指令
         this.objectManager.clearDirectives();
