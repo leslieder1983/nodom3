@@ -271,25 +271,34 @@ export class ModelManager {
         
         let mids = obj.modules;
         let modules = [];
-        for(let mid of mids){
-            let m = ModuleFactory.get(mid);
-            modules.push(m);
-            //增加修改标志
-            m.changedModelMap.set(model.$key,true);
+        if(mids){
+            for(let mid of mids){
+                let m = ModuleFactory.get(mid);
+                modules.push(m);
+                //增加修改标志
+                m.changedModelMap.set(model.$key,true);
+            }
         }
+        //watcher 处理
         let watcher = this.getWatcher(model,key);
+        console.log(watcher);
         if (watcher) {
+            
             for (let foo of watcher) {
-                for(let m of modules){
-                    //方法名
-                    if (typeof foo === 'string') {
-                        foo = m.getMethod(foo);
-                        if (foo) {
+                if(modules){
+                    for(let m of modules){
+                        //方法名
+                        if (typeof foo === 'string') {
+                            foo = m.getMethod(foo);
+                            if (foo) {
+                                foo.call(m,model, oldValue, newValue);
+                            }
+                        } else {
                             foo.call(m,model, oldValue, newValue);
                         }
-                    } else {
-                        foo.call(m,model, oldValue, newValue);
                     }
+                }else{
+                    foo.call(model,key,newValue,oldValue);
                 }
             }
         }

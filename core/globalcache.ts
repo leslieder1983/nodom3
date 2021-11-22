@@ -3,6 +3,7 @@ import { Directive } from "./directive";
 import { NEvent } from "./event";
 import { VirtualDom } from "./virtualdom";
 import { Expression } from "./expression";
+import { Module } from "./module";
 
 /**
  * 全局缓存
@@ -26,6 +27,16 @@ export class GlobalCache{
      */
     public static get(key){
         return this.cache.get(key);
+    }
+
+    /**
+     * 订阅
+     * @param module    订阅的模块
+     * @param key       字段key
+     * @param handler   回调函数 参数为key对应value
+     */
+    public static subscribe(module:Module,key:string,handler:Function){
+        this.cache.subscribe(module,key,handler);
     }
 
     /**
