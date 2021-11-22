@@ -281,9 +281,7 @@ export class ModelManager {
         }
         //watcher 处理
         let watcher = this.getWatcher(model,key);
-        console.log(watcher);
         if (watcher) {
-            
             for (let foo of watcher) {
                 if(modules){
                     for(let m of modules){

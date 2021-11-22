@@ -202,6 +202,8 @@ export default (function () {
     createDirective('if',
         function(module:Module,dom:VirtualDom,src:VirtualDom){
             dom.parent.setParam(module,'$if',this.value);
+            //子模块处理
+            Util.activeSubModules(module,src,this.value?0:1);
             return this.value;
         },
         5
@@ -214,8 +216,11 @@ export default (function () {
     createDirective(
         'else',
         function(module:Module,dom:VirtualDom,src:VirtualDom){
+            const v = dom.parent.getParam(module,'$if') === false;
+            //子模块处理
+            Util.activeSubModules(module,src,v?0:1);
             //如果前面的if/elseif值为true，则隐藏，否则显示
-            return dom.parent.getParam(module,'$if') === false;
+            return v;
         },
         5
     );
@@ -234,6 +239,8 @@ export default (function () {
                 }else{
                     dom.parent.setParam(module,'$if',true);
                 }
+                //子模块处理
+                Util.activeSubModules(module,src,this.value?0:1);
             }
             return true;
         },
@@ -259,6 +266,7 @@ export default (function () {
     createDirective(
         'show',
         function(module:Module,dom:VirtualDom,src:VirtualDom){
+            Util.activeSubModules(module,src,this.value?0:1);
             return this.value;
         },
         5

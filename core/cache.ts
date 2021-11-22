@@ -21,7 +21,6 @@ export class NCache{
      */
     public get(key:string){
         let p = this.cacheData;
-        console.log(key);
         if(key.indexOf('.') !== -1){
             let arr = key.split('.');
             if(arr.length>1){

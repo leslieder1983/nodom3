@@ -103,11 +103,12 @@
             return `
                 <div >
                     <button e-click='add'>add</button>
+                    <button e-click='hideOrShow'>hideOrShow</button>
                     <button e-click='change1'>change1</button>
                     <button e-click='setGlobalCache'>Save Global</button>
                     <div>name is:{{name}}</div>
                     <!--useDomModel表示用当前dom对应的model直接覆盖子模块的model-->
-                    <modulea style={{style}}>
+                    <modulea style={{style}} x-show={{show}}>
                         <for cond={{rows}}>
                             <ModuleB style='font-size:18px;' useDomModel/>
                         </for>
@@ -121,6 +122,7 @@
                 xxx:1,
                 name:'outer',
                 style:'width:800px',
+                show:true,
                 rows:[
                     {id:1,name:'nodom'},
                     {id:2,name:'noomi'},
@@ -139,6 +141,12 @@
         clickBtn(model,dom){
             console.log(this,model);
         }
+
+        hideOrShow(model){
+            model.show = !model.show;
+        }
+
+        
 
         change1(model){
             model.xxx = 2;

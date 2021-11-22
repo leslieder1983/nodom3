@@ -251,15 +251,18 @@ export class Module {
 
     /**
      * 激活模块(添加到渲染器)
+     * @param deep  是否深度active，如果为true，则子模块进行active
      */
-    public active() {
+    public active(deep?:boolean) {
         Renderer.add(this);
-        // for(let id of this.children){
-        //     let m = ModuleFactory.get(id);
-        //     if(m){
-        //         m.active();
-        //     }
-        // }
+        if(deep){
+            for(let id of this.children){
+                let m = ModuleFactory.get(id);
+                if(m){
+                    m.active(deep);
+                }
+            }    
+        }
     }
 
     /**
