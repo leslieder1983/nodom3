@@ -31,6 +31,7 @@ export default (function () {
             let m: Module;
             //存在moduleId，表示已经渲染过，不渲染
             let mid = dom.getParam(module,'moduleId');
+            // console.log(module,module.objectManager.get('$doms'));
             let handle:boolean = true;
             if (mid) {
                 m = ModuleFactory.get(mid);
@@ -54,7 +55,7 @@ export default (function () {
             }
             //保存到dom上，提升渲染性能
             dom.subModuleId = mid;
-            
+            // console.log('after',module,module.objectManager.get('$doms'));
             if(handle){ //需要处理
                 //设置props，如果改变了props，启动渲染
                 let o:any = {};

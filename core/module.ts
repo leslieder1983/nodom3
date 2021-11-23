@@ -206,6 +206,7 @@ export class Module {
         this.doModuleEvent('onRender');
         this.changedModelMap.clear();
         this.dontAddToRender = false;
+        
     }
 
     /**
@@ -221,6 +222,7 @@ export class Module {
         let el:any = Renderer.renderToHtml(this,this.renderTree,null,true);
         if(this.replaceContainer){ //替换
             Util.replaceNode(this.container,el);
+            this.originTree.key = el.vdom.key;
             this.getParent().saveNode(this.srcDom.key,el);
         }else{
             //清空子元素
@@ -275,6 +277,12 @@ export class Module {
         this.doModuleEvent('beforeUnActive');
         //设置状态
         this.state = 1;
+        
+        //从html 卸载
+        if(this.container){
+            Util.empty(this.container);
+        }
+
         //删除容器
         delete this.container;
         //删除渲染树
@@ -291,10 +299,6 @@ export class Module {
             if(m){
                 m.unactive();
             }
-        }
-        //从html 卸载
-        if(this.container){
-            Util.empty(this.container);
         }
     }
 
@@ -452,6 +456,7 @@ export class Module {
                 }
             }
         }
+        console.log(props,this);
         this.props = props;
         this.srcDom = dom;
         if(change){ //有改变，进行编译并激活
@@ -492,7 +497,6 @@ export class Module {
             this.objectManager.cache = new NCache();
             return;
         }
-        
         //清理dom相关，清理后会导致子模块参数丢失，这里不清理
         // this.objectManager.clearSaveDoms();
         //清理指令
