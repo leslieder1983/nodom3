@@ -72,7 +72,6 @@ export class Renderer {
         if(src.directives && src.directives.length>0 && src.directives[0].type.name === 'model'){
             src.directives[0].exec(module,dst,src);
         }
-
         if(src.tagName){
             if(!dst.notChange){
                 handleProps();
@@ -337,8 +336,8 @@ export class Renderer {
                     break;
                 case 3: //删除
                     //清除缓存
-                    module.objectManager.removeSavedNode(item[1].key);
-                    module.keyNodeMap.delete(item[1].key);
+                    // module.objectManager.removeSavedNode(item[1].key);
+                    // module.keyNodeMap.delete(item[1].key);
                     //从html dom树移除
                     pEl.removeChild(n1);
                     break;
