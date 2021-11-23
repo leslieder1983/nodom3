@@ -17,7 +17,6 @@ export class ModuleA extends Module{
                     ${props.temp}
                 </div>
             `
-            
         }else{
             return `
                 <div class='modulea'>
