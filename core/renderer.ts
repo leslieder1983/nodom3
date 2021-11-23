@@ -335,9 +335,6 @@ export class Renderer {
                     Renderer.renderToHtml(module,item[1],null,false);
                     break;
                 case 3: //删除
-                    //清除缓存
-                    // module.objectManager.removeSavedNode(item[1].key);
-                    // module.keyNodeMap.delete(item[1].key);
                     //从html dom树移除
                     pEl.removeChild(n1);
                     break;
