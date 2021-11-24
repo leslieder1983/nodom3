@@ -344,7 +344,7 @@ export default (function () {
                         }
 
                         //修改字段值,需要处理.运算符
-                        let temp = this.model;
+                        let temp = model;
                         let arr = field.split('.')
                         if (arr.length === 1) {
                             model[field] = v;
