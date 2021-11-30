@@ -1,11 +1,7 @@
 .DS_Store
 
 #other
-<<<<<<< HEAD
-# .gitignore
-=======
 #.gitignore
->>>>>>> d5f2bf58bb03ace0a10fb7f7d7a95bc08b6473da
 #tsconfig.json
 #.vscode/
 .tscache/

@@ -179,7 +179,7 @@ data(){
 方法参数由Nodom自动传入，依次为：`Model`,`事件触发的虚拟Dom`,`Nodom封装事件NEvent`,`原生事件对象Event`。  
 
 ```javascript
-change(model,Vdom,Nevent,event){
+change(Model,Vdom,Nevent,event){
    Mmodel.name='nodom3';
 }   
 ```
