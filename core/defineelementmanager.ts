@@ -10,15 +10,16 @@ export class DefineElementManager {
     private static elements: Map<string, DefineElement> = new Map();
     /**
      * 添加自定义元素类
-     * @param clazz  自定义元素类或类数组
+     * @param clazz     自定义元素类或类数组
+     * @param alias     别名   
      */
-    public static add(clazz:any) {
+    public static add(clazz:any,alias?:string) {
         if(Array.isArray(clazz)){
             for(let c of clazz){
-                this.elements.set(c.name, c);
+                this.elements.set(c.name.toUpperCase(), c);
             }
         }else{
-            this.elements.set(clazz.name, clazz);
+            this.elements.set((alias||clazz.name).toUpperCase(), clazz);
         }
     }
 

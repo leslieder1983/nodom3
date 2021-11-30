@@ -1,6 +1,7 @@
 import { Directive } from "../core/directive";
 import { NEvent } from "../core/event";
 import { Model } from "../core/model";
+import { ModelManager } from "../core/modelmanager";
 import { Module } from "../core/module";
 import { ModuleFactory } from "../core/modulefactory";
 import { createDirective } from "../core/nodom";
@@ -41,12 +42,18 @@ export default (function () {
                 }
                 mid = m.id;
                 //保留modelId
-                // src.subModuleId = mid;
                 dom.setParam(module, 'moduleId', mid);
+                module.addChild(m);
+                //共享当前dom的model给子模块
+                if (dom.hasProp('useDomModel')) {
+                    m.model = dom.model;
+                    //绑定model到子模块，共享update,watch方法
+                    ModelManager.bindToModule(m.model, m);
+                    dom.delProp('useDomModel');
+                }
             }
             //保存到dom上，提升渲染性能
             dom.subModuleId = mid;
-
             if (handle) { //需要处理
                 //设置props，如果改变了props，启动渲染
                 let o: any = {};
@@ -65,7 +72,7 @@ export default (function () {
                     }
                 }
                 //传递给模块
-                m.setProps(o);
+                m.setProps(o, dom);
             }
             return true;
         },
@@ -106,10 +113,16 @@ export default (function () {
             //避免在渲染时对src设置了model，此处需要删除
             delete src.model;
             for (let i = 0; i < rows.length; i++) {
-                rows[i].$index = i;
+                if (idxName) {
+                    rows[i][idxName] = i;
+                }
                 //渲染一次-1，所以需要+1
                 src.staticNum++;
-                Renderer.renderDom(module, src, rows[i], parent, rows[i].$key);
+                let d = Renderer.renderDom(module, src, rows[i], parent, rows[i].$key);
+                //删除$index属性
+                if (idxName) {
+                    d.delProp('$index');
+                }
             }
             //启用该指令
             this.disabled = false;
@@ -187,6 +200,8 @@ export default (function () {
     createDirective('if',
         function (module: Module, dom: VirtualDom, src: VirtualDom) {
             dom.parent.setParam(module, '$if', this.value);
+            //子模块处理
+            Util.activeSubModules(module, src, this.value ? 0 : 1);
             return this.value;
         },
         5
@@ -199,8 +214,11 @@ export default (function () {
     createDirective(
         'else',
         function (module: Module, dom: VirtualDom, src: VirtualDom) {
+            const v = dom.parent.getParam(module, '$if') === false;
+            //子模块处理
+            Util.activeSubModules(module, src, v ? 0 : 1);
             //如果前面的if/elseif值为true，则隐藏，否则显示
-            return dom.parent.getParam(module, '$if') === false;
+            return v;
         },
         5
     );
@@ -220,6 +238,8 @@ export default (function () {
                 } else {
                     dom.parent.setParam(module, '$if', true);
                 }
+                //子模块处理
+                Util.activeSubModules(module, src, this.value ? 0 : 1);
             }
             return true;
         },
@@ -245,6 +265,7 @@ export default (function () {
     createDirective(
         'show',
         function (module: Module, dom: VirtualDom, src: VirtualDom) {
+            Util.activeSubModules(module, src, this.value ? 0 : 1);
             return this.value;
         },
         5
@@ -354,7 +375,7 @@ export default (function () {
 
             //初始化
             if (!this.getParam(module, dom, 'inited')) {
-                dom.addEvent(new NEvent('change',
+                dom.addEvent(new NEvent(module, 'change',
                     function (model, dom) {
                         let el = <any>module.getNode(dom.key);
                         if (!el) {
@@ -377,7 +398,7 @@ export default (function () {
                         }
 
                         //修改字段值,需要处理.运算符
-                        let temp = this;
+                        let temp = model;
                         let arr = field.split('.')
                         if (arr.length === 1) {
                             model[field] = v;
@@ -429,7 +450,7 @@ export default (function () {
             //添加click事件,避免重复创建事件对象，创建后缓存
             let event: NEvent = module.objectManager.get('$routeClickEvent');
             if (!event) {
-                event = new NEvent('click',
+                event = new NEvent(module, 'click',
                     (model, dom, e) => {
                         let path = dom.getProp('path');
                         if (!path) {
@@ -465,7 +486,6 @@ export default (function () {
      */
     createDirective('slot',
         function (module: Module, dom: VirtualDom, src: VirtualDom) {
-            // const parent = dom.parent;
             this.value = this.value || 'default';
             let mid = dom.parent.subModuleId;
             //父dom有module指令，表示为替代节点，替换子模块中的对应的slot节点；否则为子模块定义slot节点
@@ -473,21 +493,27 @@ export default (function () {
                 let m = ModuleFactory.get(mid);
                 if (m) {
                     //缓存当前替换节点
-                    m.objectManager.set('$slots.' + this.value, { rendered: dom, origin: src.clone() });
+                    m.objectManager.set('$slots.' + this.value, { dom: src.clone(), model: dom.model });
                 }
-                //设置不添加到dom树
-                dom.dontAddToTree = true;
+                //此次不继续渲染，子节点在实际模块中渲染
+                return false;
             } else { //源slot节点
                 //获取替换节点进行替换
                 let cfg = module.objectManager.get('$slots.' + this.value);
-                if(cfg){
+                if (cfg) {
                     let rdom = cfg.dom;
                     //避免key重复，更新key
-                    for(let d of rdom.children){
-                        Util.setNodeKey(d,dom.key,true);
+                    for (let d of rdom.children) {
+                        Util.setNodeKey(d, dom.key, true);
                     }
                     //更改渲染子节点
                     src.children = rdom.children;
+                    //非内部渲染,更改model
+                    if (!src.hasProp('innerRender')) {
+                        for (let c of src.children) {
+                            c.model = cfg.model;
+                        }
+                    }
                     module.objectManager.remove('$slots.' + this.value);
                 }
             }
@@ -902,7 +928,6 @@ export default (function () {
                 return [width, height];
             }
         },
-
         9
     );
 }());

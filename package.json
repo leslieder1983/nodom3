@@ -1,5 +1,5 @@
 {
-  "name": "nodom3.3",
+  "name": "nodom3",
   "version": "0.0.1",
   "private": true,
   "main": "index.ts",
@@ -24,12 +24,8 @@
     "typescript": "^4.2.4"
   },
   "repository": {
-    "type": "git",
-    "url": "git+https://github.com/fieldyang/nodom3.2.git"
+    "type": "git"
   },
-  "bugs": {
-    "url": "https://github.com/fieldyang/nodom3.2/issues"
-  },
-  "homepage": "https://github.com/fieldyang/nodom3.2#readme",
-  "description": ""
+  "description": "nodom是一款基于数据驱动的web mvvm框架。 用于搭建单页应用(SPA)，目前发展到3.3版本。 插件也在同步更新中。",
+  "dependencies": {}
 }

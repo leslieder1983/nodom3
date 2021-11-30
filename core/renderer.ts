@@ -72,14 +72,9 @@ export class Renderer {
         if(src.directives && src.directives.length>0 && src.directives[0].type.name === 'model'){
             src.directives[0].exec(module,dst,src);
         }
-
         if(src.tagName){
             if(!dst.notChange){
                 handleProps();
-                let r = handleDirectives();
-                if(!r){
-                    return;
-                }
                 //处理style，如果为style，则不处理assets和events
                 if(!CssManager.handleStyleDom(module,src,Renderer.currentModuleRoot,src.getProp('scope') === 'this')){
                     //assets
@@ -96,6 +91,9 @@ export class Renderer {
                             dst.setEvent(p[0],p[1].slice(0));
                         }
                     }
+                }
+                if(!handleDirectives()){
+                    return;
                 }
             }
             // 子节点
@@ -238,20 +236,23 @@ export class Renderer {
                 }
             }
             
-            //如果存储node，则不需要key
-            // el.setAttribute('key', dom.key);
             //把el引用与key关系存放到cache中
             module.saveNode(dom.key,el);
-            //asset
-            if(dom.assets && dom.assets.size>0){
-                for (let p in dom.assets) {
-                    el[p] = p[1];
+
+            //非子模块才处理
+            if(!dom.subModuleId){
+                //asset
+                if(dom.assets && dom.assets.size>0){
+                    for (let p in dom.assets) {
+                        el[p] = p[1];
+                    }
+                }
+                //处理event
+                if(dom.events){
+                    EventManager.bind(module,dom);
                 }
             }
-            //处理event
-            if(dom.events){
-                EventManager.bind(module,dom);
-            }
+            
             return el;
         }
 
@@ -334,9 +335,6 @@ export class Renderer {
                     Renderer.renderToHtml(module,item[1],null,false);
                     break;
                 case 3: //删除
-                    //清除缓存
-                    module.objectManager.removeSavedNode(item[1].key);
-                    module.keyNodeMap.delete(item[1].key);
                     //从html dom树移除
                     pEl.removeChild(n1);
                     break;

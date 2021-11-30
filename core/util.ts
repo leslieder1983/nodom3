@@ -1,5 +1,7 @@
 import { NError } from "./error";
 import { NEvent } from "./event";
+import { Module } from "./module";
+import { ModuleFactory } from "./modulefactory";
 import { NodomMessage } from "./nodom";
 import { VirtualDom } from "./virtualdom";
 /**
@@ -70,6 +72,7 @@ export class Util {
         this.keyWordMap.set('with',true);
         this.keyWordMap.set('Array',true);
         this.keyWordMap.set('Date',true);
+        this.keyWordMap.set('JSON',true);
         this.keyWordMap.set('Set',true);
         this.keyWordMap.set('Map',true);
         this.keyWordMap.set('eval',true);
@@ -532,6 +535,34 @@ export class Util {
         if(deep && node.children){
             for(let c of node.children) {
                 Util.setNodeKey(c,id,deep);
+            }
+        }
+    }
+
+
+    /**
+     * 激活dom下的子模块
+     * @param module    模块
+     * @param dom       dom节点
+     * @param flag      0 active  1 unactive 
+     */
+    public static activeSubModules(module:Module,dom:VirtualDom,flag?:number){
+        if(!dom.children){
+            return;
+        }
+        for(let c of dom.children){
+            if(c.hasDirective('module')){  //如果dom带有module指令，则进行模块激活
+                let mid = c.getParam(module,'moduleId');
+                if(mid){  //初始化过
+                    let m = ModuleFactory.get(mid);
+                    if(flag){
+                        m.unactive();
+                    }else{
+                        m.active(true);
+                    }
+                }
+            }else{
+                Util.activeSubModules(module,c,flag);
             }
         }
     }

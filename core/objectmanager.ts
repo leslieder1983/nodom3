@@ -178,7 +178,7 @@ export  class ObjectManager {
      * @returns         事件对象
      */
     public getEvent(id:number):NEvent{
-        let ev = this.cache.get('$events.' + id + '.$instance')
+        let ev = this.cache.get('$events.' + id + '.$instance');
         if(!ev){
             ev = GlobalCache.get('$events.' + id);
             GlobalCache.removeEvent(id);
@@ -186,7 +186,6 @@ export  class ObjectManager {
                 this.cache.set('$events.' + id,ev);
                 return ev.$instance;
             }
-            
         }
         return ev;
     }

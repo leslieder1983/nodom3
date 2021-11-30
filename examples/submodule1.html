@@ -10,13 +10,13 @@
     <div></div>
 </body>
 <script type='module'>
-    import {nodom,Module} from '../dist/nodom.js'
+    import {nodom,Module,GlobalCache} from '../dist/nodom.js'
     
     class ModuleA extends Module{
         template(props){
             return `
-                <div class='modulea'>
-                    <slot/>
+                <div class='modulea' ${props.style?'style="' + props.style + '"':''}>
+                    <slot innerRender/>
                 </div>
             `
         }
@@ -33,56 +33,126 @@
     class ModuleB extends Module{
         template(props){
             return `
-                <div>
+                <div >
                     <div>id is:{{id}},name is:<span style='color:red;font-weight:bold;padding-left:10px'>{{name}}</span></div>
+                    <div>subscribe data is:{{subname}}</div>
                 </div>
             `
         }
         data(){
             return{
-                rows:[{name:'nodom'},{name:'noomi'},{name:'relaen'}]
+                rows:[{name:'nodom1'},{name:'noomi1'},{name:'relaen1'}]
             }
+        }
+
+        onBeforeFirstRender(){
+            GlobalCache.subscribe(this,'userName',function(value){
+                console.log(this,value);
+                this.model['subname'] = value;
+            });
+        }
+    }
+
+    class UIButton extends Module{
+        /**
+         * 模版函数
+         * @param props     父模块传递的属性值 
+         * @returns         模版字符串
+         */
+        template(props){
+            let arr = ['ui-btn'];
+            //size
+            arr.push('ui-btn-' + (props.size||'normal'));
+            //icon
+            if(props.icon){
+                arr.push('ui-icon-' + props.icon);
+                arr.push('ui-btn-' + (props.iconPos||'left'));
+            }
+            
+            //无背景
+            if(props.nobg === 'true'){
+                arr.push('ui-btn-nobg');
+            }else{
+                //theme
+                if(props.theme){
+                    arr.push('ui-btn-' + props.theme);
+                }
+            }
+
+            if(!props.title){
+                arr.push('ui-btn-notext');
+                props.title = '';
+            }
+
+            //从模版带来的class
+            if(props.class){
+                arr.push(props.class);
+            }
+            return  `
+                <button class='${arr.join(" ")}' ${props.style?'style="' + props.style + '"':''}>
+                    ${props.title}
+                </button>
+            `;
         }
     }
 
     class Module1 extends Module{
-        modules=[ModuleA,ModuleB];
+        modules=[ModuleA,ModuleB,UIButton];
 
         template(props){
             return `
-                <div>
+                <div >
                     <button e-click='add'>add</button>
+                    <button e-click='hideOrShow'>hideOrShow</button>
                     <button e-click='change1'>change1</button>
-                    <div>name is:{{o2.name}}</div>
+                    <button e-click='setGlobalCache'>Save Global</button>
+                    <div>name is:{{name}}</div>
                     <!--useDomModel表示用当前dom对应的model直接覆盖子模块的model-->
-                    <modulea>
+                    <modulea style={{style}} x-show={{show}}>
                         <for cond={{rows}}>
                             <ModuleB style='font-size:18px;' useDomModel/>
                         </for>
+                        <uibutton e-click='clickBtn' title='clickBtn' />
                     </modulea>
                 </div>
             `;
-			}
-			data() {
-				return {
-					xxx: 1,
-					rows: [
-						{ id: 1, name: "nodom" },
-						{ id: 2, name: "noomi" },
-						{ id: 3, name: "relaen" },
-					],
-				};
-			}
-			add(model) {
-				model.rows.push({ id: 4, name: "weblab" });
-				console.log(model.rows);
-			}
+        }
+        data(){
+            return {
+                xxx:1,
+                name:'outer',
+                style:'width:800px',
+                show:true,
+                rows:[
+                    {id:1,name:'nodom'},
+                    {id:2,name:'noomi'},
+                    {id:3,name:'relaen'}
+                ]
+            }
+        }
+        add(model){
+            model.rows.push({id:4,name:'weblab'});
+            console.log(model.rows);
+        }
 
-			change1(model) {
-				// model.xxx = 2;
-				console.log(this);
-			}
-		}
-		nodom(Module1, "div");
-	</script>
+        setGlobalCache(){
+            GlobalCache.set('userName','yang')
+        }
+        clickBtn(model,dom){
+            console.log(this,model);
+        }
+
+        hideOrShow(model){
+            model.show = !model.show;
+        }
+
+        
+
+        change1(model){
+            model.xxx = 2;
+            model.style='background:#ccc'
+        }
+    }
+    nodom(Module1,'div');
+</script>
 </html>

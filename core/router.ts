@@ -308,8 +308,8 @@ export class Router {
      */
     private static dependHandle(module: Module, route: Route, pm: Module) {
         const me = this;
-        //激活
-        module.active();
+        //深度激活
+        module.active(true);
         //设置参数
         let o = {
             path: route.path

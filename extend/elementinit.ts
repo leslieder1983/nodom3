@@ -39,7 +39,6 @@ class FOR extends DefineElement{
         if(typeof cond === 'number'){ //表达式
             cond = GlobalCache.getExpression(cond);
         }
-        
         node.addDirective(new Directive('repeat',cond));
     }
 }

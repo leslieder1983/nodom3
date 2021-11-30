@@ -105,6 +105,11 @@ export class Module {
     public replaceContainer:boolean;
 
     /**
+     * 来源dom，子模块对应dom
+     */
+    public srcDom:VirtualDom;
+
+    /**
      * 生成dom时的keyid，每次编译置0
      */
     domKeyId:number;
@@ -201,6 +206,7 @@ export class Module {
         this.doModuleEvent('onRender');
         this.changedModelMap.clear();
         this.dontAddToRender = false;
+        
     }
 
     /**
@@ -215,21 +221,9 @@ export class Module {
         //渲染为html element
         let el:any = Renderer.renderToHtml(this,this.renderTree,null,true);
         if(this.replaceContainer){ //替换
-            ['style','class'].forEach(item=>{
-                let c = this.container.getAttribute(item);
-                if(!c){
-                    return;
-                }
-                c = c.trim();
-                let c1 = el.getAttribute(item) || '';
-                if(item==='style'){
-                    c += (c.endsWith(';')?'':';') + c1;
-                }else{
-                    c += ' ' + c1;
-                }
-                el.setAttribute(item,c);
-            });
             Util.replaceNode(this.container,el);
+            this.originTree.key = el.vdom.key;
+            this.getParent().saveNode(this.srcDom.key,el);
         }else{
             //清空子元素
             Util.empty(this.container);
@@ -259,14 +253,17 @@ export class Module {
 
     /**
      * 激活模块(添加到渲染器)
+     * @param deep  是否深度active，如果为true，则子模块进行active
      */
-    public active() {
+    public active(deep?:boolean) {
         Renderer.add(this);
-        for(let id of this.children){
-            let m = ModuleFactory.get(id);
-            if(m){
-                m.active();
-            }
+        if(deep){
+            for(let id of this.children){
+                let m = ModuleFactory.get(id);
+                if(m){
+                    m.active(deep);
+                }
+            }    
         }
     }
 
@@ -280,6 +277,12 @@ export class Module {
         this.doModuleEvent('beforeUnActive');
         //设置状态
         this.state = 1;
+        
+        //从html 卸载
+        if(this.container){
+            Util.empty(this.container);
+        }
+
         //删除容器
         delete this.container;
         //删除渲染树
@@ -296,10 +299,6 @@ export class Module {
             if(m){
                 m.unactive();
             }
-        }
-        //从html 卸载
-        if(this.container){
-            Util.empty(this.container);
         }
     }
 
@@ -415,11 +414,13 @@ export class Module {
     /**
      * 设置props
      * @param props     属性值
+     * @param dom       子模块对应节点
      */
-    public setProps(props:any){
+    public setProps(props:any,dom:VirtualDom){
         let change:boolean = false;
         //保留数据
         let dataObj = props.$data;
+        
         //属性对比不对data进行对比，删除数据属性
         delete props.$data;
         if(!this.props){
@@ -455,8 +456,8 @@ export class Module {
                 }
             }
         }
-        
         this.props = props;
+        this.srcDom = dom;
         if(change){ //有改变，进行编译并激活
             this.compile();
             this.active();
@@ -473,6 +474,17 @@ export class Module {
         const str = this.template(this.props);
         if(str){
             this.originTree = new Compiler(this).compile(str);
+            //事件传递
+            if(this.srcDom && this.srcDom.events){
+                if(!this.originTree.events){
+                    this.originTree.events = new Map();
+                }
+                for(let p of this.srcDom.events){
+                    if(!this.originTree.events.has(p[0])){  //子模块已存在的事件不处理
+                        this.originTree.events.set(p[0],p[1]);
+                    }
+                }
+            }
         }
     }
     /**
@@ -484,9 +496,8 @@ export class Module {
             this.objectManager.cache = new NCache();
             return;
         }
-        
-        //清理dom相关
-        this.objectManager.clearSaveDoms();
+        //清理dom相关，清理后会导致子模块参数丢失，这里不清理
+        // this.objectManager.clearSaveDoms();
         //清理指令
         this.objectManager.clearDirectives();
         //清理表达式
