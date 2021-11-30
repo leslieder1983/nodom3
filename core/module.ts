@@ -163,6 +163,9 @@ export class Module {
      * 模型渲染
      */
     public render(): boolean {
+        if(!this.container){
+            return;
+        }
         this.dontAddToRender = true;
         //编译
         if(!this.originTree){
