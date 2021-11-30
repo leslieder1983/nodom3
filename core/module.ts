@@ -456,7 +456,6 @@ export class Module {
                 }
             }
         }
-        console.log(props,this);
         this.props = props;
         this.srcDom = dom;
         if(change){ //有改变，进行编译并激活
