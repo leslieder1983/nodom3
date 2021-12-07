@@ -43,51 +43,11 @@ export interface IRouteCfg {
 }
 
 /**
- * 提示消息接口
+ * 模块状态类型
  */
-export interface ITipMessage {
-    TipWords: Object;
-    ErrorMsgs: Object;
-    FormMsgs: Object;
-    WeekDays: Object;
+export enum EModuleState {
+    INITED = 1,
+    UNACTIVE=2,
+    RENDERED=4
 }
 
-
-/**
- *  AST类
- */
-export interface IASTObj {
-    /**
-     * 节点类型，如果是原生节点，如div则是div，如果是文本节点则是text。如果是注释则为comment
-     */
-    tagName: string;
-
-    /**
-     * 属性map，里面为属性对象如{name:**,...}
-     */
-    attrs?: Map<string, any>;
-    /**
-     * 事件数组，里面为事件对象{eventName:'click',eventHandler:'change'}
-     */
-    events?: Array<{ eventName: string, exec: any }>;
-
-    /**
-     * 子节点数组，与textContent互斥
-     */
-    children?: Array<IASTObj>;
-
-    /**
-     * 表达式数组
-     */
-    expressions?: any[]
-
-    /**
-     * textContent 节点为text的时候才有的属性，与children属性互斥
-     */
-    textContent?: string;
-
-    /**
-     * 是否闭合
-     */
-    isClosed?: boolean;
-}

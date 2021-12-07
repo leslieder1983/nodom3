@@ -178,7 +178,8 @@ export  class ObjectManager {
         let ev = this.cache.get('$events.' + id + '.$instance');
         if(!ev){
             ev = GlobalCache.get('$events.' + id);
-            GlobalCache.removeEvent(id);
+            //如果从global移除，如果是slot，则会导致子模块事件丢失
+            // GlobalCache.removeEvent(id);
             if(ev){
                 this.cache.set('$events.' + id,ev);
                 return ev.$instance;
@@ -277,9 +278,9 @@ export  class ObjectManager {
      * 移除保存的html节点和节点参数
      * @param key   dom key
      */
-    public removeSavedNode(key:string){
-        this.cache.remove('$doms.' + key);
-    }
+    // public removeSavedNode(key:string){
+    //     this.cache.remove('$doms.' + key);
+    // }
 
     /**
      * 设置dom参数值
@@ -342,7 +343,7 @@ export  class ObjectManager {
     /**
      * 清除缓存dom对象
      */
-    public clearSaveDoms(){
+    public clearElements(){
         this.remove('$doms');
     }
 

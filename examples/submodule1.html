@@ -16,19 +16,19 @@
         template(props){
             let s;
             if(!this.model.rows1){
-                return `
+                s = `
                     <div class='modulea' ${props.style?'style="' + props.style + '"':''}>
                         <slot innerRender/>
                     </div>
                 `
             }else{
-                return `
+                s = `
                     <div class='modulea' ${props.style?'style="' + props.style + '"':''}>
                         <for cond={{rows1}}>{{title}}</for>
                     </div>
                 `
             }
-            
+            return s;
         }
         data(){
             return{
@@ -43,7 +43,7 @@
     class ModuleB extends Module{
         template(props){
             return `
-                <div >
+                <div>
                     <div>id is:{{id}},name is:<span style='color:red;font-weight:bold;padding-left:10px'>{{name}}</span></div>
                     <div>subscribe data is:{{subname}}</div>
                 </div>
@@ -99,7 +99,7 @@
                 arr.push(props.class);
             }
             return  `
-                <button class='${arr.join(" ")}' ${props.style?'style="' + props.style + '"':''}>
+                <button class='${arr.join(" ")}' ${props.style?'style="' + props.style + '"':''} data={{data}}>
                     ${props.title}
                 </button>
             `;
@@ -123,7 +123,7 @@
                     <div>name is:{{name}}</div>
                     <!--useDomModel表示用当前dom对应的model直接覆盖子模块的model-->
                     <modulea style={{style}} x-show={{show}} $rows1={{rows1}}>
-                        <uibutton e-click='clickBtn' title='clickBtn' />
+                        <uibutton e-click='clickBtn' title='clickBtn' x-repeat={{rows}}/>
                         <for cond={{rows}}>
                             <ModuleB style='font-size:18px;' useDomModel/>
                         </for>

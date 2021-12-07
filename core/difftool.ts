@@ -19,7 +19,12 @@ export class DiffTool{
             } else { //节点类型不同
                 addChange(5,src,null, dst.parent);
             }
-        } else { //element节点
+        } else { 
+            //相同子模块节点不比较
+            if(src.subModuleId && src.subModuleId === dst.subModuleId){
+                return;
+            }
+            //element节点
             if (src.tagName !== dst.tagName) { //节点类型不同
                 addChange(5,src,null, dst.parent);
             }else if(src.staticNum || dst.staticNum){ //节点类型相同，但有一个不是静态节点，进行属性和asset比较

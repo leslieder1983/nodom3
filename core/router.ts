@@ -2,6 +2,7 @@ import { Module } from "./module";
 import { ModuleFactory } from "./modulefactory";
 import { Renderer } from "./renderer";
 import { Route } from "./route";
+import { EModuleState } from "./types";
 import { Util } from "./util";
 
 /**
@@ -320,7 +321,7 @@ export class Router {
         }
         module.model['$route'] = o;
         if(pm){
-            if(pm.state === 2){  //被依赖模块处于渲染后状态
+            if(pm.state === EModuleState.RENDERED){  //被依赖模块处于渲染后状态
                 module.setContainer(<HTMLElement>pm.getNode(Router.routerKeyMap.get(pm.id)));
                 this.setDomActive(pm,route.fullPath);
             }else{ //被依赖模块不处于被渲染后状态

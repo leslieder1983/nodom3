@@ -9,6 +9,7 @@ import { Renderer } from "./renderer";
 import { Util } from "./util";
 import { DiffTool } from "./difftool";
 import { ModelManager } from "./modelmanager";
+import { EModuleState } from "./types";
 
 /**
  * 模块类
@@ -60,9 +61,9 @@ export class Module {
     public children: Array<number> = [];
 
     /**
-     * 状态 1初始化 2已渲染
+     * 模块状态
      */
-    public state: number;
+    public state: EModuleState;
 
     /**
      * 放置模块的容器
@@ -135,7 +136,7 @@ export class Module {
      */
     public init() {
         // 设置状态为初始化
-        this.state = 1;
+        this.state = EModuleState.INITED;
         //初始化model
         this.model = new Model(this.data()||{} , this);
         //注册子模块
@@ -168,12 +169,15 @@ export class Module {
      * 模型渲染
      */
     public render(): boolean {
-        if(!this.container){
+        if(this.state === EModuleState.UNACTIVE || !this.container){
             return;
         }
+        
         this.dontAddToRender = true;
-        //编译
-        if(!this.originTree){
+        //检测模版并编译
+        let templateStr = this.template(this.props);
+        if(templateStr !== this.oldTemplate){
+            this.oldTemplate = templateStr;
             this.compile();
         }
         //不存在，不渲染
@@ -207,14 +211,13 @@ export class Module {
         }
         
         //设置已渲染状态
-        this.state = 2;
+        this.state = EModuleState.RENDERED;
         //执行后置方法
         this.doRenderOps(1);
         //执行每次渲染后事件
         this.doModuleEvent('onRender');
         this.changedModelMap.clear();
         this.dontAddToRender = false;
-        
     }
 
     /**
@@ -234,6 +237,7 @@ export class Module {
             this.getParent().saveNode(this.container['vdom'].key,el);
         }else{
             //清空子元素
+            Util.empty(this.container);
             this.container.appendChild(el);
         }
         //执行首次渲染后事件
@@ -255,6 +259,8 @@ export class Module {
         if (!this.children.includes(mid)) {
             this.children.push(mid);
             module.parentId = this.id;
+            //首次添加，激活
+            module.active();
         }
     }
 
@@ -263,6 +269,7 @@ export class Module {
      * @param deep  是否深度active，如果为true，则子模块进行active
      */
     public active(deep?:boolean) {
+        this.state = EModuleState.INITED;
         Renderer.add(this);
         if(deep){
             for(let id of this.children){
@@ -283,7 +290,7 @@ export class Module {
         }
         this.doModuleEvent('beforeUnActive');
         //设置状态
-        this.state = 1;
+        this.state = EModuleState.UNACTIVE;
         
         //从html dom树移除
         if(this.container && this.renderTree){
@@ -304,7 +311,9 @@ export class Module {
         // 清理dom key map
         this.keyNodeMap.clear();
         //清理缓存
-        this.clearCache();
+        // this.clearCache();
+        // this.objectManager.clearElements();
+
         this.doModuleEvent('unActive');
         //处理子模块
         for(let id of this.children){
@@ -430,53 +439,51 @@ export class Module {
      * @param dom       子模块对应节点
      */
     public setProps(props:any,dom:VirtualDom){
-        let change:boolean = false;
-        //保留数据
         let dataObj = props.$data;
-        
-        //属性对比不对data进行对比，删除数据属性
         delete props.$data;
-        if(!this.props){
-            change = true;
-        }else{
-            const keys = Object.getOwnPropertyNames(props);
-            let len1 = keys.length;
-            const keys1 = this.props?Object.getOwnPropertyNames(this.props):[];
-            let len2 = keys1.length;
-            if(len1 !== len2){
-                change = true;
-            }else{
-                for(let k of keys){
-                    // object 默认改变
-                    if(props[k] !== this.props[k] || typeof(props[k]) === 'object'){
-                        change = true;
-                        break;
-                    }
-                }
-            }
-        }
-
         //props数据复制到模块model
         if(dataObj){
             for(let d in dataObj){
                 let o = dataObj[d];
                 //如果为对象，需要绑定到模块
-                if(typeof o === 'object'){
+                if(typeof o === 'object' && this.model[d] !== o){
                     ModelManager.bindToModule(o,this);
-                    this.model[d] = o;
-                }else if(!this.props || this.model[d] === undefined){ //非对象，值不存在，或第一次，避免覆盖模块修改的数据
-                    this.model[d] = o;
                 }
+                this.model[d] = o;
             }
         }
         this.props = props;
         this.srcDom = dom;
-
-        let templateStr = this.template(this.props);
-        if(templateStr !== this.oldTemplate){
-            this.oldTemplate = templateStr;
-            this.compile();
+        if(this.state === EModuleState.INITED){
             this.active();
+        }else if(this.state !== EModuleState.UNACTIVE){  //计算template，如果导致模版改变，需要激活
+            let change = false;
+            if(!this.props){
+                change = true;
+            }else{
+                const keys = Object.getOwnPropertyNames(props);
+                let len1 = keys.length;
+                const keys1 = this.props?Object.getOwnPropertyNames(this.props):[];
+                let len2 = keys1.length;
+                if(len1 !== len2){
+                    change = true;
+                }else{
+                    for(let k of keys){
+                        // object 默认改变
+                        if(props[k] !== this.props[k] || typeof(props[k]) === 'object'){
+                            change = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if(change){  //props 发生改变，计算模版，如果模版改变，激活模块
+                const tmp = this.template(this.props);
+                if(tmp !== this.oldTemplate){
+                    this.active();
+                }
+            }    
+            
         }
     }
 
@@ -485,25 +492,28 @@ export class Module {
      */
     public compile(){
         this.domKeyId = 0;
+        //清空孩子节点
+        this.children = [];
+
         //清除缓存
         this.clearCache();
-        //清理事件
-        this.objectManager.clearEvents();
+
+        //清除dom节点cache
+        this.objectManager.clearElements();
+
         if(!this.oldTemplate){
-            this.oldTemplate = this.template();
+            return;
         }
-        if(this.oldTemplate){
-            this.originTree = new Compiler(this).compile(this.oldTemplate);
-            //事件传递
-            if(this.srcDom && this.srcDom.events){
-                if(!this.originTree.events){
-                    this.originTree.events = new Map();
-                }
-                for(let p of this.srcDom.events){
-                    if(!this.originTree.events.has(p[0])){  //子模块已存在的事件不处理
-                        this.originTree.events.set(p[0],p[1]);
-                    }
-                }
+        this.originTree = new Compiler(this).compile(this.oldTemplate);
+        //事件传递
+        if(this.srcDom && this.srcDom.events){
+            if(!this.originTree.events){
+                this.originTree.events = new Map();
+            }
+            for(let p of this.srcDom.events){
+                // if(!this.originTree.events.has(p[0])){  //子模块已存在的事件不处理
+                    this.originTree.events.set(p[0],p[1]);
+                // }
             }
         }
     }
@@ -516,13 +526,13 @@ export class Module {
             this.objectManager.cache = new NCache();
             return;
         }
-        //清理dom相关，清理后会导致子模块参数丢失，这里不清理
-        // this.objectManager.clearSaveDoms();
         //清理指令
         this.objectManager.clearDirectives();
         //清理表达式
         this.objectManager.clearExpressions();
-        
+
+        //清理事件
+        this.objectManager.clearEvents();
         //清理css url
         CssManager.clearModuleRules(this);
     }
@@ -559,9 +569,5 @@ export class Module {
      */
     public getDomKeyId():number{
         return ++this.domKeyId;
-    }
-
-    private replaceNode(el1,el2){
-
     }
 }

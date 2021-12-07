@@ -336,9 +336,11 @@ export class Renderer {
                     break;
                 case 3: //删除
                     //从渲染树删除
-                    module.objectManager.removeElement(item[1].key);
+                    // module.objectManager.removeElement(item[1].key);
                     //从html dom树移除
-                    pEl.removeChild(n1);
+                    if(pEl && n1){
+                        pEl.removeChild(n1);
+                    }
                     break;
                 case 4: //移动
                     if(item[4] ){  //相对节点后
