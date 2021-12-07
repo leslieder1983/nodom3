@@ -83,8 +83,8 @@ export  class Directive {
      * @param name      参数名
      * @param value     参数值
      */
-    public setParam(module:Module,dom:VirtualDom,name:string,value:any){
-        module.objectManager.setDirectiveParam(this.id,dom.key,name,value);
+    public setParam(module:Module,name:string,value:any){
+        module.objectManager.setDirectiveParam(this.id,name,value);
     }
 
     /**
@@ -94,8 +94,8 @@ export  class Directive {
      * @param name      参数名
      * @returns         参数值
      */
-    public getParam(module:Module,dom:VirtualDom,name:string){
-        return module.objectManager.getDirectiveParam(this.id,dom.key,name);
+    public getParam(module:Module,name:string){
+        return module.objectManager.getDirectiveParam(this.id,name);
     }
 
     /**
@@ -104,8 +104,8 @@ export  class Directive {
      * @param dom       指令对应的虚拟dom
      * @param name      参数名
      */
-    public removeParam(module:Module,dom:VirtualDom,name:string){
-        module.objectManager.removeDirectiveParam(this.id,dom.key,name);
+    public removeParam(module:Module,name:string){
+        module.objectManager.removeDirectiveParam(this.id,name);
     }
 
     /**

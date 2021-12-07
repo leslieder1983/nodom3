@@ -10,15 +10,25 @@
     <div></div>
 </body>
 <script type='module'>
-    import {nodom,Module,GlobalCache} from '../dist/nodom.js'
+    import {nodom,Module,GlobalCache,ModuleFactory} from '../dist/nodom.js'
     
     class ModuleA extends Module{
         template(props){
-            return `
-                <div class='modulea' ${props.style?'style="' + props.style + '"':''}>
-                    <slot innerRender/>
-                </div>
-            `
+            let s;
+            if(!this.model.rows1){
+                return `
+                    <div class='modulea' ${props.style?'style="' + props.style + '"':''}>
+                        <slot innerRender/>
+                    </div>
+                `
+            }else{
+                return `
+                    <div class='modulea' ${props.style?'style="' + props.style + '"':''}>
+                        <for cond={{rows1}}>{{title}}</for>
+                    </div>
+                `
+            }
+            
         }
         data(){
             return{
@@ -103,16 +113,21 @@
             return `
                 <div >
                     <button e-click='add'>add</button>
+                    <button e-click='setRows1'>setRows1</button>
+                    <button e-click='clearRows1'>clearRows1</button>
+                    <button e-click='active1'>active</button>
+                    <button e-click='unactive1'>unactive</button>
                     <button e-click='hideOrShow'>hideOrShow</button>
                     <button e-click='change1'>change1</button>
                     <button e-click='setGlobalCache'>Save Global</button>
                     <div>name is:{{name}}</div>
                     <!--useDomModel表示用当前dom对应的model直接覆盖子模块的model-->
-                    <modulea style={{style}} x-show={{show}}>
+                    <modulea style={{style}} x-show={{show}} $rows1={{rows1}}>
+                        <uibutton e-click='clickBtn' title='clickBtn' />
                         <for cond={{rows}}>
                             <ModuleB style='font-size:18px;' useDomModel/>
                         </for>
-                        <uibutton e-click='clickBtn' title='clickBtn' />
+                        
                     </modulea>
                 </div>
             `;
@@ -130,6 +145,15 @@
                 ]
             }
         }
+
+        setRows1(model){
+            model.rows1 = [{title:'field'},{title:'nodom'}]
+        }
+
+        clearRows1(model){
+            model.rows1 = null;
+        }
+
         add(model){
             model.rows.push({id:4,name:'weblab'});
             console.log(model.rows);
@@ -146,8 +170,15 @@
             model.show = !model.show;
         }
 
+        unactive1(){
+            let m = ModuleFactory.get(this.children[0]);
+            m.unactive();
+        }
+        active1(){
+            let m = ModuleFactory.get(this.children[0]);
+            m.active(true);
+        }
         
-
         change1(model){
             model.xxx = 2;
             model.style='background:#ccc'

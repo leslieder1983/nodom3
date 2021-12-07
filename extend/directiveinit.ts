@@ -281,7 +281,6 @@ export default (function () {
             const type: string = dom.getProp('type') || 'text';
             const tgname = dom.tagName.toLowerCase();
             const model = dom.model;
-
             if (!model) {
                 return true;
             }
@@ -316,9 +315,8 @@ export default (function () {
                 dom.setAsset('value', v);
                 dom.setProp('value', v);
             }
-
             //初始化
-            if (!this.getParam(module, dom, 'inited')) {
+            if (!this.getParam(module, 'inited')) {
                 dom.addEvent(new NEvent(module, 'change',
                     function (model, dom) {
                         let el = <any>module.getNode(dom.key);
@@ -360,7 +358,7 @@ export default (function () {
                         }
                     }
                 ));
-                this.setParam(module, dom, 'inited', true);
+                this.setParam(module, 'inited', true);
             }
             return true;
         },

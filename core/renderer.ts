@@ -238,7 +238,7 @@ export class Renderer {
             
             //把el引用与key关系存放到cache中
             module.saveNode(dom.key,el);
-
+            
             //非子模块才处理
             if(!dom.subModuleId){
                 //asset
@@ -335,6 +335,8 @@ export class Renderer {
                     Renderer.renderToHtml(module,item[1],null,false);
                     break;
                 case 3: //删除
+                    //从渲染树删除
+                    module.objectManager.removeElement(item[1].key);
                     //从html dom树移除
                     pEl.removeChild(n1);
                     break;

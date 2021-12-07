@@ -112,7 +112,12 @@ export class Module {
     /**
      * 生成dom时的keyid，每次编译置0
      */
-    domKeyId:number;
+    private domKeyId:number;
+
+    /**
+     * 旧模版串
+     */
+    private oldTemplate:string;
 
     /**
      * 构造器
@@ -225,11 +230,10 @@ export class Module {
         let el:any = Renderer.renderToHtml(this,this.renderTree,null,true);
         if(this.replaceContainer){ //替换
             Util.replaceNode(this.container,el);
-            this.originTree.key = el.vdom.key;
-            this.getParent().saveNode(this.srcDom.key,el);
+            // 替换后，需要保留
+            this.getParent().saveNode(this.container['vdom'].key,el);
         }else{
             //清空子元素
-            Util.empty(this.container);
             this.container.appendChild(el);
         }
         //执行首次渲染后事件
@@ -281,13 +285,19 @@ export class Module {
         //设置状态
         this.state = 1;
         
-        //从html 卸载
-        if(this.container){
-            Util.empty(this.container);
+        //从html dom树移除
+        if(this.container && this.renderTree){
+            let el = this.getNode(this.renderTree.key);
+            if(el){
+                if(this.replaceContainer){
+                    Util.replaceNode(el,this.container);
+                    this.getParent().saveNode(this.container['vdom'].key,this.container);
+                }else{
+                    this.container.removeChild(el);
+                }
+            }
         }
-
-        //删除容器
-        delete this.container;
+        
         //删除渲染树
         delete this.renderTree;
 
@@ -461,7 +471,10 @@ export class Module {
         }
         this.props = props;
         this.srcDom = dom;
-        if(change){ //有改变，进行编译并激活
+
+        let templateStr = this.template(this.props);
+        if(templateStr !== this.oldTemplate){
+            this.oldTemplate = templateStr;
             this.compile();
             this.active();
         }
@@ -474,9 +487,13 @@ export class Module {
         this.domKeyId = 0;
         //清除缓存
         this.clearCache();
-        const str = this.template(this.props);
-        if(str){
-            this.originTree = new Compiler(this).compile(str);
+        //清理事件
+        this.objectManager.clearEvents();
+        if(!this.oldTemplate){
+            this.oldTemplate = this.template();
+        }
+        if(this.oldTemplate){
+            this.originTree = new Compiler(this).compile(this.oldTemplate);
             //事件传递
             if(this.srcDom && this.srcDom.events){
                 if(!this.originTree.events){
@@ -505,8 +522,7 @@ export class Module {
         this.objectManager.clearDirectives();
         //清理表达式
         this.objectManager.clearExpressions();
-        //清理事件
-        this.objectManager.clearEvents();
+        
         //清理css url
         CssManager.clearModuleRules(this);
     }
@@ -530,10 +546,22 @@ export class Module {
     }
 
     /**
+     * 从keyNodeMap移除
+     * @param key   dom key
+     */
+    public removeNode(key:string){
+        this.keyNodeMap.delete(key);
+    }
+
+    /**
      * 获取dom key id
      * @returns     key id
      */
     public getDomKeyId():number{
         return ++this.domKeyId;
+    }
+
+    private replaceNode(el1,el2){
+
     }
 }

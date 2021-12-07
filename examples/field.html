@@ -6,10 +6,12 @@
 		<title>field</title>
 	</head>
 	<body>
+		<button onclick='active()'>active</button>
+		<button onclick='unactive()'>unactive</button>
 		<div></div>
 	</body>
 	<script type='module'>
-		import{nodom,Module,Util} from '../dist/nodom.js'
+		import{nodom,Module,Util,ModuleFactory} from '../dist/nodom.js'
 
 		class Module1 extends Module{
 			template(){

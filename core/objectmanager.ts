@@ -5,7 +5,6 @@ import { NEvent } from "./event";
 import { Expression } from "./expression";
 import { GlobalCache } from "./globalcache";
 import { Module } from "./module";
-import { Util } from "./util";
 
 /**
  * 指令管理器
@@ -99,12 +98,11 @@ export  class ObjectManager {
     /**
      * 设置指令参数
      * @param id        指令id
-     * @param key       dom key
      * @param name      参数名  
      * @param value     参数值
      */
-    public setDirectiveParam(id:number,key:string,name:string,value:any){
-        this.cache.set('$doms.' + key + '$directives.' + id + '.$params.' + name,value);
+    public setDirectiveParam(id:number,name:string,value:any){
+        this.cache.set('$directives.' + id + '.$params.' + name,value);
     }
 
     /**
@@ -114,8 +112,8 @@ export  class ObjectManager {
      * @param name      参数名
      * @returns         参数值
      */
-    public getDirectiveParam(id:number,key:string,name:string){
-        return this.cache.get('$doms.' + key + '$directives.' + id + '.$params.' + name);
+    public getDirectiveParam(id:number,name:string){
+        return this.cache.get('$directives.' + id + '.$params.' + name);
     }
 
     /**
@@ -124,8 +122,8 @@ export  class ObjectManager {
      * @param key       dom key
      * @param name      参数名
      */
-    public removeDirectiveParam(id:number,key:string,name:string){
-        this.cache.remove('$doms.' + key + '$directives.' + id + '.$params.' + name);
+    public removeDirectiveParam(id:number,name:string){
+        this.cache.remove('$directives.' + id + '.$params.' + name);
     }
 
     /**
@@ -133,8 +131,8 @@ export  class ObjectManager {
      * @param id        指令id
      * @param key       dom key
      */
-    public clearDirectiveParam(id:number,key:string){
-        this.cache.remove('$doms.' + key + '$directives.' + id + '.$params.' + name);
+    public clearDirectiveParam(id:number){
+        this.cache.remove('$directives.' + id + '.$params.' + name);
     }
 
     /**
@@ -213,7 +211,7 @@ export  class ObjectManager {
      * @param value     参数值
      */
     public setEventParam(id:number,key:String,name:string,value:any){
-        this.cache.set('$doms.' + key + '$events.' + id + '.$params.' + name,value);
+        this.cache.set('$events.' + id + '.$params.' + key + '.' + name,value);
     }
 
     /**
@@ -224,7 +222,7 @@ export  class ObjectManager {
      * @returns         参数值
      */
     public getEventParam(id:number,key:string,name:string){
-        return this.cache.get('$doms.' + key + '$events.' + id + '.$params.' + name);
+        return this.cache.get('$events.' + id + '.$params.' + key + '.' + name);
     }
 
     /**
@@ -234,7 +232,7 @@ export  class ObjectManager {
      * @param name      参数名
      */
     public removeEventParam(id:number,key:string,name:string){
-        this.cache.remove('$doms.' + key + '$events.' + id + '.$params.' + name);
+        this.cache.remove('$events.' + id + '.$params.' + key + '.' + name);
     }
 
     /**
@@ -242,12 +240,16 @@ export  class ObjectManager {
      * @param id        事件id
      * @param key       dom key 
      */
-    public clearEventParam(id:number,key:string){
-        this.cache.remove('$doms.' + key + '$events.' + id + '.$params');
+    public clearEventParam(id:number,key?:string){
+        if(key){    //删除对应dom的事件参数
+            this.cache.remove('$events.' + id + '.$params.' + key);    
+        }else{      //删除所有事件参数
+            this.cache.remove('$events.' + id + '.$params');
+        }
     }
 
     /**
-     * 获取旧虚拟dom
+     * 缓存渲染树虚拟dom
      * @param dom       dom对象
      */
     public saveElement(dom:VirtualDom){
@@ -272,7 +274,7 @@ export  class ObjectManager {
 
 
     /**
-     * 移除保存的节点（包括参数和html dom）
+     * 移除保存的html节点和节点参数
      * @param key   dom key
      */
     public removeSavedNode(key:string){
@@ -327,14 +329,14 @@ export  class ObjectManager {
      * 清除表达式集
      */
     public clearExpressions(){
-        this.remove('$directives');
+        this.remove('$expressions');
     }
 
     /**
      * 清除事件集
      */   
     public clearEvents(){
-        this.remove('$directives');
+        this.remove('$events');
     }
 
     /**

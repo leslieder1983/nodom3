@@ -33,7 +33,6 @@ export class EventManager{
             if(arr.length === 0) return;
             //获取usecapture
             let capture = (arr.findIndex(item=>module.objectManager.getEvent(item).capture === true) !== -1);
-            
             // 只代理一次，也只绑定一次
             //是否已代理
             let hasDelg:boolean = false;

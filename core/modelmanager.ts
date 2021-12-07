@@ -178,7 +178,7 @@ export class ModelManager {
         }
         //级联设置
         Object.getOwnPropertyNames(model).forEach(item=>{
-            if(typeof model[item] === 'object' && model[item].$key){
+            if(model[item] && typeof model[item] === 'object' && model[item].$key){
                 ModelManager.bindToModule(model[item],module);
             }
         });
