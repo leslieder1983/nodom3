@@ -24,6 +24,8 @@
             }else{
                 s = `
                     <div class='modulea' ${props.style?'style="' + props.style + '"':''}>
+                        <div>{{name}}</div>
+                        <input x-field='name' />
                         <for cond={{rows1}}>{{title}}</for>
                     </div>
                 `

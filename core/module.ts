@@ -311,9 +311,8 @@ export class Module {
         // 清理dom key map
         this.keyNodeMap.clear();
         //清理缓存
-        // this.clearCache();
-        // this.objectManager.clearElements();
-
+        this.clearCache();
+        
         this.doModuleEvent('unActive');
         //处理子模块
         for(let id of this.children){
@@ -483,7 +482,6 @@ export class Module {
                     this.active();
                 }
             }    
-            
         }
     }
 
@@ -500,7 +498,9 @@ export class Module {
 
         //清除dom节点cache
         this.objectManager.clearElements();
-
+        //清理css url
+        CssManager.clearModuleRules(this);
+        
         if(!this.oldTemplate){
             return;
         }
@@ -511,9 +511,9 @@ export class Module {
                 this.originTree.events = new Map();
             }
             for(let p of this.srcDom.events){
-                // if(!this.originTree.events.has(p[0])){  //子模块已存在的事件不处理
+                if(!this.originTree.events.has(p[0])){  //子模块已存在的事件不处理
                     this.originTree.events.set(p[0],p[1]);
-                // }
+                }
             }
         }
     }
@@ -530,11 +530,8 @@ export class Module {
         this.objectManager.clearDirectives();
         //清理表达式
         this.objectManager.clearExpressions();
-
         //清理事件
         this.objectManager.clearEvents();
-        //清理css url
-        CssManager.clearModuleRules(this);
     }
 
     /**
