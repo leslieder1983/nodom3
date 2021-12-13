@@ -1,5 +1,6 @@
 import { Directive } from "../core/directive";
 import { NEvent } from "../core/event";
+import { GlobalCache } from "../core/globalcache";
 import { Model } from "../core/model";
 import { ModelManager } from "../core/modelmanager";
 import { Module } from "../core/module";
@@ -370,9 +371,6 @@ export default (function () {
      */
     createDirective('route',
         function (module: Module, dom: VirtualDom, src: VirtualDom) {
-            if (!this.value) {
-                return true;
-            }
             //a标签需要设置href
             if (dom.tagName.toLowerCase() === 'a') {
                 dom.setProp('href', 'javascript:void(0)');
@@ -388,24 +386,20 @@ export default (function () {
                     Router.go(this.value);
                 }
             }
-
+            
             //添加click事件,避免重复创建事件对象，创建后缓存
-            let event: NEvent = module.objectManager.get('$routeClickEvent');
+            let event: NEvent = GlobalCache.get('$routeClickEvent');
             if (!event) {
                 event = new NEvent(module, 'click',
-                    (model, dom, e) => {
+                    function(model, dom, evObj,e){
                         let path = dom.getProp('path');
-                        if (!path) {
-                            let dir: Directive = dom.getDirective('route');
-                            path = dir.value;
-                        }
                         if (Util.isEmpty(path)) {
                             return;
                         }
                         Router.go(path);
                     }
                 );
-                module.objectManager.set('$routeClickEvent', event);
+                GlobalCache.set('$routeClickEvent', event);
             }
             dom.addEvent(event);
             return true;

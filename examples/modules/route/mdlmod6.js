@@ -15,6 +15,7 @@ export class MdlMod6 extends Module {
                         {{name}}
                     </li>
                 </ul>
+                <button e-click='clickTest'>test</button>
             </div>
         `;
     }
@@ -27,5 +28,9 @@ export class MdlMod6 extends Module {
             model.d1 = r;
             console.log(r);
         })
+    }
+
+    clickTest(){
+        console.log(this);
     }
 }

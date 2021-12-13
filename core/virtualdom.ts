@@ -1,6 +1,7 @@
 import { Directive } from "./directive";
 import { DirectiveManager } from "./directivemanager";
 import { NEvent } from "./event";
+import { EventManager } from "./eventmanager";
 import { Expression } from "./expression";
 import { Model } from "./model";
 import { Module } from "./module";
@@ -392,11 +393,13 @@ export class VirtualDom {
     /**
      * 添加事件
      * @param event     事件对象
+     * @param module    模块
      */
     public addEvent(event: NEvent) {
         if(!this.events){
             this.events = new Map();
         }
+        
         if(!this.events.has(event.name)){
             this.events.set(event.name, [event.id]);
         }else{

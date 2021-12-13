@@ -1,8 +1,6 @@
 import { Module } from "./module";
 import { VirtualDom } from "./virtualdom";
 import { NEvent } from "./event";
-import { Util } from "./util";
-import { GlobalCache } from "./globalcache";
 /**
  * 事件管理器
  */
@@ -22,11 +20,10 @@ export class EventManager{
         }
         //判断并设置事件绑定标志
         let el = module.getNode(dom.key);
-        if(el['bindEvent']){
+        if(!el || el['bindEvent']){
             return;
         }
         el['bindEvent'] = true;
-
         for (let evt of dom.events) {
             let arr = evt[1];
             //同一个事件名可能对应多个事件对象
@@ -123,7 +120,6 @@ export class EventManager{
             const evts = dom.getEvent(e.type);
             //已执行事件map，不重复执行
             let execMap = new Map();
-            
             for(let ii=0;ii<evts.length;ii++){
                 const eid = evts[ii];
                 const ev:NEvent = module.objectManager.getEvent(eid);

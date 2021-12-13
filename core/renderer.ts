@@ -175,6 +175,7 @@ export class Renderer {
      */
     public static renderToHtml(module: Module,src:VirtualDom, parentEl:HTMLElement,isRenderChild?:boolean):Node {
         let el = module.getNode(src.key);
+        
         if(el){   //html dom节点已存在
             if(src.tagName){
                 if(src.props){
@@ -186,6 +187,10 @@ export class Renderer {
                     }
                 }
                 handleAssets(src,<HTMLElement>el);
+                //更换el的virtual dom
+                if(el['vdom']){
+                    el['vdom'] = src;
+                }
             }else{  //文本节点
                 (<any>el).textContent = src.textContent;
             }
@@ -252,7 +257,6 @@ export class Renderer {
                     EventManager.bind(module,dom);
                 }
             }
-            
             return el;
         }
 
