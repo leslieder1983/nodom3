@@ -112,7 +112,7 @@ export class EventManager{
         function handler(e){
             //从事件element获取事件
             let el = e.currentTarget;
-            const dom = el['vdom'];
+            const dom = module.getVirtualDom(el['vdom']);
             if(!dom || !dom.events || !dom.events.has(e.type)){
                 return;
             }

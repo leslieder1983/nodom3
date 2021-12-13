@@ -53,6 +53,7 @@ export class Renderer {
         //节点自带model优先级高
         model = src.model?src.model:model;
         let dst:VirtualDom = new VirtualDom(src.tagName,key?src.key+'_'+key:src.key);
+        module.saveVirtualDom(dst);
         //设置当前根root
         if(!parent){
             this.currentModuleRoot = dst;
@@ -72,6 +73,7 @@ export class Renderer {
         if(src.directives && src.directives.length>0 && src.directives[0].type.name === 'model'){
             src.directives[0].exec(module,dst,src);
         }
+        
         if(src.tagName){
             if(!dst.notChange){
                 handleProps();
@@ -83,7 +85,6 @@ export class Renderer {
                             dst.setAsset(p[0],p[1]);
                         }
                     }
-
                     //事件
                     if(src.events && src.events.size>0){
                         for(let p of src.events){
@@ -96,6 +97,7 @@ export class Renderer {
                     return;
                 }
             }
+
             // 子节点
             if(src.children && src.children.length>0){
                 dst.children = [];
@@ -187,10 +189,6 @@ export class Renderer {
                     }
                 }
                 handleAssets(src,<HTMLElement>el);
-                //更换el的virtual dom
-                if(el['vdom']){
-                    el['vdom'] = src;
-                }
             }else{  //文本节点
                 (<any>el).textContent = src.textContent;
             }
@@ -223,8 +221,8 @@ export class Renderer {
             //创建element
             let el= document.createElement(dom.tagName);
             //保存虚拟dom
-            el['vdom'] = dom;
-        
+            el['vdom'] = dom.key;
+            
             //模块容器，向目标模块设置容器
             if(dom.subModuleId){
                 let m:Module = ModuleFactory.get(dom.subModuleId);
@@ -243,6 +241,10 @@ export class Renderer {
             
             //把el引用与key关系存放到cache中
             module.saveNode(dom.key,el);
+            //保存自定义key对应element
+            if(dom.hasProp('key')){
+                module.saveElement(dom.getProp('key'),el);
+            }
             
             //非子模块才处理
             if(!dom.subModuleId){

@@ -107,6 +107,7 @@ export class VirtualDom {
      */
     constructor(tag?: string,key?:string,module?:Module) {
         this.key = key || ((module?module.getDomKeyId():Util.genId()) + '');
+        
         if(tag){
             this.tagName = tag;
         }

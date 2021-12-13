@@ -93,7 +93,17 @@ export class Module {
     /**
      * 用于保存每个key对应的html node
      */
-    public keyNodeMap:Map<string,Node> = new Map();
+    private keyNodeMap:Map<string,Node> = new Map();
+
+    /**
+     * 用户自定义key htmlelement映射
+     */
+    private keyElementMap:Map<string,HTMLElement> = new Map();
+
+    /**
+     * key virtualdom map 
+     */
+    private keyVDomMap:Map<string,VirtualDom> = new Map();
 
     /**
      * 不允许加入渲染队列标志，在renderdom前设置，避免render前修改数据引发二次渲染
@@ -234,7 +244,7 @@ export class Module {
         if(this.replaceContainer){ //替换
             Util.replaceNode(this.container,el);
             // 替换后，需要保留
-            this.getParent().saveNode(this.container['vdom'].key,el);
+            this.getParent().saveNode(this.container['vdom'],el);
         }else{
             //清空子元素
             Util.empty(this.container);
@@ -298,7 +308,7 @@ export class Module {
             if(el){
                 if(this.replaceContainer){
                     Util.replaceNode(el,this.container);
-                    this.getParent().saveNode(this.container['vdom'].key,this.container);
+                    this.getParent().saveNode(this.container['vdom'],this.container);
                 }else{
                     this.container.removeChild(el);
                 }
@@ -310,6 +320,8 @@ export class Module {
 
         // 清理dom key map
         this.keyNodeMap.clear();
+        this.keyElementMap.clear();
+        this.keyVDomMap.clear();
         //清理缓存
         this.clearCache();
         
@@ -550,6 +562,44 @@ export class Module {
      */
     public saveNode(key:string,node:Node){
         this.keyNodeMap.set(key,node);
+    }
+
+    /**
+     * 获取用户key定义的html
+     * @param key   用户自定义key
+     * @returns     html element
+     */
+    public getElement(key:string):HTMLElement{
+        return this.keyElementMap.get(key);
+    }
+
+    /**
+     * 保存用户key对应的htmlelement
+     * @param key   自定义key
+     * @param node  htmlelement
+     */
+    public saveElement(key:string,node:HTMLElement){
+        this.keyElementMap.set(key,node);
+    }
+
+
+    /**
+     * 获取key对应的virtual dom
+     * @param key   vdom key
+     * @returns     virtual dom
+     */
+    public getVirtualDom(key:string):VirtualDom{
+        return this.keyVDomMap.get(key);
+    }
+
+    /**
+     * 保存key对应的virtual dom
+     * @param dom   virtual dom
+     * @param key   vdom key
+     */
+    public saveVirtualDom(dom:VirtualDom,key?:string){
+        key = key || dom.key;
+        this.keyVDomMap.set(key,dom);
     }
 
     /**

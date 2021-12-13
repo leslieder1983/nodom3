@@ -316,9 +316,9 @@ export default (function () {
                 dom.setAsset('value', v);
                 dom.setProp('value', v);
             }
-            //初始化
-            if (!this.getParam(module, 'inited')) {
-                dom.addEvent(new NEvent(module, 'change',
+            let event: NEvent = GlobalCache.get('$fieldChangeEvent');
+            if(!event){
+                event = new NEvent(module, 'change',
                     function (model, dom) {
                         let el = <any>module.getNode(dom.key);
                         if (!el) {
@@ -358,9 +358,10 @@ export default (function () {
                             el.value = v;
                         }
                     }
-                ));
-                this.setParam(module, 'inited', true);
+                );
+                GlobalCache.set('$fieldChangeEvent',event);
             }
+            dom.addEvent(event);
             return true;
         },
         10
