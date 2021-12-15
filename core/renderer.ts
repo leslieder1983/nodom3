@@ -186,9 +186,7 @@ export class Renderer {
                 if(src.props){
                     //设置属性
                     for(let p of src.props){
-                        if(p[1]!== undefined){
-                            (<HTMLElement>el).setAttribute(p[0],p[1]);
-                        }
+                        (<HTMLElement>el).setAttribute(p[0],p[1]);
                     }
                 }
                 handleAssets(src,<HTMLElement>el);
