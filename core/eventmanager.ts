@@ -39,7 +39,7 @@ export class EventManager{
             for(let ii=0;ii<arr.length;ii++){
                 const ev:NEvent = module.objectManager.getEvent(arr[ii]);
                 //处理外部事件，如果有外部事件，则移除改事件
-                if(this.handleExtendEvent(ev.module,dom,ev)){
+                if(this.handleExtendEvent(ev.module || module,dom,ev)){
                     arr.splice(ii--,1);
                     continue;
                 }
@@ -149,7 +149,7 @@ export class EventManager{
                                 if(execMap.get(ev.id) === dom1.key){
                                     break;
                                 }
-                                ev.handler.apply(ev.module,[dom1.model, dom1,ev, e]);
+                                ev.handler.apply((ev.module||module),[dom1.model, dom1,ev, e]);
                                 execMap.set(ev.id,dom1.key);
                                 if(ev.once){
                                     EventManager.unbind(module,dom1,ev);
@@ -159,7 +159,7 @@ export class EventManager{
                         }
                     }
                 }else{
-                    ev.handler.apply(ev.module,[dom.model, dom,ev, e]);
+                    ev.handler.apply((ev.module||module),[dom.model, dom,ev, e]);
                     //事件只执行一次，从事件数组删除
                     if (ev.once) {
                         EventManager.unbind(module,dom,ev);

@@ -1,4 +1,3 @@
-import { Directive } from "../core/directive";
 import { NEvent } from "../core/event";
 import { GlobalCache } from "../core/globalcache";
 import { Model } from "../core/model";
@@ -318,9 +317,9 @@ export default (function () {
             }
             let event: NEvent = GlobalCache.get('$fieldChangeEvent');
             if(!event){
-                event = new NEvent(module, 'change',
+                event = new NEvent(null, 'change',
                     function (model, dom) {
-                        let el = <any>module.getNode(dom.key);
+                        let el = <any>this.getNode(dom.key);
                         if (!el) {
                             return;
                         }
@@ -391,7 +390,7 @@ export default (function () {
             //添加click事件,避免重复创建事件对象，创建后缓存
             let event: NEvent = GlobalCache.get('$routeClickEvent');
             if (!event) {
-                event = new NEvent(module, 'click',
+                event = new NEvent(null, 'click',
                     function(model, dom, evObj,e){
                         let path = dom.getProp('path');
                         if (Util.isEmpty(path)) {

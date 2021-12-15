@@ -16,10 +16,17 @@ export class MdlMod6 extends Module {
                     </li>
                 </ul>
                 <button e-click='clickTest'>test</button>
+                <input x-field='title' />
+                <div>{{title}}</div>
             </div>
         `;
     }
 
+    data(){
+        return {
+            title:'test'
+        }
+    }
     onBeforeFirstRender(model){
         request({
             url:'/examples/data/data1.json',

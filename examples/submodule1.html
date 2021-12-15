@@ -123,6 +123,7 @@
                     <button e-click='change1'>change1</button>
                     <button e-click='setGlobalCache'>Save Global</button>
                     <div>name is:{{name}}</div>
+                    <input x-field='name' />
                     <!--useDomModel表示用当前dom对应的model直接覆盖子模块的model-->
                     <modulea style={{style}} x-show={{show}} $rows1={{rows1}}>
                         <uibutton e-click='clickBtn' title='clickBtn' x-repeat={{rows}}/>
