@@ -323,8 +323,9 @@ export default (function () {
                         if (!el) {
                             return;
                         }
+                        let directive = dom.getDirective('field');
                         let type = dom.getProp('type');
-                        let field = me.value;
+                        let field = directive.value;
                         let v = el.value;
                         //根据选中状态设置checkbox的value
                         if (type === 'checkbox') {
@@ -340,16 +341,18 @@ export default (function () {
                         }
 
                         //修改字段值,需要处理.运算符
-                        let temp = model;
                         let arr = field.split('.')
                         if (arr.length === 1) {
                             model[field] = v;
                         } else {
+                            let temp = model;
                             field = arr.pop();
-                            for (let i = 0; i < arr.length; i++) {
+                            for (let i = 0; i < arr.length && temp; i++) {
                                 temp = temp[arr[i]];
                             }
-                            temp[field] = v;
+                            if(temp){
+                                temp[field] = v;
+                            }
                         }
                         //修改value值，该节点不重新渲染
                         if (type !== 'radio') {

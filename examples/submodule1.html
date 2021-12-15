@@ -122,8 +122,8 @@
                     <button e-click='hideOrShow'>hideOrShow</button>
                     <button e-click='change1'>change1</button>
                     <button e-click='setGlobalCache'>Save Global</button>
-                    <div>name is:{{name}}</div>
-                    <input x-field='name' />
+                    <div>name is:{{name1}}</div>
+                    <input x-field='name1' />
                     <!--useDomModel表示用当前dom对应的model直接覆盖子模块的model-->
                     <modulea style={{style}} x-show={{show}} $rows1={{rows1}}>
                         <uibutton e-click='clickBtn' title='clickBtn' x-repeat={{rows}}/>
@@ -138,7 +138,7 @@
         data(){
             return {
                 xxx:1,
-                name:'outer',
+                name1:'outer',
                 style:'width:800px',
                 show:true,
                 rows:[

@@ -5,6 +5,7 @@ import { Model } from "./model";
 import { Expression } from "./expression";
 import { CssManager } from "./cssmanager";
 import { EventManager } from "./eventmanager";
+import { domainToASCII } from "url";
 
 /**
  * 渲染器
@@ -136,12 +137,14 @@ export class Renderer {
             if(!src.directives || src.directives.length===0){
                 return true;
             }
+            dst.directives = [];
             dst.staticNum = -1;
             for(let d of src.directives){
                 //model指令不执行
                 if(d.type.name==='model'){
                     continue;
                 }
+                dst.directives.push(d);
                 if(!d.exec(module,dst,src)){
                     return false;
                 }
