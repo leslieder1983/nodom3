@@ -182,8 +182,6 @@ export class Module {
         if(this.state === EModuleState.UNACTIVE || !this.container){
             return;
         }
-        console.log(this,this.state);
-        
         this.dontAddToRender = true;
         //检测模版并编译
         let templateStr = this.template(this.props);
@@ -307,7 +305,6 @@ export class Module {
             let el = this.getNode(this.renderTree.key);
             if(el){
                 if(this.replaceContainer){
-                    console.log(el,this.container);
                     Util.replaceNode(el,this.container);
                     this.getParent().saveNode(this.container['vdom'],this.container);
                 }else{
