@@ -5,7 +5,6 @@ import { Model } from "./model";
 import { Expression } from "./expression";
 import { CssManager } from "./cssmanager";
 import { EventManager } from "./eventmanager";
-import { domainToASCII } from "url";
 
 /**
  * 渲染器
@@ -223,7 +222,6 @@ export class Renderer {
             let el= document.createElement(dom.tagName);
             //保存虚拟dom
             el['vdom'] = dom.key;
-            
             //模块容器，向目标模块设置容器
             if(dom.subModuleId){
                 let m:Module = ModuleFactory.get(dom.subModuleId);
@@ -344,6 +342,11 @@ export class Renderer {
                 case 3: //删除
                     //从渲染树删除
                     // module.objectManager.removeElement(item[1].key);
+                    //移除dom 事件
+                    // module.objectManager.remove('$domevents.' + item[1].key);
+                    // //从key node map 移除
+                    // module.removeNode(item[1].key,true);
+                    module.clearDomCache(item[1],true);
                     //从html dom树移除
                     if(pEl && n1){
                         pEl.removeChild(n1);

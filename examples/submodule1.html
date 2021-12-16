@@ -25,8 +25,11 @@
                 s = `
                     <div class='modulea' ${props.style?'style="' + props.style + '"':''}>
                         <div>{{name}}</div>
+                        <button e-click='clickShow'>showme</button>
                         <input x-field='name' />
-                        <for cond={{rows1}}>{{title}}</for>
+                        <ul x-show={{showme}}>
+                            <for cond={{rows1}} tag='li' e-click='clickme:delg'>{{title}}</for>
+                        </ul>
                     </div>
                 `
             }
@@ -35,10 +38,17 @@
         data(){
             return{
                 name:'yang',
+                showme:true,
                 x1:0,
                 x2:0,
                 rows:[{name:'nodom1'},{name:'nodom2'},{name:'nodom3'}]
             }
+        }
+        clickShow(model){
+            model.showme = !model.showme;
+        }
+        clickme(model){
+            console.log(model);
         }
     }
 

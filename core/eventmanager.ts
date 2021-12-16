@@ -23,6 +23,7 @@ export class EventManager{
         if(!el || el['bindEvent']){
             return;
         }
+
         el['bindEvent'] = true;
         for (let evt of dom.events) {
             let arr = evt[1];
@@ -54,7 +55,6 @@ export class EventManager{
                         const parent = dom.parent;
                         //事件加入父对象
                         parent.addEvent(ev);
-                        
                         // 保存代理dom信息
                         let delgs = ev.getParam(module,parent,'$delgs');
                         if(!delgs){
@@ -89,8 +89,8 @@ export class EventManager{
          * @param handler   事件方法
          * @param capture   是否capture
          */
-        function saveCfg(dom,ev,handler,capture){
-            module.objectManager.set('$domevents_' + dom.key + '_' + ev,{
+        function saveCfg(dom:VirtualDom,ev,handler,capture){
+            dom.setParam(module,'$events_' + ev,{
                 handler:handler,
                 capture:capture
             });
@@ -102,9 +102,9 @@ export class EventManager{
          * @param ev        事件名
          * @returns         {handler,capture}
          */
-        function getCfg(dom,ev):any{
-            return module.objectManager.get('$domevents_' + dom.key + '_' + ev);
-        }   
+        function getCfg(dom:VirtualDom,ev):any{
+            return dom.getParam(module,'$events_' + ev);
+        }
         /**
          * 事件handler
          * @param e  Event
@@ -116,7 +116,6 @@ export class EventManager{
             if(!dom || !dom.events || !dom.events.has(e.type)){
                 return;
             }
-            
             const evts = dom.getEvent(e.type);
             //已执行事件map，不重复执行
             let execMap = new Map();
@@ -140,7 +139,7 @@ export class EventManager{
                     //向上找节点
                     for(let i=0;i<e.path.length&&e.path[i] !== el;i++){
                         let el1 = e.path[i];
-                        let key = el1.vdom.key;
+                        let key = el1.vdom;
                         //　找到事件节点
                         if(key && delgs.hasOwnProperty(key)){
                             let dom1 = delgs[key];

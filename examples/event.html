@@ -28,9 +28,11 @@
 					<button e-click='show'>show</button>
 					<button e-click='change'>change</button>
 					<!-- e-swipedown='swipedown' touch设备下测试-->
-					<ul x-show={{show}} e-click='clickP' >
-						<li x-repeat={{edus}} e-click='clickItem:once:delg' ><span>{{eduName}}</span></li>
+					<div x-show={{show}} > 
+					<ul >
+						<li x-repeat={{edus}} e-click='clickItem:delg' ><span>{{eduName}}</span></li>
 					</ul>
+					</div>
 				</div>
 				`
 			}

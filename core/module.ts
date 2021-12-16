@@ -182,6 +182,7 @@ export class Module {
         if(this.state === EModuleState.UNACTIVE || !this.container){
             return;
         }
+        console.log(this,this.state);
         
         this.dontAddToRender = true;
         //检测模版并编译
@@ -301,12 +302,12 @@ export class Module {
         this.doModuleEvent('beforeUnActive');
         //设置状态
         this.state = EModuleState.UNACTIVE;
-        
         //从html dom树移除
         if(this.container && this.renderTree){
             let el = this.getNode(this.renderTree.key);
             if(el){
                 if(this.replaceContainer){
+                    console.log(el,this.container);
                     Util.replaceNode(el,this.container);
                     this.getParent().saveNode(this.container['vdom'],this.container);
                 }else{
@@ -598,16 +599,46 @@ export class Module {
      * @param key   vdom key
      */
     public saveVirtualDom(dom:VirtualDom,key?:string){
-        key = key || dom.key;
-        this.keyVDomMap.set(key,dom);
+        this.keyVDomMap.set(key || dom.key,dom);
     }
 
     /**
      * 从keyNodeMap移除
      * @param key   dom key
+     * @param deep  深度清理
      */
-    public removeNode(key:string){
+    public removeNode(key:string,deep?:boolean){
         this.keyNodeMap.delete(key);
+        if(deep){
+            let dom = this.keyVDomMap.get(key);
+            if(dom && dom.children){
+                for(let d of dom.children){
+                    this.removeNode(d.key,true);
+                }    
+            }
+        }
+    }
+
+    /**
+     * 移除 dom cache
+     * @param key   dom key
+     * @param deep  深度清理
+     */
+    public clearDomCache(dom:VirtualDom,deep?:boolean){
+        if(deep){
+            if(dom.children){
+                for(let d of dom.children){
+                    this.clearDomCache(d,true);
+                }
+            }
+        }
+        //从缓存移除节点
+        this.objectManager.removeElement(dom.key);
+        // this.objectManager.clearElementParams(dom.key);
+        //从key node map移除
+        this.keyNodeMap.delete(dom.key);
+        //从virtual dom map移除
+        this.keyVDomMap.delete(dom.key);
     }
 
     /**
