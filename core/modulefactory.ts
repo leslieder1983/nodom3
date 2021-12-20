@@ -85,11 +85,9 @@ export class ModuleFactory {
         }else{
             cls = this.classes.get(className);
         }
-        
         if(!cls){
             return;
         }
-
         let m:Module = Reflect.construct(cls, []);
         m.init();
         return m;

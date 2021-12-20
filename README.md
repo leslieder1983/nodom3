@@ -582,6 +582,15 @@ export class ModuleA extends Module{
 
 指令用于增强元素的表现能力，以"x-"开头，以设置元素属性(attribute)的形式来使用。指令具有优先级，按照数字从小到大，数字越小，优先级越高。优先级高的指令优先执行。
 
+含有指令的标签经过编译之后默认为`div标签`，若想使用其它标签包裹，可通过tag属性指定。
+
+```html
+//使用tag属性之后，通过repeat指令生成的元素被`span标签`包裹
+<div x-repeat={{food}} tag="span">
+    {{foodName}}
+</div>
+```
+
 目前NoDom支持以下几个指令:
 
 | 指令名 | 指令优先级 |              指令描述              |
@@ -1367,6 +1376,38 @@ class Main extends Module{
 
 在开发大型项目时，可以使用数据管理库帮助我们管理数据，使数据以可预测的方式发生变化，我们推荐使用Nodom团队开发的**kayaks**库，或者其他优秀的数据管理库均可。
 
+#### Props中的template
+
+若子模块中的模板生成依赖父模块中的某些字符串，可使用以下方式传递：
+
+```js
+//子模块从props中的template属性中取出对应字符串生成模板
+class ModuleA extends Module{
+      template(props){
+              return `<div>${props.template}</div>`
+    }
+}
+registModule(ModuleA,'User');
+<!-- 根模块 -->
+class Main extends Module{
+    template(){
+        return `
+        <!-- 需要传递的template值由template标签包裹-->
+        <ModuleA $name={{name}}>
+        	<template>
+				<span style="width: 100px">{{name}}</span>
+			</template>
+        </ModuleA>
+    `
+    }
+    data(){
+        return {
+            name:'Nodom',
+        }
+    }
+}
+```
+
 ### 插槽
 
 在实际开发中，插槽功能会较大程度的降低应用开发难度，插槽作为模板暴露的外部接口，增大了模板的灵活度，更利于模块化开发。Nodom以指令和自定义元素的方式实现插槽功能，两者的功能类似。
@@ -1480,7 +1521,7 @@ class Main extends Module{
   			<User>
 				{{title}}
 			</User>
-        `
+        `;
     }
     data(){
         return {
@@ -1496,6 +1537,29 @@ class Main extends Module{
 
 - 模块实例的`data()`函数返回的对象;
 - 父模块通过`$data`方式传入的值。
+
+每一个模块都有独立的`Model`，但可以通过在使用子模块时传入属性”useDomModel“的方式与子模块共享`Model`，使用方式如下
+
+```js
+class ModuleA extends Module{
+      template(props){
+              return `<div>{{name}}</div>`;
+    }
+}
+registModule(ModuleA,'User');
+<!-- 根模块 -->
+class Main extends Module{
+    template(){
+        return `
+        <ModuleA useDomModel></ModuleA>`;
+    }
+    data(){
+        return {
+            name:'Nodom',
+        }
+    }
+}
+```
 
 `Model`会深层代理内部的`object`类型数据。
 
