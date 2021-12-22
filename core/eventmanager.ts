@@ -1,5 +1,4 @@
 import { Module } from "./module";
-import { VirtualDom } from "./virtualdom";
 import { NEvent } from "./event";
 import { IRenderedDom } from "./types";
 /**

@@ -311,9 +311,7 @@ export class Module {
             let el = this.getNode(this.renderTree.key);
             if(el){
                 if(this.replaceContainer){
-                    // el.parentElement.removeChild(el);
                     Util.replaceNode(el,this.container);
-                    // this.getParent().saveNode(this.container['vdom'],this.container);
                 }else{
                     this.container.removeChild(el);
                 }
@@ -544,7 +542,7 @@ export class Module {
                 for(let evt of eobj){
                     if(evt[1].own){  //子模块不支持代理事件
                         for(let ev of evt[1].own){
-                            this.eventFactory.addEvent(this.originTree.key,ev);
+                            this.originTree.addEvent(ev);
                         }
                     }
                 }

@@ -204,8 +204,6 @@ export default (function () {
     createDirective('if',
         function (module: Module, dom: IRenderedDom, src: VirtualDom) {
             module.objectManager.setDomParam(dom.parent.key,'$if',this.value);
-            //子模块处理
-            // Util.activeSubModules(module, dom, this.value ? 0 : 1);
             return this.value;
         },
         5
@@ -218,11 +216,7 @@ export default (function () {
     createDirective(
         'else',
         function (module: Module, dom: IRenderedDom, src: VirtualDom) {
-            const v = module.objectManager.getDomParam(dom.parent.key,'$if') === false;
-            //子模块处理
-            // Util.activeSubModules(module, dom, v ? 0 : 1);
-            //如果前面的if/elseif值为true，则隐藏，否则显示
-            return v;
+            return module.objectManager.getDomParam(dom.parent.key,'$if') === false;
         },
         5
     );
@@ -241,8 +235,6 @@ export default (function () {
                 } else {
                     module.objectManager.setDomParam(dom.parent.key,'$if',true);
                 }
-                //子模块处理
-                // Util.activeSubModules(module, dom, this.value ? 0 : 1);
             }
             return true;
         },
@@ -268,14 +260,6 @@ export default (function () {
     createDirective(
         'show',
         function (module: Module, dom: IRenderedDom, src: VirtualDom) {
-            // console.log(this.value);
-            // Util.activeSubModules(module, src, this.value ? 0 : 1);
-            // if(this.value){
-            //     src.removeStyle('display:none');
-            // }else{
-            //     src.addStyle('display:none');
-            // }
-            // dom.props['style'] = src.getProp('style');
             if(this.value){
                 return true;
             }
@@ -443,7 +427,6 @@ export default (function () {
                 let m = ModuleFactory.get(mid);
                 if (m) {
                     //缓存当前替换节点
-                    // m.objectManager.set('$slots.' + this.value, { dom: src.clone(module), model: dom.model });
                     m.objectManager.set('$slots.' + this.value, { dom: src, model: dom.model });
                 }
                 //此次不继续渲染，子节点在实际模块中渲染

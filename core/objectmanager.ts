@@ -171,41 +171,6 @@ export  class ObjectManager {
     }
 
     /**
-     * 获取事件实例
-     * @param id        表达式id
-     * @returns         事件对象
-     */
-    // public getEvent(id:number):NEvent{
-    //     let ev = this.cache.get('$events.' + id + '.$instance');
-    //     if(!ev){
-    //         ev = GlobalCache.get('$events.' + id);
-    //         //如果从global移除，如果是slot，则会导致子模块事件丢失
-    //         // GlobalCache.removeEvent(id);
-    //         if(ev){
-    //             this.cache.set('$events.' + id,ev);
-    //             return ev.$instance;
-    //         }
-    //     }
-    //     return ev;
-    // }
-
-    /**
-     * 保存事件实例
-     * @param event     事件对象
-     */
-    // public saveEvent(event:NEvent){
-    //     this.cache.set('$events.' + event.id + '.$instance',event);
-    // }
-
-    /**
-     * 移除事件
-     * @param id    事件id
-     */
-    // public removeEvent(id:number){
-    //     this.cache.remove('$events.' + id);
-    // }
-
-    /**
      * 设置事件参数
      * @param id        事件id
      * @param key       dom key
