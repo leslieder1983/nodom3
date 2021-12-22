@@ -10,6 +10,7 @@ export { VirtualDom } from "./core/virtualdom";
 export { NError } from "./core/error";
 export { NEvent } from "./core/event";
 export { EventManager } from "./core/eventmanager";
+export { EventFactory } from "./core/eventfactory";
 export { GlobalCache } from "./core/globalcache";
 export { Expression } from "./core/expression";
 export { NFactory } from "./core/factory";

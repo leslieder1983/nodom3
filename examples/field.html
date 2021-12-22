@@ -6,12 +6,10 @@
 		<title>field</title>
 	</head>
 	<body>
-		<button onclick='active()'>active</button>
-		<button onclick='unactive()'>unactive</button>
 		<div></div>
 	</body>
 	<script type='module'>
-		import{nodom,Module,Util,ModuleFactory} from '../dist/nodom.js'
+		import{nodom,Module,Util,ModuleFactory} from '../dist/nodom.esm.js'
 
 		class Module1 extends Module{
 			template(){
@@ -37,7 +35,6 @@
 							<input x-field='sexy' type='radio' value='F' />女
 						</div>
 						<div>已婚：<input type='checkbox' x-field='married' yes-value='1' no-value='0' />是</div>
-						
 						<div>
 							学历：<select x-field='edu'>
 								<option x-repeat={{edus}} value={{eduId}}>{{eduName}}</option>
@@ -46,7 +43,6 @@
 						<div>
 							简介:<textarea x-field='intro'></textarea>
 						</div>
-
 					</div>
 				</div>
 				`

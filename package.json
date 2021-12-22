@@ -11,10 +11,13 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rollup -c"
   },
-  "unpkg": "dist/nodom.js",
   "author": "weblabsw",
   "license": "MIT",
-  "browser": "dist/nodom.js",
+  "unpkg": "dist/nodom.global.js",
+  "jsdelivr": "dist/nodom.global.js",
+  "module": "dist/nodom.esm.js",
+  "types": "dist/index.d.ts",
+  "browser": "dist/nodom.global.js",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^18.1.0",
     "@rollup/plugin-node-resolve": "^13.0.0",

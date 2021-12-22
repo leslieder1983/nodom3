@@ -20,17 +20,18 @@
 	</div>
 </body>
 	<script type='module'>
-		import{nodom,Module} from '../dist/nodom.js'
+		import{nodom,Module} from '../dist/nodom.esm.js'
 		class Module1 extends Module{
 			template(){
 				return `
 				<div>
 					<button e-click='show'>show</button>
 					<button e-click='change'>change</button>
+					<button e-click='change1'>change1</button>
 					<!-- e-swipedown='swipedown' touch设备下测试-->
-					<div x-show={{show}} > 
-					<ul >
-						<li x-repeat={{edus}} e-click='clickItem:delg' ><span>{{eduName}}</span></li>
+					<div  x-show={{show}}> 
+					<ul e-click='clickP:once'>
+						<li x-repeat={{edus}} e-click='clickItem:delg'><span>{{eduName}}</span></li>
 					</ul>
 					</div>
 				</div>
@@ -57,6 +58,7 @@
 			}
 			clickItem(model,dom,evo,e){
 				console.log('child',model);
+				model.checked = true;
 			}
 			show(model,dom,evo,e){
 				console.log(model.show);
@@ -68,7 +70,7 @@
 				})
 			}
 			change1(model,dom,evo,e){
-				model.edus[0].eduName = '幼儿园';
+				model.edus[0].checked = false;
 			}
 		}
 	

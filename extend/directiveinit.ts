@@ -7,6 +7,7 @@ import { ModuleFactory } from "../core/modulefactory";
 import { createDirective } from "../core/nodom";
 import { Renderer } from "../core/renderer";
 import { Router } from "../core/router";
+import { IRenderedDom } from "../core/types";
 import { Util } from "../core/util";
 import { VirtualDom } from "../core/virtualdom";
 
@@ -27,14 +28,14 @@ export default (function () {
      */
     createDirective(
         'module',
-        function (module: Module, dom: VirtualDom, src: VirtualDom) {
+        function (module: Module, dom: IRenderedDom, src: VirtualDom) {
             let m: Module;
             //存在moduleId，表示已经渲染过，不渲染
-            let mid = dom.getParam(module, 'moduleId');
+            let mid = module.objectManager.getDomParam(dom.key,'moduleId');
             let handle: boolean = true;
             if (mid) {
                 m = ModuleFactory.get(mid);
-                handle = !dom.getProp('renderOnce');
+                handle = !dom.props['renderOnce'];
             } else {
                 m = ModuleFactory.get(this.value);
                 if (!m) {
@@ -42,14 +43,14 @@ export default (function () {
                 }
                 mid = m.id;
                 //保留modelId
-                dom.setParam(module, 'moduleId', mid);
+                module.objectManager.setDomParam(dom.key,'moduleId',mid);
                 module.addChild(m);
                 //共享当前dom的model给子模块
-                if (dom.hasProp('useDomModel')) {
+                if (dom.props.hasOwnProperty('useDomModel')) {
                     m.model = dom.model;
                     //绑定model到子模块，共享update,watch方法
                     ModelManager.bindToModule(m.model, m);
-                    dom.delProp('useDomModel');
+                    delete dom.props['useDomModel'];
                 }
             }
             //保存到dom上，提升渲染性能
@@ -58,16 +59,17 @@ export default (function () {
                 //设置props，如果改变了props，启动渲染
                 let o: any = {};
                 if (dom.props) {
-                    for (let p of dom.props) {
-                        if (p[0][0] === '$') { //数据
+                    for (let p of Object.keys(dom.props)) {
+                        let v = dom.props[p];
+                        if (p[0] === '$') { //数据
                             if (!o.$data) {
                                 o.$data = {};
                             }
-                            o.$data[p[0].substr(1)] = p[1];
+                            o.$data[p.substr(1)] = v;
                             //删除属性
-                            dom.delProp(p[0]);
+                            delete dom.props[p];
                         } else {
-                            o[p[0]] = p[1];
+                            o[p] = v;
                         }
                     }
                 }
@@ -84,7 +86,7 @@ export default (function () {
      */
     createDirective(
         'model',
-        function (module: Module, dom: VirtualDom, src: VirtualDom) {
+        function (module: Module, dom: IRenderedDom, src: VirtualDom) {
             let model: Model = dom.model.$get(this.value);
             if (model) {
                 dom.model = model;
@@ -100,7 +102,7 @@ export default (function () {
      */
     createDirective(
         'repeat',
-        function (module: Module, dom: VirtualDom, src: VirtualDom) {
+        function (module: Module, dom: IRenderedDom, src: VirtualDom) {
             let rows = this.value;
             // 无数据，不渲染
             if (!Util.isArray(rows) || rows.length === 0) {
@@ -119,10 +121,11 @@ export default (function () {
                 }
                 //渲染一次-1，所以需要+1
                 src.staticNum++;
+                // console.log(rows[i]);
                 let d = Renderer.renderDom(module, src, rows[i], parent, rows[i].$key);
                 //删除$index属性
                 if (idxName) {
-                    d.delProp('$index');
+                    delete d.props['$index'];
                 }
             }
             //启用该指令
@@ -148,13 +151,13 @@ export default (function () {
      */
     createDirective(
         'recur',
-        function (module: Module, dom: VirtualDom, src: VirtualDom) {
+        function (module: Module, dom: IRenderedDom, src: VirtualDom) {
             //递归节点存放容器
-            if (dom.hasProp('ref')) {
+            if (dom.props['ref']) {
                 //如果出现在repeat中，src为单例，需要在使用前清空子节点，避免沿用上次的子节点
                 src.children = [];
                 //递归存储名
-                const name = '$recurs.' + (dom.getProp('ref') || 'default');
+                const name = '$recurs.' + (dom.props['ref'] || 'default');
                 let node = module.objectManager.get(name);
                 if (!node) {
                     return true;
@@ -184,9 +187,9 @@ export default (function () {
                     return true;
                 }
                 //递归名，默认default
-                const name = '$recurs.' + (dom.getProp('name') || 'default');
+                const name = '$recurs.' + (dom.props['name'] || 'default');
                 if (!module.objectManager.get(name)) {
-                    module.objectManager.set(name, src.clone());
+                    module.objectManager.set(name, src.clone(module));
                 }
             }
             return true;
@@ -199,10 +202,10 @@ export default (function () {
      * 描述：条件指令
      */
     createDirective('if',
-        function (module: Module, dom: VirtualDom, src: VirtualDom) {
-            dom.parent.setParam(module, '$if', this.value);
+        function (module: Module, dom: IRenderedDom, src: VirtualDom) {
+            module.objectManager.setDomParam(dom.parent.key,'$if',this.value);
             //子模块处理
-            Util.activeSubModules(module, src, this.value ? 0 : 1);
+            // Util.activeSubModules(module, dom, this.value ? 0 : 1);
             return this.value;
         },
         5
@@ -214,10 +217,10 @@ export default (function () {
      */
     createDirective(
         'else',
-        function (module: Module, dom: VirtualDom, src: VirtualDom) {
-            const v = dom.parent.getParam(module, '$if') === false;
+        function (module: Module, dom: IRenderedDom, src: VirtualDom) {
+            const v = module.objectManager.getDomParam(dom.parent.key,'$if') === false;
             //子模块处理
-            Util.activeSubModules(module, src, v ? 0 : 1);
+            // Util.activeSubModules(module, dom, v ? 0 : 1);
             //如果前面的if/elseif值为true，则隐藏，否则显示
             return v;
         },
@@ -228,18 +231,18 @@ export default (function () {
      * elseif 指令
      */
     createDirective('elseif',
-        function (module: Module, dom: VirtualDom, src: VirtualDom) {
-            let v = dom.parent.getParam(module, '$if');
+        function (module: Module, dom: IRenderedDom, src: VirtualDom) {
+            let v = module.objectManager.getDomParam(dom.parent.key,'$if');
             if (v === true) {
                 return false;
             } else {
                 if (!this.value) {
                     return false;
                 } else {
-                    dom.parent.setParam(module, '$if', true);
+                    module.objectManager.setDomParam(dom.parent.key,'$if',true);
                 }
                 //子模块处理
-                Util.activeSubModules(module, src, this.value ? 0 : 1);
+                // Util.activeSubModules(module, dom, this.value ? 0 : 1);
             }
             return true;
         },
@@ -251,8 +254,8 @@ export default (function () {
      */
     createDirective(
         'endif',
-        function (module: Module, dom: VirtualDom, src: VirtualDom) {
-            dom.parent.removeParam(module, '$if');
+        function (module: Module, dom: IRenderedDom, src: VirtualDom) {
+            module.objectManager.removeDomParam(dom.parent.key,'$if');
             return true;
         },
         5
@@ -264,9 +267,19 @@ export default (function () {
      */
     createDirective(
         'show',
-        function (module: Module, dom: VirtualDom, src: VirtualDom) {
-            Util.activeSubModules(module, src, this.value ? 0 : 1);
-            return this.value;
+        function (module: Module, dom: IRenderedDom, src: VirtualDom) {
+            // console.log(this.value);
+            // Util.activeSubModules(module, src, this.value ? 0 : 1);
+            // if(this.value){
+            //     src.removeStyle('display:none');
+            // }else{
+            //     src.addStyle('display:none');
+            // }
+            // dom.props['style'] = src.getProp('style');
+            if(this.value){
+                return true;
+            }
+            return false;
         },
         5
     );
@@ -276,44 +289,41 @@ export default (function () {
      * 描述：字段指令
      */
     createDirective('field',
-        function (module: Module, dom: VirtualDom, src: VirtualDom) {
-            const me = this;
-            const type: string = dom.getProp('type') || 'text';
+        function (module: Module, dom: IRenderedDom, src: VirtualDom) {
+            const type: string = dom.props['type'] || 'text';
             const tgname = dom.tagName.toLowerCase();
             const model = dom.model;
             if (!model) {
                 return true;
             }
-
             let dataValue = model.$get(this.value);
-
             if (type === 'radio') {
-                let value = dom.getProp('value');
+                let value = dom.props['value'];
                 if (dataValue == value) {
-                    dom.setProp('checked', true);
-                    dom.setAsset('checked', 'checked');
+                    dom.props['checked'] = 'checked';
+                    Util.setDomAsset(dom,'checked',true);
                 } else {
-                    dom.setAsset('checked', false);
-                    dom.delProp('checked');
+                    delete dom.props['checked'];
+                    Util.setDomAsset(dom,'checked',false);
                 }
             } else if (type === 'checkbox') {
                 //设置状态和value
-                let yv = dom.getProp('yes-value');
+                let yv = dom.props['yes-value'];
                 //当前值为yes-value
                 if (dataValue == yv) {
-                    dom.setProp('value', yv);
-                    dom.setAsset('checked', 'checked');
+                    dom.props['value'] = yv;
+                    Util.setDomAsset(dom,'checked',true);
                 } else { //当前值为no-value
-                    dom.setProp('value', dom.getProp('no-value'));
-                    dom.setAsset('checked', false);
+                    dom.props['value'] = dom.props['no-value'];
+                    Util.setDomAsset(dom,'checked',false);
                 }
             } else if (tgname === 'select') { //下拉框
-                dom.setAsset('value', dataValue);
-                dom.setProp('value', dataValue);
+                dom.props['value'] = dataValue;
+                Util.setDomAsset(dom,'value',dataValue);
             } else {
                 let v = (dataValue !== undefined && dataValue !== null) ? dataValue : '';
-                dom.setAsset('value', v);
-                dom.setProp('value', v);
+                dom.props['value'] = v;
+                Util.setDomAsset(dom,'value',v);
             }
             let event: NEvent = GlobalCache.get('$fieldChangeEvent');
             if(!event){
@@ -323,16 +333,17 @@ export default (function () {
                         if (!el) {
                             return;
                         }
-                        let directive = dom.getDirective('field');
-                        let type = dom.getProp('type');
+                        let directive = this.originTree.query(dom.key).getDirective('field');
+                        let type = dom.props['type'];
                         let field = directive.value;
                         let v = el.value;
+
                         //根据选中状态设置checkbox的value
                         if (type === 'checkbox') {
-                            if (dom.getProp('yes-value') == v) {
-                                v = dom.getProp('no-value');
+                            if (dom.props['yes-value'] == v) {
+                                v = dom.props['no-value'];
                             } else {
-                                v = dom.getProp('yes-value');
+                                v = dom.props['yes-value'];
                             }
                         } else if (type === 'radio') {
                             if (!el.checked) {
@@ -356,14 +367,14 @@ export default (function () {
                         }
                         //修改value值，该节点不重新渲染
                         if (type !== 'radio') {
-                            dom.setProp('value', v);
+                            dom.props['value'] =  v;
                             el.value = v;
                         }
                     }
                 );
                 GlobalCache.set('$fieldChangeEvent',event);
             }
-            dom.addEvent(event);
+            module.eventFactory.addEvent(dom.key,event);
             return true;
         },
         10
@@ -373,16 +384,16 @@ export default (function () {
      * route指令
      */
     createDirective('route',
-        function (module: Module, dom: VirtualDom, src: VirtualDom) {
+        function (module: Module, dom: IRenderedDom, src: VirtualDom) {
             //a标签需要设置href
             if (dom.tagName.toLowerCase() === 'a') {
-                dom.setProp('href', 'javascript:void(0)');
+                dom.props['href'] = 'javascript:void(0)';
             }
-            dom.setProp('path', this.value);
+            dom.props['path'] = this.value;
             //有激活属性
-            if (dom.hasProp('active')) {
-                let acName = dom.getProp('active');
-                dom.delProp('active');
+            if (dom.props['active']) {
+                let acName = dom.props['active'];
+                delete dom.props['active'];
                 //active 转expression
                 Router.addActiveField(module, this.value, dom.model, acName);
                 if (this.value.startsWith(Router.currentPath) && dom.model[acName]) {
@@ -395,7 +406,7 @@ export default (function () {
             if (!event) {
                 event = new NEvent(null, 'click',
                     function(model, dom, evObj,e){
-                        let path = dom.getProp('path');
+                        let path = dom.props['path'];
                         if (Util.isEmpty(path)) {
                             return;
                         }
@@ -404,7 +415,7 @@ export default (function () {
                 );
                 GlobalCache.set('$routeClickEvent', event);
             }
-            dom.addEvent(event);
+            module.eventFactory.addEvent(dom.key,event);
             return true;
         }
     );
@@ -413,7 +424,7 @@ export default (function () {
      * 增加router指令
      */
     createDirective('router',
-        function (module: Module, dom: VirtualDom, src: VirtualDom) {
+        function (module: Module, dom: IRenderedDom, src: VirtualDom) {
             Router.routerKeyMap.set(module.id, dom.key);
             return true;
         }
@@ -424,7 +435,7 @@ export default (function () {
      * 用于模块中，可实现同名替换
      */
     createDirective('slot',
-        function (module: Module, dom: VirtualDom, src: VirtualDom) {
+        function (module: Module, dom: IRenderedDom, src: VirtualDom) {
             this.value = this.value || 'default';
             let mid = dom.parent.subModuleId;
             //父dom有module指令，表示为替代节点，替换子模块中的对应的slot节点；否则为子模块定义slot节点
@@ -432,7 +443,8 @@ export default (function () {
                 let m = ModuleFactory.get(mid);
                 if (m) {
                     //缓存当前替换节点
-                    m.objectManager.set('$slots.' + this.value, { dom: src.clone(), model: dom.model });
+                    // m.objectManager.set('$slots.' + this.value, { dom: src.clone(module), model: dom.model });
+                    m.objectManager.set('$slots.' + this.value, { dom: src, model: dom.model });
                 }
                 //此次不继续渲染，子节点在实际模块中渲染
                 return false;
@@ -448,7 +460,7 @@ export default (function () {
                     //更改渲染子节点
                     src.children = rdom.children;
                     //非内部渲染,更改model
-                    if (!src.hasProp('innerRender')) {
+                    if (!src.getProp('innerRender')) {
                         for (let c of src.children) {
                             c.model = cfg.model;
                         }
@@ -466,7 +478,7 @@ export default (function () {
      * 描述：动画指令
      */
     createDirective('animation',
-        function (module: Module, dom: VirtualDom, src: VirtualDom) {
+        function (module: Module, dom: IRenderedDom, src: VirtualDom) {
             const confObj = this.value
             if (!Util.isObject(confObj)) {
                 return new Error('未找到animation配置对象');
@@ -548,7 +560,7 @@ export default (function () {
                 if (el) {
                     if (el.getAttribute('class').indexOf(`${nameLeave}-leave-to`) != -1) {
                         // 当前已经处于leave动画播放完成之后了，直接返回
-                        dom.addClass(`${nameLeave}-leave-to`)
+                        src.addClass(`${nameLeave}-leave-to`)
                         return true;
                     }
                     // 调用函数触发 Leave动画/过渡
@@ -558,7 +570,7 @@ export default (function () {
                     // el不存在，第一次渲染
                     if (isAppear) {
                         // 是进入离开动画，管理初次渲染的状态，让他隐藏
-                        dom.addStyle('display:none')
+                        src.addStyle('display:none')
                     }
 
                     // 下一帧
@@ -567,7 +579,7 @@ export default (function () {
                         let el: HTMLElement = <HTMLElement>module.getNode(dom.key)
                         if (isAppear) {
                             // 动画/过渡 是进入离开动画/过渡，并且当前是需要让他隐藏所以我们不播放动画，直接隐藏。
-                            dom.removeStyle('display:none');
+                            src.removeStyle('display:none');
                             el.style.display = 'none'
                         } else {
                             //  动画/过渡 是 **非进入离开动画/过渡** 我们不管理元素的隐藏，所以我们让他播放一次Leave动画。
@@ -581,7 +593,7 @@ export default (function () {
                 // tigger为true 播放Enter动画
                 if (el) {
                     if (el.getAttribute('class').indexOf(`${nameEnter}-enter-to`) != -1) {
-                        dom.addClass(`${nameEnter}-enter-to`)
+                        src.addClass(`${nameEnter}-enter-to`)
                         return true;
                     }
                     // 调用函数触发Enter动画/过渡
@@ -590,14 +602,14 @@ export default (function () {
                     // el不存在，是初次渲染
                     if (isAppear) {
                         // 管理初次渲染元素的隐藏显示状态
-                        dom.addStyle('display:none')
+                        src.addStyle('display:none')
                     }
                     // 下一帧
                     setTimeout(() => {
                         // 等虚拟dom把元素更新上去了之后，取得元素
                         let el: HTMLElement = <HTMLElement>module.getNode(dom.key)
                         if (isAppear) {
-                            dom.removeStyle('display:none');
+                            src.removeStyle('display:none');
                             el.style.display = 'none'
                         }
                         // Enter动画与Leave动画不同，
@@ -847,8 +859,8 @@ export default (function () {
              * @param dom 虚拟dom
              * @returns 获得模板上的width/height 如果没有则返回空字符串
              */
-            function getOriginalWidthAndHeight(dom: VirtualDom): Array<string> {
-                const oStyle = dom.getProp('style');
+            function getOriginalWidthAndHeight(dom: IRenderedDom): Array<string> {
+                const oStyle = dom.props['style'];
                 let width: string;
                 let height: string;
                 if (oStyle) {

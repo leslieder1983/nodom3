@@ -333,13 +333,15 @@ export class Compiler {
      * @param node  虚拟dom节点
      */
     private postHandleNode(node:VirtualDom){
+        // 自定义元素判断
+        if(DefineElementManager.has(node.tagName)){ //自定义元素
+            let clazz = DefineElementManager.get(node.tagName);
+            Reflect.construct(clazz,[node,this.module]);
+        }
         // 模块类判断
         if (ModuleFactory.hasClass(node.tagName)) {
             node.addDirective(new Directive('module',node.tagName));
             node.tagName = 'div';
-        }else if(DefineElementManager.has(node.tagName)){ //自定义元素
-            let clazz = DefineElementManager.get(node.tagName);
-            Reflect.construct(clazz,[node,this.module]);
         }
     }
 

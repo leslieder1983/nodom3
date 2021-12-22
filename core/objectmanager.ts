@@ -5,6 +5,7 @@ import { NEvent } from "./event";
 import { Expression } from "./expression";
 import { GlobalCache } from "./globalcache";
 import { Module } from "./module";
+import { IRenderedDom } from "./types";
 
 /**
  * 指令管理器
@@ -174,35 +175,35 @@ export  class ObjectManager {
      * @param id        表达式id
      * @returns         事件对象
      */
-    public getEvent(id:number):NEvent{
-        let ev = this.cache.get('$events.' + id + '.$instance');
-        if(!ev){
-            ev = GlobalCache.get('$events.' + id);
-            //如果从global移除，如果是slot，则会导致子模块事件丢失
-            // GlobalCache.removeEvent(id);
-            if(ev){
-                this.cache.set('$events.' + id,ev);
-                return ev.$instance;
-            }
-        }
-        return ev;
-    }
+    // public getEvent(id:number):NEvent{
+    //     let ev = this.cache.get('$events.' + id + '.$instance');
+    //     if(!ev){
+    //         ev = GlobalCache.get('$events.' + id);
+    //         //如果从global移除，如果是slot，则会导致子模块事件丢失
+    //         // GlobalCache.removeEvent(id);
+    //         if(ev){
+    //             this.cache.set('$events.' + id,ev);
+    //             return ev.$instance;
+    //         }
+    //     }
+    //     return ev;
+    // }
 
     /**
      * 保存事件实例
      * @param event     事件对象
      */
-    public saveEvent(event:NEvent){
-        this.cache.set('$events.' + event.id + '.$instance',event);
-    }
+    // public saveEvent(event:NEvent){
+    //     this.cache.set('$events.' + event.id + '.$instance',event);
+    // }
 
     /**
      * 移除事件
      * @param id    事件id
      */
-    public removeEvent(id:number){
-        this.cache.remove('$events.' + id);
-    }
+    // public removeEvent(id:number){
+    //     this.cache.remove('$events.' + id);
+    // }
 
     /**
      * 设置事件参数
@@ -253,7 +254,7 @@ export  class ObjectManager {
      * 缓存渲染树虚拟dom
      * @param dom       dom对象
      */
-    public saveElement(dom:VirtualDom){
+    public saveDom(dom:IRenderedDom){
         this.cache.set('$doms.' + dom.key,dom);
     }
     /**
@@ -261,7 +262,7 @@ export  class ObjectManager {
      * @param key       dom key
      * @returns         dom对象
      */
-    public getElement(key:string):VirtualDom{
+    public getDom(key:string):IRenderedDom{
         return this.cache.get('$doms.' + key);
     }
 
@@ -269,18 +270,9 @@ export  class ObjectManager {
      * 删除渲染树虚拟dom
      * @param key       虚拟dom key
      */
-     public removeElement(key:string){
+     public removeDom(key:string){
         this.cache.remove('$doms.' + key);
     }
-
-
-    /**
-     * 移除保存的html节点和节点参数
-     * @param key   dom key
-     */
-    // public removeSavedNode(key:string){
-    //     this.cache.remove('$doms.' + key);
-    // }
 
     /**
      * 设置dom参数值
@@ -288,7 +280,7 @@ export  class ObjectManager {
      * @param name       参数名
      * @param value     参数值
      */
-    public setElementParam(key:string,name:string,value:any){
+    public setDomParam(key:string,name:string,value:any){
         this.cache.set('$doms.' + key + '.$params.' + name ,value);
     }
 
@@ -298,7 +290,7 @@ export  class ObjectManager {
      * @param name      参数名
      * @returns         参数值
      */
-    public getElementParam(key:string,name:string):any{
+    public getDomParam(key:string,name:string):any{
         return this.cache.get('$doms.' + key + '.$params.' + name);
     }
 
@@ -307,7 +299,7 @@ export  class ObjectManager {
      * @param key       dom key
      * @param name      参数名
      */
-    public removeElementParam(key:string,name:string){
+    public removeDomParam(key:string,name:string){
         this.cache.remove('$doms.' + key + '.$params.' + name);
     }
 
@@ -315,7 +307,7 @@ export  class ObjectManager {
      * 清除element 参数集
      * @param key   dom key
      */
-    public clearElementParams(key:string){
+    public clearDomParams(key:string){
         this.cache.remove('$doms.' + key + '.$params');
     }
 

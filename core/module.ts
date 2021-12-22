@@ -9,7 +9,8 @@ import { Renderer } from "./renderer";
 import { Util } from "./util";
 import { DiffTool } from "./difftool";
 import { ModelManager } from "./modelmanager";
-import { EModuleState } from "./types";
+import { EModuleState, IRenderedDom } from "./types";
+import { EventFactory } from "./eventfactory";
 
 /**
  * 模块类
@@ -48,7 +49,7 @@ export class Module {
     /**
      * 渲染树
      */
-    public renderTree: VirtualDom;
+    public renderTree: IRenderedDom;
 
     /**
      * 父模块 id
@@ -86,6 +87,11 @@ export class Module {
     public objectManager:ObjectManager;
 
     /**
+     * 事件工厂
+     */
+    public eventFactory:EventFactory;
+
+    /**
      * 更改model的map，用于记录增量渲染时更改的model
      */
     public changedModelMap:Map<string,boolean>;
@@ -103,7 +109,7 @@ export class Module {
     /**
      * key virtualdom map 
      */
-    private keyVDomMap:Map<string,VirtualDom> = new Map();
+    private keyVDomMap:Map<string,IRenderedDom> = new Map();
 
     /**
      * 不允许加入渲染队列标志，在renderdom前设置，避免render前修改数据引发二次渲染
@@ -118,7 +124,7 @@ export class Module {
     /**
      * 来源dom，子模块对应dom
      */
-    public srcDom:VirtualDom;
+    public srcDom:IRenderedDom;
 
     /**
      * 生成dom时的keyid，每次编译置0
@@ -137,6 +143,7 @@ export class Module {
         this.id = Util.genId();
         this.objectManager = new ObjectManager(this);
         this.changedModelMap = new Map();
+        this.eventFactory = new EventFactory(this);
         //加入模块工厂
         ModuleFactory.add(this);
     }
@@ -200,7 +207,6 @@ export class Module {
             this.dontAddToRender = false;
             return;
         }
-        
         if (!this.renderTree) {
             this.doFirstRender();
         } else { //增量渲染
@@ -305,8 +311,9 @@ export class Module {
             let el = this.getNode(this.renderTree.key);
             if(el){
                 if(this.replaceContainer){
+                    // el.parentElement.removeChild(el);
                     Util.replaceNode(el,this.container);
-                    this.getParent().saveNode(this.container['vdom'],this.container);
+                    // this.getParent().saveNode(this.container['vdom'],this.container);
                 }else{
                     this.container.removeChild(el);
                 }
@@ -320,6 +327,9 @@ export class Module {
         this.keyNodeMap.clear();
         this.keyElementMap.clear();
         this.keyVDomMap.clear();
+        //清空event factory
+        this.eventFactory = new EventFactory(this);
+            
         //清理缓存
         this.clearCache();
         
@@ -447,7 +457,7 @@ export class Module {
      * @param props     属性值
      * @param dom       子模块对应节点
      */
-    public setProps(props:any,dom:VirtualDom){
+    public setProps(props:any,dom:IRenderedDom){
         let dataObj = props.$data;
         delete props.$data;
         //props数据复制到模块model
@@ -463,9 +473,10 @@ export class Module {
         }
         this.props = props;
         this.srcDom = dom;
-        if(this.state === EModuleState.INITED){
+        
+        if(this.state === EModuleState.INITED || this.state === EModuleState.UNACTIVE){
             this.active();
-        }else if(this.state !== EModuleState.UNACTIVE){  //计算template，如果导致模版改变，需要激活
+        }else {  //计算template，如果导致模版改变，需要激活
             let change = false;
             if(!this.props){
                 change = true;
@@ -479,16 +490,21 @@ export class Module {
                 }else{
                     for(let k of keys){
                         // object 默认改变
-                        if(props[k] !== this.props[k] || typeof(props[k]) === 'object'){
+                        if(props[k] !== this.props[k]){
                             change = true;
                             break;
                         }
                     }
                 }
             }
+
             if(change){  //props 发生改变，计算模版，如果模版改变，激活模块
+                let propChanged = false;
+                if(this.originTree){
+                    propChanged = this.mergeProps(this.originTree,props);
+                }
                 const tmp = this.template(this.props);
-                if(tmp !== this.oldTemplate){
+                if(tmp !== this.oldTemplate || propChanged){
                     this.active();
                 }
             }    
@@ -515,18 +531,49 @@ export class Module {
             return;
         }
         this.originTree = new Compiler(this).compile(this.oldTemplate);
-        //事件传递
-        if(this.srcDom && this.srcDom.events){
-            if(!this.originTree.events){
-                this.originTree.events = new Map();
-            }
-            for(let p of this.srcDom.events){
-                if(!this.originTree.events.has(p[0])){  //子模块已存在的事件不处理
-                    this.originTree.events.set(p[0],p[1]);
+        
+        if(this.props){
+            this.mergeProps(this.originTree,this.props);
+        }
+        
+        //源事件传递到子模块根
+        let parentModule = this.getParent();
+        if(parentModule){
+            const eobj = parentModule.eventFactory.getEvent(this.srcDom.key);
+            if(eobj){
+                for(let evt of eobj){
+                    if(evt[1].own){  //子模块不支持代理事件
+                        for(let ev of evt[1].own){
+                            this.eventFactory.addEvent(this.originTree.key,ev);
+                        }
+                    }
                 }
             }
         }
     }
+
+    /**
+    * 合并属性
+    * @param dom       dom节点 
+    * @param props     属性集合
+    * @returns         是否改变
+    */
+    private mergeProps(dom:VirtualDom,props:any):boolean{
+       let change = false;
+       for(let k of Object.keys(props)){
+           if(props[k] !== dom.getProp(k)){
+               change = true;
+               if(k === 'style'){
+                   dom.addStyle(props[k]);
+               }else if(k === 'class'){
+                   dom.addClass(props[k]);
+               }else{
+                   dom.setProp(k,props[k]);
+               }
+           }
+       }
+       return change;
+   }
     /**
      * 清理缓存
      * @param force 强力清除 
@@ -586,7 +633,7 @@ export class Module {
      * @param key   vdom key
      * @returns     virtual dom
      */
-    public getVirtualDom(key:string):VirtualDom{
+    public getVirtualDom(key:string):IRenderedDom{
         return this.keyVDomMap.get(key);
     }
 
@@ -595,25 +642,41 @@ export class Module {
      * @param dom   virtual dom
      * @param key   vdom key
      */
-    public saveVirtualDom(dom:VirtualDom,key?:string){
-        this.keyVDomMap.set(key || dom.key,dom);
+    public saveVirtualDom(dom:IRenderedDom,key?:string){
+        key = key || dom.key;
+        // if(this.keyVDomMap.has(key)){
+        //     let dom1 = this.keyVDomMap.get(key);
+        //     // if(dom1.events){ //保留事件
+        //         // dom.events = dom1.events;
+        //     // }
+        // }
+        this.keyVDomMap.set(key,dom);
     }
 
     /**
      * 从keyNodeMap移除
-     * @param key   dom key
+     * @param dom   虚拟dom
      * @param deep  深度清理
      */
-    public removeNode(key:string,deep?:boolean){
-        this.keyNodeMap.delete(key);
+    public removeNode(dom:IRenderedDom,deep?:boolean){
         if(deep){
-            let dom = this.keyVDomMap.get(key);
             if(dom && dom.children){
                 for(let d of dom.children){
-                    this.removeNode(d.key,true);
-                }    
+                    this.removeNode(d,true);
+                }
             }
         }
+        if(dom.subModuleId){
+            let m = ModuleFactory.get(dom.subModuleId);
+            console.log(m);
+            if(m){
+                m.unactive();
+            }
+        }
+        //解绑所有事件
+        this.eventFactory.unbindAll(dom.key);
+        //从map移除
+        this.keyNodeMap.delete(dom.key);
     }
 
     /**
@@ -621,7 +684,7 @@ export class Module {
      * @param key   dom key
      * @param deep  深度清理
      */
-    public clearDomCache(dom:VirtualDom,deep?:boolean){
+    public clearDomCache(dom:IRenderedDom,deep?:boolean){
         if(deep){
             if(dom.children){
                 for(let d of dom.children){
@@ -630,12 +693,35 @@ export class Module {
             }
         }
         //从缓存移除节点
-        this.objectManager.removeElement(dom.key);
-        // this.objectManager.clearElementParams(dom.key);
+        this.objectManager.removeDom(dom.key);
         //从key node map移除
         this.keyNodeMap.delete(dom.key);
         //从virtual dom map移除
         this.keyVDomMap.delete(dom.key);
+    }
+
+    /**
+     * 从origin tree 获取虚拟dom节点
+     * @param key   dom key
+     */
+    public getOrginDom(key:string):VirtualDom{
+        if(!this.originTree){
+            return null;
+        }
+        return find(this.originTree);
+        function find(dom:VirtualDom){
+            if(dom.key === key){
+                return dom;
+            }
+            if(dom.children){
+                for(let d of dom.children){
+                    let d1 = find(d);
+                    if(d1){
+                        return d1;
+                    }
+                }
+            }
+        }
     }
 
     /**

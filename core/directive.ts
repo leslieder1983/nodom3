@@ -6,6 +6,7 @@ import { Util } from "./util";
 import { Expression } from "./expression";
 import { NError } from "./error";
 import { NodomMessage } from "./nodom";
+import { IRenderedDom } from "./types";
 
 /**
  * 指令类
@@ -65,7 +66,7 @@ export  class Directive {
      * @param src       源节点
      * @returns         true/false
      */
-    public exec(module:Module,dom:any,src:VirtualDom):boolean {
+    public exec(module:Module,dom:IRenderedDom,src:VirtualDom):boolean {
         //禁用，不执行
         if(this.disabled){
             return true;

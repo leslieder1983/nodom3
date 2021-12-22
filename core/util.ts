@@ -3,6 +3,7 @@ import { NEvent } from "./event";
 import { Module } from "./module";
 import { ModuleFactory } from "./modulefactory";
 import { NodomMessage } from "./nodom";
+import { IRenderedDom } from "./types";
 import { VirtualDom } from "./virtualdom";
 /**
  * 基础服务库
@@ -541,13 +542,20 @@ export class Util {
      * @param dom       dom节点
      * @param flag      0 active  1 unactive 
      */
-    public static activeSubModules(module:Module,dom:VirtualDom,flag?:number){
+    public static activeSubModules(module:Module,dom:IRenderedDom,flag?:number){
+        console.log(dom.subModuleId);
+        if(dom.subModuleId){
+            let m = ModuleFactory.get(dom.subModuleId);
+            if(m){
+                flag?m.unactive():m.active();
+            }
+        }
         if(!dom.children){
             return;
         }
         for(let c of dom.children){
-            if(c.hasDirective('module')){  //如果dom带有module指令，则进行模块激活
-                let mid = c.getParam(module,'moduleId');
+            if(c.vdom.hasDirective('module')){  //如果dom带有module指令，则进行模块激活
+                let mid = c.subModuleId;
                 if(mid){  //初始化过
                     let m = ModuleFactory.get(mid);
                     if(flag){
@@ -560,6 +568,32 @@ export class Util {
                 Util.activeSubModules(module,c,flag);
             }
         }
+    }
+
+    /**
+     * 设置dom asset
+     * @param dom       渲染后的dom节点
+     * @param name      asset name    
+     * @param value     asset value
+     */
+    public static setDomAsset(dom:IRenderedDom,name:string,value:any){
+        if(!dom.assets){
+            dom.assets = {};
+        }
+        dom.assets[name] = value;
+    }
+
+    /**
+     * 删除dom asset
+     * @param dom   渲染后的dom节点
+     * @param name  asset name
+     * @returns 
+     */
+    public static delDomAsset(dom:IRenderedDom,name:string){
+        if(!dom.assets){
+            return;
+        }
+        delete dom.assets[name];
     }
 }
 

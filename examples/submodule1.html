@@ -10,7 +10,7 @@
     <div></div>
 </body>
 <script type='module'>
-    import {nodom,Module,GlobalCache,ModuleFactory} from '../dist/nodom.js'
+    import {nodom,Module,GlobalCache,ModuleFactory} from '../dist/nodom.esm.js'
     
     class ModuleA extends Module{
         template(props){
@@ -41,7 +41,8 @@
                 showme:true,
                 x1:0,
                 x2:0,
-                rows:[{name:'nodom1'},{name:'nodom2'},{name:'nodom3'}]
+                rows:[{name:'nodom1'},{name:'nodom2'},{name:'nodom3'}],
+                
             }
         }
         clickShow(model){
@@ -120,7 +121,6 @@
 
     class Module1 extends Module{
         modules=[ModuleA,ModuleB,UIButton];
-
         template(props){
             return `
                 <div >
@@ -135,12 +135,12 @@
                     <div>name is:{{name1}}</div>
                     <input x-field='name1' />
                     <!--useDomModel表示用当前dom对应的model直接覆盖子模块的model-->
-                    <modulea style={{style}} x-show={{show}} $rows1={{rows1}}>
-                        <uibutton e-click='clickBtn' title='clickBtn' x-repeat={{rows}}/>
+                    <modulea class='cls1' x-show={{show}} $rows1={{rows1}}>
+                        <for tag='uibutton' e-click='clickBtn' title={{name}} cond={{rows}} />
+                        
                         <for cond={{rows}}>
                             <ModuleB style='font-size:18px;' useDomModel/>
                         </for>
-                        
                     </modulea>
                 </div>
             `;
@@ -152,9 +152,9 @@
                 style:'width:800px',
                 show:true,
                 rows:[
-                    {id:1,name:'nodom'},
-                    {id:2,name:'noomi'},
-                    {id:3,name:'relaen'}
+                    {id:1,name:'nodom',title:'click1'},
+                    {id:2,name:'noomi',title:'click2'},
+                    {id:3,name:'relaen',title:'click3'}
                 ]
             }
         }

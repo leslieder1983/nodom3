@@ -1,7 +1,6 @@
 import { Directive } from "./directive";
 import { DirectiveManager } from "./directivemanager";
 import { NEvent } from "./event";
-import { EventManager } from "./eventmanager";
 import { Expression } from "./expression";
 import { Model } from "./model";
 import { Module } from "./module";
@@ -52,11 +51,11 @@ export class VirtualDom {
      */
     public props: Map<string,any>;
 
+
     /**
-     * 事件集合,{eventName1:nodomNEvent1,...}
-     * 一个事件名，可以绑定多个事件方法对象
+     * 事件数组
      */
-    public events: Map<string, number[]>;
+    public events:Array<NEvent>;
 
     /**
      * 子节点数组[]
@@ -64,9 +63,19 @@ export class VirtualDom {
     public children: Array<VirtualDom>;
 
     /**
+     * 样式map
+     */
+    private styleMap:Map<string,string>;
+
+    /**
+     * class 数组
+     */
+    private classArr:Array<string>;
+    
+    /**
      * 父虚拟dom
      */
-    // public parent: VirtualDom;
+    public parent: VirtualDom;
 
     /**
      * staticNum 静态标识数
@@ -87,27 +96,11 @@ export class VirtualDom {
     public notChange:boolean;
 
     /**
-     * 子模块id，模块容器时有效
-     */
-    public subModuleId:number;
-
-    /**
-     * 不添加到树
-     */
-    public dontAddToTree:boolean;
-
-    /**
-     * 父dom
-     */
-    public parent:VirtualDom;
-
-    /**
      * @param tag       标签名
      * @param key       key
      */
     constructor(tag?: string,key?:string,module?:Module) {
         this.key = key || ((module?module.getDomKeyId():Util.genId()) + '');
-        
         if(tag){
             this.tagName = tag;
         }
@@ -210,107 +203,143 @@ export class VirtualDom {
     }
     /**
      * 是否存在某个class
-     * @param cls   classname
+     * @param cls   class name
      * @return      true/false
      */
-    public hasClass(cls: string): boolean {
-        let clazz = this.getProp('class');
-        if (!clazz) {
+    public hasClass(module,cls: string): boolean {
+        let classes = this.getParam(module,'$classes');
+        if(!classes){
             return false;
-        } else {
-            return clazz.trim().split(/\s+/).includes(cls);
         }
+        return classes.includes(cls);
     }
 
     /**
+     * 初始化class数组
+     */
+    private initClassArr(){
+        let classes = this.classArr;
+        if(classes){
+            return;
+        }
+        this.classArr = [];
+        let clazz = this.getProp('class');
+        if(clazz){
+            this.classArr = clazz.trim().split(/\s+/);
+            this.setProp('class',this.classArr.join(' '));
+        }
+    }
+    /**
      * 添加css class
-     * @param cls class名
+     * @param cls class名,可以多个，以“空格”分割
      */
     public addClass(cls: string) {
-        let clazz = this.getProp('class');
-        if (!clazz || clazz === '') {
-            this.setProp('class', cls);
-            this.setStaticOnce();
-        } else {
-            let sa: any[] = clazz.trim().split(/\s+/);
-            if (!sa.includes(cls)) {
-                sa.push(cls);
-                clazz = sa.join(' ');
-                this.setProp('class',clazz);
-                this.setStaticOnce();
+        this.initClassArr();
+        let classes = this.classArr;
+        let arr = cls.trim().split(/\s+/);
+        let change = false;
+        for(let a of arr){
+            if(!classes.includes(a)){
+                change = true;
+                classes.push(a);        
             }
+        }
+        if(change){
+            this.setProp('class',classes.join(' '));
+            this.setStaticOnce();
         }
     }
 
     /**
      * 删除css class
-     * @param cls class名
+     * @param cls class名,可以多个，以“空格”分割
      */
     public removeClass(cls: string) {
-        let clazz = this.getProp('class');
-        if (!clazz || clazz === '') {
+        let classes = this.classArr;
+        if(!classes){
             return;
-        } else {
-            let sa: string[] = clazz.trim().split(/\s+/);
-            let index;
-            if ((index = sa.indexOf(cls)) !== -1) {
-                sa.splice(index, 1);
-                clazz = sa.join(' ');
+        }
+        let arr = cls.trim().split(/\s+/);
+        let change = false;
+        for(let a of arr){
+            let ind;
+            if((ind=classes.indexOf(a))!==-1){
+                change = true;
+                classes.splice(ind,1);
             }
         }
-        this.setProp('class',clazz);
-    }
-    /**
-     * 查询style
-     * @param styStr style字符串
-     */
-    public hasStyle(styStr: string) {
-        let styleStr = this.getProp('style');
-        if (!styleStr) {
-            return false;
-        } else {
-            return styleStr.trim().split(/;\s+/).includes(styStr);
+        if(change){
+            this.setProp('class',classes.join(' '));
+            this.setStaticOnce();
         }
     }
+    
+    /**
+     * 初始化style map
+     */
+    private initStyleMap(){
+        if(this.styleMap){
+            return;
+        }
+        this.styleMap = new Map();
 
+        let styles = this.styleMap;
+        let oriStyle = this.getProp('style');
+        if(oriStyle){
+            let sa: any[] = oriStyle.trim().split(/\s*;\s*/);
+            for(let s of sa){
+                let sa1 = s.split(/\s*:\s*/);
+                styles.set(sa1[0],sa[1]);
+            }
+        }
+    }
     /**
      * 添加style
-     *  @param styStr style字符串
+     *  @param styleStr style字符串
      */
-    public addStyle(styStr: string) {
-        let styleStr = this.getProp('style');
-        if (!styleStr) {
-            this.setProp('style', styStr);
-            this.setStaticOnce();
-        } else {
-            let sa: any[] = styleStr.trim().split(/;\s+/);
-            if (!sa.includes(styStr)) {
-                sa.push(styStr);
-                styleStr = sa.join(';');
-                this.setProp('style',styleStr);
-                this.setStaticOnce();
+    public addStyle(styleStr: string) {
+        this.initStyleMap();
+        let change = false;
+        let sa = styleStr.trim().split(/\s*;\s*/);
+        let styles = this.styleMap
+        for(let s of sa){
+            if(s === ''){
+                continue;
             }
+            let sa1 = s.split(/\s*:\s*/);
+            if(!styles.has(sa1[0]) || styles.get(sa1[0]) !== sa1[1]){
+                change =true;
+                styles.set(sa1[0],sa1[1]);
+            }
+        }
+        if(change){
+            this.setProp('style',[...styles].map(item=>item.join(':')).join(';'));
+            this.setStaticOnce();
         }
     }
 
     /**
      * 删除style
-     * @param styStr style字符串
+     * @param styleStr style字符串，可以是stylename:stylevalue[;...]或stylename1;stylename2
      */
-    public removeStyle(styStr: string) {
-        let styleStr = this.getProp('style');
-        if (!styleStr) {
+    public removeStyle(styleStr: string) {
+        let styles = this.styleMap;
+        if(!styles){
             return;
-        } else {
-            let sa: string[] = styleStr.trim().split(/;\s+/);
-            let index;
-            if ((index = sa.indexOf(styStr)) !== -1) {
-                sa.splice(index, 1);
-                styleStr = sa.join(';');
+        }
+        let change = false;
+        let sa = styleStr.trim().split(/\s*;\s*/);
+        for(let s of sa){
+            let sa1 = s.split(/\s*:\s*/);
+            if(!sa1[1]&&styles.has(sa1[0]) || styles.get(sa1[0]) === sa1[1]){
+                change =true;
+                styles.delete(sa1[0]);
             }
         }
-        this.setProp('style',styleStr);
-        this.setStaticOnce();
+        if(change){
+            this.setProp('style',[...styles].map(item=>item.join(':')).join(';'));
+            this.setStaticOnce();
+        }
     }
 
     /**
@@ -389,52 +418,6 @@ export class VirtualDom {
         this.assets.delete(assetName);
     }
 
-    
-
-    /**
-     * 添加事件
-     * @param event     事件对象
-     * @param module    模块
-     */
-    public addEvent(event: NEvent) {
-        if(!this.events){
-            this.events = new Map();
-        }
-        
-        if(!this.events.has(event.name)){
-            this.events.set(event.name, [event.id]);
-        }else{
-            let arr = this.events.get(event.name);
-            //已添加的事件，不再添加
-            if(arr.indexOf(event.id) === -1){
-                arr.push(event.id);
-            }
-        }
-    }
-
-    /**
-     * 获取事件集
-     * @param eventName     事件名
-     * @returns             事件对象或事件对象数组
-     */
-    public getEvent(eventName:string):number[]{
-        if(this.events){
-            return this.events.get(eventName);
-        }
-    }
-
-    /**
-     * 设置事件集
-     * @param eventName     事件名
-     * @param events        事件数组
-     */
-    public setEvent(eventName:string,events:number[]){
-        if(!this.events){
-            this.events = new Map();
-        }
-        this.events.set(eventName,events);
-    }
-
     /**
      * 获取html dom
      * @param module    模块 
@@ -470,7 +453,7 @@ export class VirtualDom {
      * @param value     参数值
      */
     public setParam(module:Module,name:string,value:any){
-        module.objectManager.setElementParam(this.key,name,value);
+        module.objectManager.setDomParam(this.key,name,value);
     }
 
     /**
@@ -480,7 +463,7 @@ export class VirtualDom {
      * @returns         参数值
      */
     public getParam(module:Module,name:string){
-        return module.objectManager.getElementParam(this.key,name);
+        return module.objectManager.getDomParam(this.key,name);
     }
 
     /**
@@ -489,7 +472,7 @@ export class VirtualDom {
      * @param name      参数名
      */
     public removeParam(module:Module,name:string){
-        module.objectManager.removeElementParam(this.key,name);
+        module.objectManager.removeDomParam(this.key,name);
     }
 
     /**
@@ -505,7 +488,7 @@ export class VirtualDom {
      * 克隆
      * @param changeKey     是否更改key，如果为true，则生成的节点用新的key
      */
-     public clone(): VirtualDom {
+     public clone(module:Module): VirtualDom {
         let dst: VirtualDom = new VirtualDom(this.tagName,this.key);
         if(this.tagName){
             //属性
@@ -521,13 +504,22 @@ export class VirtualDom {
                 }
             }
             
-            //事件
-            if(this.events && this.events.size>0){
-                for(let p of this.events){
-                    //复制数组
-                    dst.setEvent(p[0],p[1].slice(0));
-                }    
-            }
+            // //事件
+            // let eobj = module.eventFactory.getEvent(this.key);
+            // if(eobj && eobj.size>0){
+            //     module.eventFactory = new Map();
+            //     for(let p of this.events){
+            //         //复制数组
+            //         let obj = {capture:p[1].capture};
+            //         if(p[1].own){
+            //             obj['own'] = p[1].own.slice(0);
+            //         }
+            //         if(p[1].delg){
+            //             obj['delg'] = p[1].delg.slice(0);
+            //         }
+            //         dst.events.set(p[0],obj);
+            //     }
+            // }
             
             if(this.directives && this.directives.length>0){
                 dst.directives = [];
@@ -539,7 +531,7 @@ export class VirtualDom {
             //子节点clone
             if(this.children){
                 for(let c of this.children){
-                    dst.add(c.clone());
+                    dst.add(c.clone(module));
                 }
             }
         }else{
@@ -548,5 +540,17 @@ export class VirtualDom {
         }
         dst.staticNum = this.staticNum;
         return dst;
+    }
+
+    /**
+     * 保存事件
+     * @param key       dom key 
+     * @param event     事件对象
+     */
+     public addEvent(event: NEvent){
+        if(!this.events){
+            this.events = [];
+        }
+        this.events.push(event);
     }
 }

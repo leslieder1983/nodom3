@@ -37,13 +37,17 @@
 		}
 	</style>
 	<body>
-		<div class="outer fade-enter-active"></div>
+		<div>
+			hello
+			<p>hello inner</p>
+		</div>
 	</body>
 	<script>
-		let reg = /(?<!{{[^}}]*)(?:<(\/?)\s*?([a-zA-Z][a-zA-Z0-9-_]*)([\s\S]*?)(\/?)(?<!{{[^}}]*)(?<!=)>)(?![^{{]*}})/g;
-		let str2 = `{{asda}}<div a b='b' c={{c}} d='{{d}}' e={{"<div>{{'asd{{<ppp>}}'}}</div>"}}>{{ asdas }}`;
-
-		
-		console.log(str2.match(reg));
+		let map = new Map();
+		// map.set('a',1);
+		// map.set('b',2);
+		let arr = [...map];
+		console.log([...map].map(item=>item.join(':')).join(';'));
+		console.log(arr);
 	</script>
 </html>

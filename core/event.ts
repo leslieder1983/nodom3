@@ -62,7 +62,7 @@ export class NEvent {
         this.id = Util.genId();
         this.module = module;
         this.name = eventName;
-        GlobalCache.saveEvent(this);
+        // GlobalCache.saveEvent(this);
         //如果事件串不为空，则不需要处理
         if (eventStr) {
             let tp = typeof eventStr;

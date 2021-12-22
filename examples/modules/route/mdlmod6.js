@@ -1,4 +1,4 @@
-import {Module,request} from '../../../dist/nodom.js'
+import {Module,request} from '../../../dist/nodom.esm.js'
 /**
  * 路由主模块
  */
