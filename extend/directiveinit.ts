@@ -31,7 +31,7 @@ export default (function () {
         function (module: Module, dom: IRenderedDom, src: VirtualDom) {
             let m: Module;
             //存在moduleId，表示已经渲染过，不渲染
-            let mid = module.objectManager.getDomParam(dom.key,'moduleId');
+            let mid = module.objectManager.getDomParam(dom.key, 'moduleId');
             let handle: boolean = true;
             if (mid) {
                 m = ModuleFactory.get(mid);
@@ -43,7 +43,7 @@ export default (function () {
                 }
                 mid = m.id;
                 //保留modelId
-                module.objectManager.setDomParam(dom.key,'moduleId',mid);
+                module.objectManager.setDomParam(dom.key, 'moduleId', mid);
                 module.addChild(m);
                 //共享当前dom的model给子模块
                 if (dom.props.hasOwnProperty('useDomModel')) {
@@ -171,7 +171,7 @@ export default (function () {
                 if (!m) {
                     return true;
                 }
-                
+
                 //克隆，后续可以继续用
                 let node1 = node.clone();
                 let key: string;
@@ -206,7 +206,7 @@ export default (function () {
      */
     createDirective('if',
         function (module: Module, dom: IRenderedDom, src: VirtualDom) {
-            module.objectManager.setDomParam(dom.parent.key,'$if',this.value);
+            module.objectManager.setDomParam(dom.parent.key, '$if', this.value);
             return this.value;
         },
         5
@@ -219,7 +219,7 @@ export default (function () {
     createDirective(
         'else',
         function (module: Module, dom: IRenderedDom, src: VirtualDom) {
-            return module.objectManager.getDomParam(dom.parent.key,'$if') === false;
+            return module.objectManager.getDomParam(dom.parent.key, '$if') === false;
         },
         5
     );
@@ -229,14 +229,14 @@ export default (function () {
      */
     createDirective('elseif',
         function (module: Module, dom: IRenderedDom, src: VirtualDom) {
-            let v = module.objectManager.getDomParam(dom.parent.key,'$if');
+            let v = module.objectManager.getDomParam(dom.parent.key, '$if');
             if (v === true) {
                 return false;
             } else {
                 if (!this.value) {
                     return false;
                 } else {
-                    module.objectManager.setDomParam(dom.parent.key,'$if',true);
+                    module.objectManager.setDomParam(dom.parent.key, '$if', true);
                 }
             }
             return true;
@@ -250,7 +250,7 @@ export default (function () {
     createDirective(
         'endif',
         function (module: Module, dom: IRenderedDom, src: VirtualDom) {
-            module.objectManager.removeDomParam(dom.parent.key,'$if');
+            module.objectManager.removeDomParam(dom.parent.key, '$if');
             return true;
         },
         5
@@ -263,7 +263,7 @@ export default (function () {
     createDirective(
         'show',
         function (module: Module, dom: IRenderedDom, src: VirtualDom) {
-            if(this.value){
+            if (this.value) {
                 return true;
             }
             return false;
@@ -288,10 +288,10 @@ export default (function () {
                 let value = dom.props['value'];
                 if (dataValue == value) {
                     dom.props['checked'] = 'checked';
-                    Util.setDomAsset(dom,'checked',true);
+                    Util.setDomAsset(dom, 'checked', true);
                 } else {
                     delete dom.props['checked'];
-                    Util.setDomAsset(dom,'checked',false);
+                    Util.setDomAsset(dom, 'checked', false);
                 }
             } else if (type === 'checkbox') {
                 //设置状态和value
@@ -299,21 +299,21 @@ export default (function () {
                 //当前值为yes-value
                 if (dataValue == yv) {
                     dom.props['value'] = yv;
-                    Util.setDomAsset(dom,'checked',true);
+                    Util.setDomAsset(dom, 'checked', true);
                 } else { //当前值为no-value
                     dom.props['value'] = dom.props['no-value'];
-                    Util.setDomAsset(dom,'checked',false);
+                    Util.setDomAsset(dom, 'checked', false);
                 }
             } else if (tgname === 'select') { //下拉框
                 dom.props['value'] = dataValue;
-                Util.setDomAsset(dom,'value',dataValue);
+                Util.setDomAsset(dom, 'value', dataValue);
             } else {
                 let v = (dataValue !== undefined && dataValue !== null) ? dataValue : '';
                 dom.props['value'] = v;
-                Util.setDomAsset(dom,'value',v);
+                Util.setDomAsset(dom, 'value', v);
             }
             let event: NEvent = GlobalCache.get('$fieldChangeEvent');
-            if(!event){
+            if (!event) {
                 event = new NEvent(null, 'change',
                     function (model, dom) {
                         let el = <any>this.getNode(dom.key);
@@ -348,20 +348,20 @@ export default (function () {
                             for (let i = 0; i < arr.length && temp; i++) {
                                 temp = temp[arr[i]];
                             }
-                            if(temp){
+                            if (temp) {
                                 temp[field] = v;
                             }
                         }
                         //修改value值，该节点不重新渲染
                         if (type !== 'radio') {
-                            dom.props['value'] =  v;
+                            dom.props['value'] = v;
                             el.value = v;
                         }
                     }
                 );
-                GlobalCache.set('$fieldChangeEvent',event);
+                GlobalCache.set('$fieldChangeEvent', event);
             }
-            module.eventFactory.addEvent(dom.key,event);
+            module.eventFactory.addEvent(dom.key, event);
             return true;
         },
         10
@@ -387,12 +387,12 @@ export default (function () {
                     Router.go(this.value);
                 }
             }
-            
+
             //添加click事件,避免重复创建事件对象，创建后缓存
             let event: NEvent = GlobalCache.get('$routeClickEvent');
             if (!event) {
                 event = new NEvent(null, 'click',
-                    function(model, dom, evObj,e){
+                    function (model, dom, evObj, e) {
                         let path = dom.props['path'];
                         if (Util.isEmpty(path)) {
                             return;
@@ -402,7 +402,7 @@ export default (function () {
                 );
                 GlobalCache.set('$routeClickEvent', event);
             }
-            module.eventFactory.addEvent(dom.key,event);
+            module.eventFactory.addEvent(dom.key, event);
             return true;
         }
     );
@@ -465,6 +465,7 @@ export default (function () {
      */
     createDirective('animation',
         function (module: Module, dom: IRenderedDom, src: VirtualDom) {
+
             const confObj = this.value
             if (!Util.isObject(confObj)) {
                 return new Error('未找到animation配置对象');
@@ -546,7 +547,7 @@ export default (function () {
                 if (el) {
                     if (el.getAttribute('class').indexOf(`${nameLeave}-leave-to`) != -1) {
                         // 当前已经处于leave动画播放完成之后了，直接返回
-                        src.addClass(`${nameLeave}-leave-to`)
+                        // dom.vdom.addClass(`${nameLeave}-leave-to`)
                         return true;
                     }
                     // 调用函数触发 Leave动画/过渡
@@ -556,7 +557,7 @@ export default (function () {
                     // el不存在，第一次渲染
                     if (isAppear) {
                         // 是进入离开动画，管理初次渲染的状态，让他隐藏
-                        src.addStyle('display:none')
+                        dom.vdom.addStyle('display:none')
                     }
 
                     // 下一帧
@@ -565,7 +566,12 @@ export default (function () {
                         let el: HTMLElement = <HTMLElement>module.getNode(dom.key)
                         if (isAppear) {
                             // 动画/过渡 是进入离开动画/过渡，并且当前是需要让他隐藏所以我们不播放动画，直接隐藏。
-                            src.removeStyle('display:none');
+                            dom.vdom.removeStyle('display:none');
+                            el.classList.add(`${nameLeave}-leave-to`)
+                            // 这里必须将这个属性加入到dom中,否则该模块其他数据变化触发增量渲染时,diff会将这个节点重新渲染,导致显示异常
+                            // 这里添加添加属性是为了避免diff算法重新渲染该节点
+                            dom.vdom.addClass(`${nameLeave}-leave-to`);
+                            dom.props['class'] += ` ${nameLeave}-leave-to`;
                             el.style.display = 'none'
                         } else {
                             //  动画/过渡 是 **非进入离开动画/过渡** 我们不管理元素的隐藏，所以我们让他播放一次Leave动画。
@@ -579,7 +585,7 @@ export default (function () {
                 // tigger为true 播放Enter动画
                 if (el) {
                     if (el.getAttribute('class').indexOf(`${nameEnter}-enter-to`) != -1) {
-                        src.addClass(`${nameEnter}-enter-to`)
+                        // dom.vdom.addClass(`${nameEnter}-enter-to`)
                         return true;
                     }
                     // 调用函数触发Enter动画/过渡
@@ -588,15 +594,19 @@ export default (function () {
                     // el不存在，是初次渲染
                     if (isAppear) {
                         // 管理初次渲染元素的隐藏显示状态
-                        src.addStyle('display:none')
+                        dom.vdom.addStyle('display:none')
                     }
                     // 下一帧
                     setTimeout(() => {
                         // 等虚拟dom把元素更新上去了之后，取得元素
                         let el: HTMLElement = <HTMLElement>module.getNode(dom.key)
                         if (isAppear) {
-                            src.removeStyle('display:none');
-                            el.style.display = 'none'
+                            dom.vdom.removeStyle('display:none');
+                            // 这里必须将这个属性加入到dom中,否则该模块其他数据变化触发增量渲染时,diff会将这个节点重新渲染,导致显示异常
+                            // 这里添加添加属性是为了避免diff算法重新渲染该节点
+                            dom.vdom.addStyle(`${nameEnter}-enter-to`);
+                            dom.props['class'] += ` ${nameEnter}-enter-to`;
+                            el.style.display = 'none';
                         }
                         // Enter动画与Leave动画不同，
                         //不管动画是不是进入离开动画，我们在初次渲染的时候都要执行一遍动画
@@ -667,7 +677,6 @@ export default (function () {
 
                     });
                 } else {
-
                     requestAnimationFrame(() => {
                         // 动画类型是aniamtion
                         el.classList.remove(nameEnter + '-enter-to');
@@ -713,58 +722,60 @@ export default (function () {
                     // Enter过渡的延迟时间与Leave过渡的延迟时间处理不一样
                     // 我们这里把延迟统一设置成0s，然后通过定时器来设置延时，
                     // 这样可以避免先渲染一片空白区域占位，然后再延时一段时间执行过渡效果。
+
                     el.style.transitionDelay = '0s';
                     let delay = parseFloat(delayEnter) * 1000;
                     setTimeout(() => {
-                        // 下一帧请求过渡效果
+
                         let [width, height] = getElRealSzie(el);
                         // 在第一帧设置初始状态
+                        // requestAnimationFrame(() => {
+                        // 移除掉上一次过渡的最终状态
+                        el.classList.remove(nameLeave + '-leave-to');
+                        // 添加过渡的类名
+                        el.classList.add(nameEnter + '-enter-active');
+                        // 给进入过渡设置开始类名
+                        el.classList.add(nameEnter + '-enter-from');
+                        // 获得元素的真实尺寸
+                        if (nameEnter == 'fold-height') {
+                            el.style.height = '0px'
+                        } else if (nameEnter == 'fold-width') {
+                            el.style.width = '0px'
+                        }
+                        // 设置过渡持续时间
+                        if (durationEnter != '') {
+                            el.style.transitionDuration = durationEnter;
+                        }
+                        // 设置过渡时间函数
+                        if (timingFunctionEnter != 'ease') {
+                            el.style.transitionTimingFunction = timingFunctionEnter;
+                        }
+                        // 第二帧将带有初始状态的元素显示出来,如果不开这一帧那么fade的进入过渡在初次渲染的时候会被当作离开过渡触发。
                         requestAnimationFrame(() => {
-                            // 移除掉上一次过渡的最终状态
-                            el.classList.remove(nameLeave + '-leave-to');
-                            // 添加过渡的类名
-                            el.classList.add(nameEnter + '-enter-active');
-                            // 给进入过渡设置开始类名
-                            el.classList.add(nameEnter + '-enter-from');
-                            // 获得元素的真实尺寸
-                            if (nameEnter == 'fold-height') {
-                                el.style.height = '0px'
-                            } else if (nameEnter == 'fold-width') {
-                                el.style.width = '0px'
+                            // 下一帧请求过渡效果
+                            // 过渡开始之前先将元素显示
+                            if (isAppear) {
+                                el.style.display = '';
                             }
-                            // 设置过渡持续时间
-                            if (durationEnter != '') {
-                                el.style.transitionDuration = durationEnter;
-                            }
-                            // 设置过渡时间函数
-                            if (timingFunctionEnter != 'ease') {
-                                el.style.transitionTimingFunction = timingFunctionEnter;
-                            }
-                            // 第二帧将带有初始状态的元素显示出来,如果不开这一帧那么fade的进入过渡在初次渲染的时候会被当作离开过渡触发。
+                            // 第三帧触发过渡
                             requestAnimationFrame(() => {
-                                // 过渡开始之前先将元素显示
-                                if (isAppear) {
-                                    el.style.display = '';
+                                if (beforeEnter) {
+                                    beforeEnter.apply(module.model, [module]);
                                 }
-                                // 第三帧触发过渡
-                                requestAnimationFrame(() => {
-                                    if (beforeEnter) {
-                                        beforeEnter.apply(module.model, [module]);
-                                    }
-                                    // 增加 过渡 结束类名
-                                    el.classList.add(nameEnter + '-enter-to');
-                                    // 移除过渡的开始类名
-                                    el.classList.remove(nameEnter + '-enter-from');
+                                // 增加 过渡 结束类名
+                                el.classList.add(nameEnter + '-enter-to');
+                                // 移除过渡的开始类名
+                                el.classList.remove(nameEnter + '-enter-from');
 
-                                    if (nameEnter == 'fold-height') {
-                                        el.style.height = height;
-                                    } else if (nameEnter == 'fold-width') {
-                                        el.style.width = width;
-                                    }
-                                    el.addEventListener('transitionend', handler);
-                                })
+                                if (nameEnter == 'fold-height') {
+                                    el.style.height = height;
+                                } else if (nameEnter == 'fold-width') {
+                                    el.style.width = width;
+                                }
+                                el.addEventListener('transitionend', handler);
                             })
                         })
+                        // })
                     }, delay);
                 } else {
                     // 动画类型是aniamtion
@@ -827,6 +838,7 @@ export default (function () {
 
                     let width = window.getComputedStyle(el).getPropertyValue("width");
                     let height = window.getComputedStyle(el).getPropertyValue("height");
+
                     // 还原样式
                     el.style.position = position;
                     el.style.visibility = vis;
@@ -846,7 +858,7 @@ export default (function () {
              * @returns 获得模板上的width/height 如果没有则返回空字符串
              */
             function getOriginalWidthAndHeight(dom: IRenderedDom): Array<string> {
-                const oStyle = dom.props['style'];
+                const oStyle = dom.vdom.getProp('style');
                 let width: string;
                 let height: string;
                 if (oStyle) {
