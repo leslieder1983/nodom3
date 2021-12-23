@@ -125,11 +125,11 @@ export class MAnimation extends Module {
 				name: "scale-fixcenterY", // 必填
 			},
 			transition5: {
-				tigger: true, // 必填
+				tigger: false, // 必填
 				name: "fold-width", // 必填
 			},
 			transition6: {
-				tigger: true, // 必填
+				tigger: false, // 必填
 				name: "fold-height", // 必填
 			},
 			transition7: {
