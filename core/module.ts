@@ -304,12 +304,7 @@ export class Module {
         //第一个module 从html dom树移除
         if(this.renderTree && !notFirstModule){
             let el = this.getNode(this.renderTree.key);
-            if(this.srcDom){
-                let srcEl = this.getParent().getNode(this.srcDom.key);
-                if(this.container){
-                    this.container.removeChild(el);
-                }
-            }else if(this.container){
+            if(el && this.container){
                 this.container.removeChild(el);
             }
         }
