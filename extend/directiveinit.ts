@@ -55,6 +55,8 @@ export default (function () {
             }
             //保存到dom上，提升渲染性能
             dom.subModuleId = mid;
+            //变成文本节点，作为子模块占位符，子模块渲染后插入到占位符前面
+            dom.tagName = '';
             if (handle) { //需要处理
                 //设置props，如果改变了props，启动渲染
                 let o: any = {};
@@ -153,7 +155,7 @@ export default (function () {
         'recur',
         function (module: Module, dom: IRenderedDom, src: VirtualDom) {
             //递归节点存放容器
-            if (dom.props['ref']) {
+            if (dom.props.hasOwnProperty('ref')) {
                 //如果出现在repeat中，src为单例，需要在使用前清空子节点，避免沿用上次的子节点
                 src.children = [];
                 //递归存储名
@@ -169,6 +171,7 @@ export default (function () {
                 if (!m) {
                     return true;
                 }
+                
                 //克隆，后续可以继续用
                 let node1 = node.clone();
                 let key: string;
@@ -189,7 +192,7 @@ export default (function () {
                 //递归名，默认default
                 const name = '$recurs.' + (dom.props['name'] || 'default');
                 if (!module.objectManager.get(name)) {
-                    module.objectManager.set(name, src.clone(module));
+                    module.objectManager.set(name, src);
                 }
             }
             return true;

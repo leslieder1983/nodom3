@@ -1,4 +1,3 @@
-import { NCache } from "./cache";
 import { Compiler } from "./compiler";
 import { CssManager } from "./cssmanager";
 import { VirtualDom } from "./virtualdom";
@@ -117,11 +116,6 @@ export class Module {
     public dontAddToRender:boolean;
 
     /**
-     * 是否替换容器
-     */
-    public replaceContainer:boolean;
-
-    /**
      * 来源dom，子模块对应dom
      */
     public srcDom:IRenderedDom;
@@ -186,7 +180,7 @@ export class Module {
      * 模型渲染
      */
     public render(): boolean {
-        if(this.state === EModuleState.UNACTIVE || !this.container){
+        if(this.state === EModuleState.UNACTIVE){
             return;
         }
         this.dontAddToRender = true;
@@ -218,6 +212,7 @@ export class Module {
                 let changeDoms = [];
                 // 比较节点
                 DiffTool.compare(this.renderTree,oldTree, changeDoms);
+                
                 //执行更改
                 if(changeDoms.length>0){
                     Renderer.handleChangedDoms(this,changeDoms);
@@ -246,13 +241,11 @@ export class Module {
         this.doModuleEvent('onBeforeFirstRenderToHTML');
         //渲染为html element
         let el:any = Renderer.renderToHtml(this,this.renderTree,null,true);
-        if(this.replaceContainer){ //替换
-            Util.replaceNode(this.container,el);
-            // 替换后，需要保留
-            this.getParent().saveNode(this.container['vdom'],el);
-        }else{
-            //清空子元素
-            Util.empty(this.container);
+        if(this.srcDom){
+            const srcEl = this.getParent().getNode(this.srcDom.key);
+            this.container = srcEl.parentElement;
+            this.container.insertBefore(el,srcEl);
+        }else if(this.container){
             this.container.appendChild(el);
         }
         //执行首次渲染后事件
@@ -298,23 +291,26 @@ export class Module {
 
     /**
      * 取消激活
+     * @param deep              是否深度遍历
+     * @param notFirstModule    不是第一个模块
      */
-    public unactive() {
+    public unactive(deep?:boolean,notFirstModule?:boolean) {
         if (ModuleFactory.getMain() === this) {
             return;
         }
         this.doModuleEvent('beforeUnActive');
         //设置状态
         this.state = EModuleState.UNACTIVE;
-        //从html dom树移除
-        if(this.container && this.renderTree){
+        //第一个module 从html dom树移除
+        if(this.renderTree && !notFirstModule){
             let el = this.getNode(this.renderTree.key);
-            if(el){
-                if(this.replaceContainer){
-                    Util.replaceNode(el,this.container);
-                }else{
+            if(this.srcDom){
+                let srcEl = this.getParent().getNode(this.srcDom.key);
+                if(this.container){
                     this.container.removeChild(el);
                 }
+            }else if(this.container){
+                this.container.removeChild(el);
             }
         }
         
@@ -325,37 +321,21 @@ export class Module {
         this.keyNodeMap.clear();
         this.keyElementMap.clear();
         this.keyVDomMap.clear();
+        
         //清空event factory
         this.eventFactory = new EventFactory(this);
-            
-        //清理缓存
-        this.clearCache();
-        
+        //unactive事件
         this.doModuleEvent('unActive');
-        //处理子模块
-        for(let id of this.children){
-            let m = ModuleFactory.get(id);
-            if(m){
-                m.unactive();
+        //深度处理子模块
+        if(deep && this.children){
+            //处理子模块
+            for(let id of this.children){
+                let m = ModuleFactory.get(id);
+                if(m){
+                    m.unactive(true,true);
+                }
             }
         }
-    }
-
-    /**
-     * 模块销毁
-     */
-    public destroy() {
-        if (Util.isArray(this.children)) {
-            this.children.forEach((item) => {
-                let m: Module = ModuleFactory.get(item);
-                if (m) {
-                    m.destroy();
-                }
-            });
-        }
-        this.clearCache(true);
-        //从工厂释放
-        ModuleFactory.remove(this.id);
     }
 
     /**
@@ -391,11 +371,9 @@ export class Module {
     /**
      * 设置渲染容器
      * @param el        容器
-     * @param replace   渲染时是否直接替换container
      */
-    public setContainer(el:HTMLElement,replace?:boolean){
+    public setContainer(el:HTMLElement){
         this.container = el;
-        this.replaceContainer = replace;
     }
 
     /**
@@ -471,7 +449,6 @@ export class Module {
         }
         this.props = props;
         this.srcDom = dom;
-        
         if(this.state === EModuleState.INITED || this.state === EModuleState.UNACTIVE){
             this.active();
         }else {  //计算template，如果导致模版改变，需要激活
@@ -517,13 +494,10 @@ export class Module {
         //清空孩子节点
         this.children = [];
 
-        //清除缓存
-        this.clearCache();
-
-        //清除dom节点cache
-        this.objectManager.clearElements();
         //清理css url
         CssManager.clearModuleRules(this);
+        //清理dom参数
+        this.objectManager.clearAllDomParams();
         
         if(!this.oldTemplate){
             return;
@@ -571,22 +545,6 @@ export class Module {
            }
        }
        return change;
-   }
-    /**
-     * 清理缓存
-     * @param force 强力清除 
-     */
-    public clearCache(force?:boolean){
-        if(force){ //强力清除，后续不再使用
-            this.objectManager.cache = new NCache();
-            return;
-        }
-        //清理指令
-        this.objectManager.clearDirectives();
-        //清理表达式
-        this.objectManager.clearExpressions();
-        //清理事件
-        this.objectManager.clearEvents();
     }
 
     /**
@@ -641,14 +599,7 @@ export class Module {
      * @param key   vdom key
      */
     public saveVirtualDom(dom:IRenderedDom,key?:string){
-        key = key || dom.key;
-        // if(this.keyVDomMap.has(key)){
-        //     let dom1 = this.keyVDomMap.get(key);
-        //     // if(dom1.events){ //保留事件
-        //         // dom.events = dom1.events;
-        //     // }
-        // }
-        this.keyVDomMap.set(key,dom);
+        this.keyVDomMap.set(key || dom.key,dom);
     }
 
     /**
@@ -657,24 +608,26 @@ export class Module {
      * @param deep  深度清理
      */
     public removeNode(dom:IRenderedDom,deep?:boolean){
-        if(deep){
-            if(dom && dom.children){
-                for(let d of dom.children){
-                    this.removeNode(d,true);
+        if(dom.subModuleId){  //子模块
+            let m = ModuleFactory.get(dom.subModuleId);
+            if(m){
+                m.unactive(deep);
+            }
+        }else{  //非子模块
+            //从map移除
+            this.keyNodeMap.delete(dom.key);
+            this.keyElementMap.delete(dom.key);
+            this.keyVDomMap.delete(dom.key);
+            //解绑所有事件
+            this.eventFactory.unbindAll(dom.key);
+            if(deep){
+                if(dom && dom.children){
+                    for(let d of dom.children){
+                        this.removeNode(d,true);
+                    }
                 }
             }
         }
-        if(dom.subModuleId){
-            let m = ModuleFactory.get(dom.subModuleId);
-            console.log(m);
-            if(m){
-                m.unactive();
-            }
-        }
-        //解绑所有事件
-        this.eventFactory.unbindAll(dom.key);
-        //从map移除
-        this.keyNodeMap.delete(dom.key);
     }
 
     /**
@@ -691,7 +644,7 @@ export class Module {
             }
         }
         //从缓存移除节点
-        this.objectManager.removeDom(dom.key);
+        this.objectManager.clearDomParams(dom.key);
         //从key node map移除
         this.keyNodeMap.delete(dom.key);
         //从virtual dom map移除

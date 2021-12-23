@@ -35,9 +35,9 @@ class FOR extends DefineElement{
             throw new NError('itemnotempty', NodomMessage.TipWords['element'], 'FOR', 'cond');
         }
         node.delProp('cond');
-        if(typeof cond === 'number'){ //表达式
-            cond = GlobalCache.getExpression(cond);
-        }
+        // if(typeof cond === 'number'){ //表达式
+        //     cond = GlobalCache.getExpression(cond);
+        // }
         node.addDirective(new Directive('repeat',cond));
     }
 }
@@ -51,9 +51,9 @@ class RECUR extends DefineElement{
         //条件
         let cond = node.getProp('cond');
         node.delProp('cond');
-        if(typeof cond === 'number'){ //表达式
-            cond = GlobalCache.getExpression(cond);
-        }
+        // if(typeof cond === 'number'){ //表达式
+        //     cond = GlobalCache.getExpression(cond);
+        // }
         node.addDirective(new Directive('recur',cond));
     }
 }
@@ -70,9 +70,9 @@ class IF extends DefineElement{
             throw new NError('itemnotempty', NodomMessage.TipWords['element'], 'IF', 'cond');
         }
         node.delProp('cond');
-        if(typeof cond === 'number'){ //表达式
-            cond = GlobalCache.getExpression(cond);
-        }
+        // if(typeof cond === 'number'){ //表达式
+        //     cond = GlobalCache.getExpression(cond);
+        // }
         node.addDirective(new Directive('if',cond));
     }
 }
@@ -95,9 +95,9 @@ class ELSEIF extends DefineElement{
             throw new NError('itemnotempty', NodomMessage.TipWords['element'], 'ELSEIF', 'cond');
         }
         node.delProp('cond');
-        if(typeof cond === 'number'){ //表达式
-            cond = GlobalCache.getExpression(cond);
-        }
+        // if(typeof cond === 'number'){ //表达式
+        //     cond = GlobalCache.getExpression(cond);
+        // }
         node.addDirective(new Directive('elseif',cond));
     }
 }

@@ -535,41 +535,6 @@ export class Util {
         }
     }
 
-
-    /**
-     * 激活dom下的子模块
-     * @param module    模块
-     * @param dom       dom节点
-     * @param flag      0 active  1 unactive 
-     */
-    public static activeSubModules(module:Module,dom:IRenderedDom,flag?:number){
-        console.log(dom.subModuleId);
-        if(dom.subModuleId){
-            let m = ModuleFactory.get(dom.subModuleId);
-            if(m){
-                flag?m.unactive():m.active();
-            }
-        }
-        if(!dom.children){
-            return;
-        }
-        for(let c of dom.children){
-            if(c.vdom.hasDirective('module')){  //如果dom带有module指令，则进行模块激活
-                let mid = c.subModuleId;
-                if(mid){  //初始化过
-                    let m = ModuleFactory.get(mid);
-                    if(flag){
-                        m.unactive();
-                    }else{
-                        m.active(true);
-                    }
-                }
-            }else{
-                Util.activeSubModules(module,c,flag);
-            }
-        }
-    }
-
     /**
      * 设置dom asset
      * @param dom       渲染后的dom节点

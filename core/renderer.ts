@@ -6,6 +6,7 @@ import { Expression } from "./expression";
 import { CssManager } from "./cssmanager";
 import { EventManager } from "./eventmanager";
 import { IRenderedDom } from "./types";
+import { domainToASCII } from "url";
 
 /**
  * 渲染器
@@ -65,7 +66,7 @@ export class Renderer {
         }
         
         //设置model
-        model = model || src.model;
+        model = src.model || model;
         //设置当前根root
         if(!parent){
             this.currentModuleRoot = src;
@@ -201,7 +202,7 @@ export class Renderer {
                 }
                 //设置属性
                 for(let p of Object.keys(src.props)){
-                    (<HTMLElement>el).setAttribute(p,src.props[p]);
+                    (<HTMLElement>el).setAttribute(p,src.props[p]===undefined?'':src.props[p]);
                     let ind;
                     if((ind=arr.indexOf(p)) !== -1){
                         arr.splice(ind,1);
@@ -247,13 +248,6 @@ export class Renderer {
             let el= document.createElement(dom.tagName);
             //保存虚拟dom
             el['vdom'] = dom.key;
-            //模块容器，向目标模块设置容器
-            if(dom.subModuleId){
-                let m:Module = ModuleFactory.get(dom.subModuleId);
-                if(m){
-                    m.setContainer(el,true);
-                }
-            }
             
             //把el引用与key关系存放到cache中
             module.saveNode(dom.key,el);
@@ -265,7 +259,7 @@ export class Renderer {
             if(!dom.subModuleId){
                 //设置属性
                 for(let p of Object.keys(dom.props)){
-                    el.setAttribute(p,dom.props[p]);
+                    el.setAttribute(p,dom.props[p]===undefined?'':dom.props[p]);
                 }
                 //asset
                 if(dom.assets){

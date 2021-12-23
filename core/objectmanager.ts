@@ -61,116 +61,6 @@ export  class ObjectManager {
     }
 
     /**
-     * 获取指令实例
-     * @param module    模块
-     * @param id        指令id
-     * @returns         指令对象
-     */
-    public getDirective(id:number):Directive{
-        let d = this.cache.get('$directives.' + id + '.$instance');
-        if(!d){
-            d = GlobalCache.get('$directives.' + id);
-            GlobalCache.removeDirective(id);
-            if(d){
-                this.cache.set('$directives.' + id,d);
-                return d.$instance;
-            }
-        }
-        return d;
-    }
-
-    /**
-     * 保存指令实例
-     * @param module        模块
-     * @param directive     指令对象
-     */
-    public saveDirective(directive:Directive){
-        this.cache.set('$directives.' + directive.id + '.$instance',directive);
-    }
-
-    /**
-     * 移除指令
-     * @param id    指令id
-     */
-    public removeDirective(id:number){
-        this.cache.remove('$directives.' + id);
-    }
-
-    /**
-     * 设置指令参数
-     * @param id        指令id
-     * @param name      参数名  
-     * @param value     参数值
-     */
-    public setDirectiveParam(id:number,name:string,value:any){
-        this.cache.set('$directives.' + id + '.$params.' + name,value);
-    }
-
-    /**
-     * 获取指令参数值
-     * @param id        指令id
-     * @param key       dom key
-     * @param name      参数名
-     * @returns         参数值
-     */
-    public getDirectiveParam(id:number,name:string){
-        return this.cache.get('$directives.' + id + '.$params.' + name);
-    }
-
-    /**
-     * 移除指令参数
-     * @param id        指令id
-     * @param key       dom key
-     * @param name      参数名
-     */
-    public removeDirectiveParam(id:number,name:string){
-        this.cache.remove('$directives.' + id + '.$params.' + name);
-    }
-
-    /**
-     * 清空指令参数
-     * @param id        指令id
-     * @param key       dom key
-     */
-    public clearDirectiveParam(id:number){
-        this.cache.remove('$directives.' + id + '.$params.' + name);
-    }
-
-    /**
-     * 获取表达式实例
-     * @param id        表达式id
-     * @returns         表达式对象
-     */
-    public getExpression(id:number):Expression{
-        let ex = this.cache.get('$expressions.' + id);
-        if(!ex){
-            ex = GlobalCache.get('$expressions.' + id);
-            GlobalCache.removeExpression(id);
-            if(ex){
-                this.cache.set('$expressions.' + id,ex);
-                return ex;
-            }
-        }
-        return ex;
-    }
-
-    /**
-     * 保存表达式实例
-     * @param expression    表达式对象
-     */
-    public saveExpression(expression:Expression){
-        this.cache.set('$expressions.' + expression.id,expression);
-    }
-
-    /**
-     * 移除表达式
-     * @param id    表达式id
-     */
-    public removeExpression(id:number){
-        this.cache.remove('$expressions.' + id);
-    }
-
-    /**
      * 设置事件参数
      * @param id        事件id
      * @param key       dom key
@@ -189,7 +79,7 @@ export  class ObjectManager {
      * @returns         参数值
      */
     public getEventParam(id:number,key:string,name:string){
-        return this.cache.get('$events.' + id + '.$params.' + key + '.' + name);
+        return this.get('$events.' + id + '.$params.' + key + '.' + name);
     }
 
     /**
@@ -199,7 +89,7 @@ export  class ObjectManager {
      * @param name      参数名
      */
     public removeEventParam(id:number,key:string,name:string){
-        this.cache.remove('$events.' + id + '.$params.' + key + '.' + name);
+        this.remove('$events.' + id + '.$params.' + key + '.' + name);
     }
 
     /**
@@ -209,34 +99,10 @@ export  class ObjectManager {
      */
     public clearEventParam(id:number,key?:string){
         if(key){    //删除对应dom的事件参数
-            this.cache.remove('$events.' + id + '.$params.' + key);    
+            this.remove('$events.' + id + '.$params.' + key);    
         }else{      //删除所有事件参数
-            this.cache.remove('$events.' + id + '.$params');
+            this.remove('$events.' + id + '.$params');
         }
-    }
-
-    /**
-     * 缓存渲染树虚拟dom
-     * @param dom       dom对象
-     */
-    public saveDom(dom:IRenderedDom){
-        this.cache.set('$doms.' + dom.key,dom);
-    }
-    /**
-     * 获取渲染树虚拟dom
-     * @param key       dom key
-     * @returns         dom对象
-     */
-    public getDom(key:string):IRenderedDom{
-        return this.cache.get('$doms.' + key);
-    }
-
-    /**
-     * 删除渲染树虚拟dom
-     * @param key       虚拟dom key
-     */
-     public removeDom(key:string){
-        this.cache.remove('$doms.' + key);
     }
 
     /**
@@ -246,7 +112,7 @@ export  class ObjectManager {
      * @param value     参数值
      */
     public setDomParam(key:string,name:string,value:any){
-        this.cache.set('$doms.' + key + '.$params.' + name ,value);
+        this.set('$domparam.' + key + '.' + name ,value);
     }
 
     /**
@@ -256,7 +122,7 @@ export  class ObjectManager {
      * @returns         参数值
      */
     public getDomParam(key:string,name:string):any{
-        return this.cache.get('$doms.' + key + '.$params.' + name);
+        return this.get('$domparam.' + key + '.' + name);
     }
 
     /**
@@ -265,7 +131,7 @@ export  class ObjectManager {
      * @param name      参数名
      */
     public removeDomParam(key:string,name:string){
-        this.cache.remove('$doms.' + key + '.$params.' + name);
+        this.remove('$domparam.' + key + '.' + name);
     }
 
     /**
@@ -273,35 +139,13 @@ export  class ObjectManager {
      * @param key   dom key
      */
     public clearDomParams(key:string){
-        this.cache.remove('$doms.' + key + '.$params');
+        this.remove('$domparam.' + key);
     }
-
-    /**
-     * 清除指令集
-     */
-    public clearDirectives(){
-        this.remove('$directives');
-    }
-
-    /**
-     * 清除表达式集
-     */
-    public clearExpressions(){
-        this.remove('$expressions');
-    }
-
-    /**
-     * 清除事件集
-     */   
-    public clearEvents(){
-        this.remove('$events');
-    }
-
+    
     /**
      * 清除缓存dom对象
      */
-    public clearElements(){
-        this.remove('$doms');
+    public clearAllDomParams(){
+        this.remove('$domparam');
     }
-
 }

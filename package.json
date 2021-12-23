@@ -4,8 +4,9 @@
   "private": true,
   "main": "index.ts",
   "directories": {
-    "example": "examples",
-    "test": "test"
+    "core": "core",
+    "extend": "extend",
+    "example": "examples"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -29,6 +30,6 @@
   "repository": {
     "type": "git"
   },
-  "description": "nodom是一款基于数据驱动的web mvvm框架。 用于搭建单页应用(SPA)，目前发展到3.3版本。 插件也在同步更新中。",
+  "description": "nodom是一款基于数据驱动的web mvvm框架。 用于搭建单页应用(SPA)",
   "dependencies": {}
 }

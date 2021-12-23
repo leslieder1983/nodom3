@@ -504,23 +504,6 @@ export class VirtualDom {
                 }
             }
             
-            // //事件
-            // let eobj = module.eventFactory.getEvent(this.key);
-            // if(eobj && eobj.size>0){
-            //     module.eventFactory = new Map();
-            //     for(let p of this.events){
-            //         //复制数组
-            //         let obj = {capture:p[1].capture};
-            //         if(p[1].own){
-            //             obj['own'] = p[1].own.slice(0);
-            //         }
-            //         if(p[1].delg){
-            //             obj['delg'] = p[1].delg.slice(0);
-            //         }
-            //         dst.events.set(p[0],obj);
-            //     }
-            // }
-            
             if(this.directives && this.directives.length>0){
                 dst.directives = [];
                 for(let d of this.directives){

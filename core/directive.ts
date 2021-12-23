@@ -78,38 +78,6 @@ export  class Directive {
     }
 
     /**
-     * 设置参数
-     * @param module    模块
-     * @param dom       指令对应的虚拟dom
-     * @param name      参数名
-     * @param value     参数值
-     */
-    public setParam(module:Module,name:string,value:any){
-        module.objectManager.setDirectiveParam(this.id,name,value);
-    }
-
-    /**
-     * 获取参数值
-     * @param module    模块 
-     * @param dom       指令对应的虚拟dom
-     * @param name      参数名
-     * @returns         参数值
-     */
-    public getParam(module:Module,name:string){
-        return module.objectManager.getDirectiveParam(this.id,name);
-    }
-
-    /**
-     * 移除参数
-     * @param module    模块
-     * @param dom       指令对应的虚拟dom
-     * @param name      参数名
-     */
-    public removeParam(module:Module,name:string){
-        module.objectManager.removeDirectiveParam(this.id,name);
-    }
-
-    /**
      * 克隆
      */
     public clone():Directive{

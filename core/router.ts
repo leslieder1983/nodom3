@@ -120,7 +120,7 @@ export class Router {
             // 清理map映射
             this.activeFieldMap.delete(module.id);
             //module置为不激活
-            module.unactive();
+            module.unactive(true);
         }
         if (diff[2].length === 0) { //路由相同，参数不同
             let route:Route = diff[0];
