@@ -578,7 +578,6 @@ export class Module {
         this.keyElementMap.set(key,node);
     }
 
-
     /**
      * 获取key对应的virtual dom
      * @param key   vdom key
