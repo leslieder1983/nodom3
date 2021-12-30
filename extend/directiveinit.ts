@@ -430,7 +430,7 @@ export default (function () {
                 let m = ModuleFactory.get(mid);
                 if (m) {
                     //缓存当前替换节点
-                    m.objectManager.set('$slots.' + this.value, { dom: src, model: dom.model });
+                    m.objectManager.set('$slots.' + this.value, { dom: src.clone(m), model: dom.model });
                 }
                 //此次不继续渲染，子节点在实际模块中渲染
                 return false;
