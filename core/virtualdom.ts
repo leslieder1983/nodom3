@@ -494,9 +494,8 @@ export class VirtualDom {
 
     /**
      * 克隆
-     * @param changeKey     是否更改key，如果为true，则生成的节点用新的key
      */
-    public clone(module: Module): VirtualDom {
+    public clone(): VirtualDom {
         let dst: VirtualDom = new VirtualDom(this.tagName, this.key);
         if (this.tagName) {
             //属性
@@ -518,11 +517,13 @@ export class VirtualDom {
                     dst.directives.push(d.clone());
                 }
             }
+            //复制事件
+            dst.events = this.events;
 
             //子节点clone
             if (this.children) {
                 for (let c of this.children) {
-                    dst.add(c.clone(module));
+                    dst.add(c.clone());
                 }
             }
         } else {

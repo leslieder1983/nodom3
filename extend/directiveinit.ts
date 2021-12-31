@@ -123,7 +123,6 @@ export default (function () {
                 }
                 //渲染一次-1，所以需要+1
                 src.staticNum++;
-                // console.log(rows[i]);
                 let d = Renderer.renderDom(module, src, rows[i], parent, rows[i].$key);
                 //删除$index属性
                 if (idxName) {
@@ -430,7 +429,7 @@ export default (function () {
                 let m = ModuleFactory.get(mid);
                 if (m) {
                     //缓存当前替换节点
-                    m.objectManager.set('$slots.' + this.value, { dom: src.clone(m), model: dom.model });
+                    m.objectManager.set('$slots.' + this.value, { dom: src, model: dom.model });
                 }
                 //此次不继续渲染，子节点在实际模块中渲染
                 return false;
@@ -438,20 +437,22 @@ export default (function () {
                 //获取替换节点进行替换
                 let cfg = module.objectManager.get('$slots.' + this.value);
                 if (cfg) {
+                    let chds = [];
                     let rdom = cfg.dom;
                     //避免key重复，更新key
                     for (let d of rdom.children) {
-                        Util.setNodeKey(d, dom.key, true);
+                        let d1 = d.clone();
+                        Util.setNodeKey(d1, dom.key, true);
+                        chds.push(d1);
                     }
                     //更改渲染子节点
-                    src.children = rdom.children;
+                    src.children = chds;
                     //非内部渲染,更改model
                     if (!src.getProp('innerRender')) {
                         for (let c of src.children) {
                             c.model = cfg.model;
                         }
                     }
-                    module.objectManager.remove('$slots.' + this.value);
                 }
             }
             return true;
