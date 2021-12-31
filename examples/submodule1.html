@@ -26,7 +26,7 @@
                     <div class='modulea' ${props.style?'style="' + props.style + '"':''}>
                         <div>{{name}}</div>
                         <button e-click='clickShow'>showme</button>
-                        <input x-field='name' />
+                        <input x-field='name'/>
                         <ul x-show={{showme}}>
                             <for cond={{rows1}} tag='li' e-click='clickme:delg'>{{title}}</for>
                         </ul>
@@ -44,6 +44,9 @@
                 rows:[{name:'nodom1'},{name:'nodom2'},{name:'nodom3'}],
                 
             }
+        }
+        keyup(){
+            console.log('keyup');
         }
         clickShow(model){
             model.showme = !model.showme;
@@ -136,7 +139,7 @@
                     <input x-field='name1' />
                     <!--useDomModel表示用当前dom对应的model直接覆盖子模块的model-->
                     <modulea class='cls1' x-show={{show}} $rows1={{rows1}}>
-                        <for tag='uibutton' e-click='clickBtn' title={{name}} cond={{rows}} />
+                        <for tag='uibutton' e-click='clickBtn' title={{name}} cond={{rows}}/>
                         <for cond={{rows}}>
                             <ModuleB style='font-size:18px;' useDomModel/>
                         </for>
@@ -175,9 +178,10 @@
             GlobalCache.set('userName','yang')
         }
         clickBtn(model,dom){
-            console.log(this,model);
+            // console.log(this,model);
+            console.log('click')
         }
-
+        
         hideOrShow(model){
             model.show = !model.show;
         }

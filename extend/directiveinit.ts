@@ -360,7 +360,7 @@ export default (function () {
                 );
                 GlobalCache.set('$fieldChangeEvent', event);
             }
-            module.eventFactory.addEvent(dom.key, event);
+            src.addEvent(event);
             return true;
         },
         10
@@ -401,7 +401,7 @@ export default (function () {
                 );
                 GlobalCache.set('$routeClickEvent', event);
             }
-            module.eventFactory.addEvent(dom.key, event);
+            src.addEvent(event);
             return true;
         }
     );
