@@ -243,6 +243,8 @@ export class Module {
         let el:any = Renderer.renderToHtml(this,this.renderTree,null,true);
         if(this.srcDom){
             const srcEl = this.getParent().getNode(this.srcDom.key);
+            let pm = this.getParent();
+            // console.log(srcEl,this.srcDom.key,pm.keyNodeMap)
             this.container = srcEl.parentElement;
             this.container.insertBefore(el,srcEl);
         }else if(this.container){

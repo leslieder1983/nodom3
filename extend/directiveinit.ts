@@ -123,7 +123,7 @@ export default (function () {
                 }
                 //渲染一次-1，所以需要+1
                 src.staticNum++;
-                let d = Renderer.renderDom(module, src, rows[i], parent, rows[i].$key);
+                let d = Renderer.renderDom(module, src, rows[i], parent, i+'');
                 //删除$index属性
                 if (idxName) {
                     delete d.props['$index'];
