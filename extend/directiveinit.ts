@@ -46,11 +46,11 @@ export default (function () {
                 module.objectManager.setDomParam(dom.key, 'moduleId', mid);
                 module.addChild(m);
                 //共享当前dom的model给子模块
-                if (dom.props.hasOwnProperty('useDomModel')) {
+                if (src.hasProp('usedommodel')) {
                     m.model = dom.model;
                     //绑定model到子模块，共享update,watch方法
                     ModelManager.bindToModule(m.model, m);
-                    delete dom.props['useDomModel'];
+                    delete dom.props['usedommodel'];
                 }
             }
             //保存到dom上，提升渲染性能

@@ -20,7 +20,7 @@ export class Renderer {
     /**
      * 当前模块根dom
      */
-    private static currentModuleRoot:VirtualDom;
+    private static currentModuleRoot:IRenderedDom;
     /**
      * 添加到渲染列表
      * @param module 模块
@@ -69,7 +69,7 @@ export class Renderer {
         model = src.model || model;
         //设置当前根root
         if(!parent){
-            this.currentModuleRoot = src;
+            this.currentModuleRoot = dst;
         }else{
             if(!model){
                 model = parent.model;
@@ -164,7 +164,7 @@ export class Renderer {
             }
             return true;
         }
-
+        
         /**
          * 处理属性（带表达式）
          */
@@ -172,13 +172,33 @@ export class Renderer {
             if(!src.props || src.props.size === 0){
                 return;
             }
+            let value;
             for(let k of src.props){
-                if(k[1] instanceof Expression){
-                    dst.props[k[0]] = k[1].val(module,dst.model);
+                if(Array.isArray(k[1])){  //数组，需要合并
+                    value = [];
+                    for(let i=0;i<k[1].length;i++){
+                        let a = k[1][i];
+                        if(a instanceof Expression){
+                            value.push(a.val(module,dst.model));
+                            dst.staticNum = -1;
+                        }else{
+                            value.push(a);
+                        }
+                    }
+                    if(k[0] === 'style'){
+                        value = src.getStyleString(value);
+                    }else if(k[0] === 'class'){
+                        value = src.getClassString(value);
+                    }else{
+                        value = value.join(' ');
+                    }
+                }else if(k[1] instanceof Expression){
+                    value = k[1].val(module,dst.model);
                     dst.staticNum = -1;
                 }else{
-                    dst.props[k[0]] = k[1];
+                    value = k[1];
                 }
+                dst.props[k[0]] = value;
             }
         }
     }

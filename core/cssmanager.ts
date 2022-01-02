@@ -37,14 +37,17 @@ export class CssManager{
      * @param add       是否添加
      * @returns         如果是styledom，则返回true，否则返回false
      */
-    public static handleStyleDom(module:Module,dom:IRenderedDom,root:VirtualDom,add?:boolean):boolean{
+    public static handleStyleDom(module:Module,dom:IRenderedDom,root:IRenderedDom,add?:boolean):boolean{
         if(dom.tagName.toLowerCase() !== 'style'){
             return false;
         }
         if(add){
-            root.addClass(this.cssPreName + module.id);
-        }else{
-            root.removeClass(this.cssPreName + module.id);
+            let cls = this.cssPreName + module.id;
+            if(root.props['class']){
+                root.props['class'] = dom.props['class'] + ' ' + cls;
+            }else{
+                root.props['class'] = cls;
+            }
         }
         return true;
     }

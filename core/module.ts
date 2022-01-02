@@ -244,7 +244,6 @@ export class Module {
         if(this.srcDom){
             const srcEl = this.getParent().getNode(this.srcDom.key);
             let pm = this.getParent();
-            // console.log(srcEl,this.srcDom.key,pm.keyNodeMap)
             this.container = srcEl.parentElement;
             this.container.insertBefore(el,srcEl);
         }else if(this.container){
@@ -433,6 +432,7 @@ export class Module {
     public setProps(props:any,dom:IRenderedDom){
         let dataObj = props.$data;
         delete props.$data;
+        console.log(dataObj);
         //props数据复制到模块model
         if(dataObj){
             for(let d in dataObj){
@@ -441,6 +441,7 @@ export class Module {
                 if(typeof o === 'object' && this.model[d] !== o){
                     ModelManager.bindToModule(o,this);
                 }
+                console.log(d,o);
                 this.model[d] = o;
             }
         }
@@ -528,20 +529,14 @@ export class Module {
     * @returns         是否改变
     */
     private mergeProps(dom:VirtualDom,props:any):boolean{
-       let change = false;
-       for(let k of Object.keys(props)){
-           if(props[k] !== dom.getProp(k)){
-               change = true;
-               if(k === 'style'){
-                   dom.addStyle(props[k]);
-               }else if(k === 'class'){
-                   dom.addClass(props[k]);
-               }else{
-                   dom.setProp(k,props[k]);
-               }
-           }
-       }
-       return change;
+        let change = false;
+        for(let k of Object.keys(props)){
+            let c = dom.addProp(k,props[k]);
+            if(!change){
+                change = c;
+            }
+        }
+        return change;
     }
 
     /**

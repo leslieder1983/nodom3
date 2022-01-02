@@ -15,7 +15,8 @@
     class ModuleA extends Module{
         template(props){
             let s;
-            if(!this.model.rows1){
+            console.log(this.model.rows1);
+            if(!this.model.rows1 || this.model.rows1.length === 0){
                 s = `
                     <div class='modulea' ${props.style?'style="' + props.style + '"':''}>
                         <slot innerRender/>
@@ -138,7 +139,7 @@
                     <div>name is:{{name1}}</div>
                     <input x-field='name1' />
                     <!--useDomModel表示用当前dom对应的model直接覆盖子模块的model-->
-                    <modulea class='cls1' x-show={{show}} $rows1={{rows1}}>
+                    <modulea class={{genCls()}} x-show={{show}} $rows1={{rows1}}>
                         <for tag='uibutton' e-click='clickBtn' title={{name}} cond={{rows}}/>
                         <for cond={{rows}}>
                             <ModuleB style='font-size:18px;' useDomModel/>
@@ -167,11 +168,16 @@
 
         clearRows1(model){
             model.rows1 = null;
+            // model.rows1 = [];
         }
 
         add(model){
             model.rows.push({id:4,name:'weblab'});
             console.log(model.rows);
+        }
+
+        genCls(){
+            return 'cls2';
         }
 
         setGlobalCache(){

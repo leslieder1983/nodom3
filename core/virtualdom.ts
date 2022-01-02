@@ -1,3 +1,5 @@
+import { resourceUsage } from "process";
+import { threadId } from "worker_threads";
 import { Directive } from "./directive";
 import { DirectiveManager } from "./directivemanager";
 import { NEvent } from "./event";
@@ -46,11 +48,21 @@ export class VirtualDom {
     public assets: Map<string, any>;
 
     /**
-     * 静态属性(attribute)集合
+     * 属性(attribute)集合
      * {prop1:value1,...}
+     * 属性值可能是值，也可能是表达式，还可能是数组，当为子模块时，存在从props传递过来的属性，如果模块模版存在相同属性，则会变成数组。
      */
     public props: Map<string, any>;
 
+    /**
+     * 删除的class名数组
+     */
+    removedClassMap:Map<string,boolean>;
+
+    /**
+     * 删除的style属性名map
+     */
+    removedStyleMap:Map<string,boolean>;
 
     /**
      * 事件数组
@@ -61,16 +73,6 @@ export class VirtualDom {
      * 子节点数组[]
      */
     public children: Array<VirtualDom>;
-
-    /**
-     * 样式map
-     */
-    private styleMap: Map<string, string>;
-
-    /**
-     * class 数组
-     */
-    private classArr: Array<string>;
 
     /**
      * 父虚拟dom
@@ -201,155 +203,139 @@ export class VirtualDom {
         }
         this.children.push(dom);
     }
-    /**
-     * 是否存在某个class
-     * @param cls   class name
-     * @return      true/false
-     */
-    public hasClass(module, cls: string): boolean {
-        let classes = this.getParam(module, '$classes');
-        if (!classes) {
-            return false;
-        }
-        return classes.includes(cls);
-    }
 
-    /**
-     * 初始化class数组
-     */
-    private initClassArr() {
-        let classes = this.classArr;
-        if (classes) {
-            return;
-        }
-        this.classArr = [];
-        let clazz = this.getProp('class');
-        if (clazz) {
-            this.classArr = clazz.trim().split(/\s+/);
-            this.setProp('class', this.classArr.join(' '));
-        }
-    }
+
+    
     /**
      * 添加css class
-     * @param cls class名,可以多个，以“空格”分割
+     * @param cls class名或表达式,可以多个，以“空格”分割
      */
-    public addClass(cls: string) {
-        this.initClassArr();
-        let classes = this.classArr;
-        let arr = cls.trim().split(/\s+/);
-        let change = false;
-        for (let a of arr) {
-            if (!classes.includes(a)) {
-                change = true;
-                classes.push(a);
+    public addClass(cls: string|Expression) {
+        this.addProp('class',cls);
+        console.log(this.props,cls);
+        //需要从remove class map 移除
+        if(this.removedClassMap && this.removedClassMap.size>0){
+            let arr = (<string>cls).trim().split(/\s+/);
+            for(let a of arr){
+                if(a === ''){
+                    continue;
+                }
+                this.removedClassMap.delete(a);
             }
-        }
-        if (change) {
-            this.setProp('class', classes.join(' '));
-            this.setStaticOnce();
         }
     }
 
     /**
-     * 删除css class
+     * 删除css class，因为涉及到表达式，此处只记录删除标识
      * @param cls class名,可以多个，以“空格”分割
      */
     public removeClass(cls: string) {
-        let classes = this.classArr;
-        if (!classes) {
+        let pv = this.getProp('class');
+        if(!pv){
             return;
+        }
+        if(!this.removedClassMap){
+            this.removedClassMap = new Map();
         }
         let arr = cls.trim().split(/\s+/);
-        let change = false;
-        for (let a of arr) {
-            let ind;
-            if ((ind = classes.indexOf(a)) !== -1) {
-                change = true;
-                classes.splice(ind, 1);
-            }
-        }
-        if (change) {
-            if (classes.length === 0) {
-                this.delProp('class');
-            } else {
-                this.setProp('class', classes.join(' '));
-            }
-            this.setStaticOnce();
-        }
-    }
-
-    /**
-     * 初始化style map
-     */
-    private initStyleMap() {
-        if (this.styleMap) {
-            return;
-        }
-        this.styleMap = new Map();
-
-        let styles = this.styleMap;
-        let oriStyle = this.getProp('style');
-        if (oriStyle) {
-            let sa: any[] = oriStyle.trim().split(/\s*;\s*/);
-            for (let s of sa) {
-                let sa1 = s.split(/\s*:\s*/);
-                styles.set(sa1[0], sa[1]);
-            }
-        }
-    }
-    /**
-     * 添加style
-     *  @param styleStr style字符串
-     */
-    public addStyle(styleStr: string) {
-        this.initStyleMap();
-        let change = false;
-        let sa = styleStr.trim().split(/\s*;\s*/);
-        let styles = this.styleMap
-        for (let s of sa) {
-            if (s === '') {
+        for(let a of arr){
+            if(a === ''){
                 continue;
             }
-            let sa1 = s.split(/\s*:\s*/);
-            if (!styles.has(sa1[0]) || styles.get(sa1[0]) !== sa1[1]) {
-                change = true;
-                styles.set(sa1[0], sa1[1]);
+            this.removedClassMap.set(a,true);
+        }
+        this.setStaticOnce();
+    }
+
+    /**
+     * 获取class串
+     * @returns class 串
+     */
+    public getClassString(values):string{
+        let clsArr = [];
+        for(let pv of values){
+            let arr = pv.trim().split(/\s+/);
+            for (let a of arr) {
+                if(!this.removedClassMap || !this.removedClassMap.has(a)){
+                    if (!clsArr.includes(a)) {
+                        clsArr.push(a);
+                    }
+                }
             }
         }
-        if (change) {
-            this.setProp('style', [...styles].map(item => item.join(':')).join(';'));
-            this.setStaticOnce();
+        console.log(clsArr,values);
+        if(clsArr.length>0){
+            return clsArr.join(' ');
+        }
+        
+    }
+
+    /**
+     * 添加style
+     *  @param style style字符串或表达式
+     */
+    public addStyle(style: string|Expression) {
+        this.addProp('style',style);
+        if(typeof style === 'string'){
+            //需要从remove class map 移除
+            if(this.removedStyleMap && this.removedStyleMap.size>0){
+                let arr = style.trim().split(/\s*;\s*/);
+                for(let a of arr){
+                    if(a === ''){
+                        continue;
+                    }
+                    let sa1 = a.split(/\s*:\s*/);
+                    let p = sa1[0].trim();
+                    if(p !== ''){
+                        this.removedClassMap.delete(sa1[0].trim());
+                    }
+                }
+            }
         }
     }
 
     /**
      * 删除style
-     * @param styleStr style字符串，可以是stylename:stylevalue[;...]或stylename1;stylename2
+     * @param styleStr style字符串，多个style以空格' '分割
      */
     public removeStyle(styleStr: string) {
-        let styles = this.styleMap;
-        if (!styles) {
-            return;
+        if(!this.removedClassMap){
+            this.removedClassMap = new Map();
         }
-        let change = false;
-        let sa = styleStr.trim().split(/\s*;\s*/);
-        for (let s of sa) {
-            let sa1 = s.split(/\s*:\s*/);
-            if (!sa1[1] && styles.has(sa1[0]) || styles.get(sa1[0]) === sa1[1]) {
-                change = true;
-                styles.delete(sa1[0]);
+        let arr = styleStr.trim().split(/\s+/);
+        for(let a of arr){
+            if (a === '') {
+                continue;
             }
+            this.removedClassMap.set(a,true);
         }
-        if (change) {
-            if (styles.size === 0) {
-                this.delProp('style');
-            } else {
-                this.setProp('style', [...styles].map(item => item.join(':')).join(';'));
-            }
-            this.setStaticOnce();
-        }
+        this.setStaticOnce();
     }
 
+    /**
+     * 获取style串
+     * @returns style 串
+     */
+    public getStyleString(values):string{
+        let map = new Map();
+        for(let pv of values){
+            let sa = pv.trim().split(/\s*;\s*/);
+            for (let s of sa) {
+                if (s === '') {
+                    continue;
+                }
+                let sa1 = s.split(/\s*:\s*/);
+                //不在移除style map才能加入
+                if(!this.removedStyleMap || !this.removedStyleMap.has(sa1[0])){
+                    map.set(sa1[0], sa1[1]);
+                }
+            }
+        }
+
+        if(map.size>0){
+            return [...map].map(item => item.join(':')).join(';');
+        }
+    }
     /**
      * 是否拥有属性
      * @param propName  属性名
@@ -381,7 +367,39 @@ export class VirtualDom {
         if (!this.props) {
             this.props = new Map();
         }
+        if(propName === 'style'){  
+            if(this.removedStyleMap){ //清空removedStyleMap
+                this.removedStyleMap.clear();
+            }
+        }else if(propName === 'class'){ 
+            if(this.removedClassMap){ //清空removedClassMap
+                this.removedClassMap.clear();
+            }
+        }
         this.props.set(propName, v);
+    }
+
+    /**
+     * 添加属性，如果原来的值存在，则属性值变成数组
+     * @param pName     属性名
+     * @param pValue    属性值
+     */
+    public addProp(pName,pValue):boolean{
+        let pv = this.getProp(pName);
+        if(!pv){
+            this.setProp(pName,pValue);
+        }else if(Array.isArray(pv)){
+            if(pv.includes(pValue)){
+                return false;
+            }
+            pv.push(pValue);
+        }else if(pv !== pValue){
+            this.setProp(pName,[pv,pValue]);
+        }else{
+            return false;
+        }
+        this.setStaticOnce();
+        return true;
     }
 
     /**
