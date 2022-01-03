@@ -243,7 +243,6 @@ export class Module {
         let el:any = Renderer.renderToHtml(this,this.renderTree,null,true);
         if(this.srcDom){
             const srcEl = this.getParent().getNode(this.srcDom.key);
-            let pm = this.getParent();
             this.container = srcEl.parentElement;
             this.container.insertBefore(el,srcEl);
         }else if(this.container){
@@ -299,6 +298,7 @@ export class Module {
         if (ModuleFactory.getMain() === this) {
             return;
         }
+        delete this.srcDom;
         this.doModuleEvent('beforeUnActive');
         //设置状态
         this.state = EModuleState.UNACTIVE;
@@ -432,7 +432,6 @@ export class Module {
     public setProps(props:any,dom:IRenderedDom){
         let dataObj = props.$data;
         delete props.$data;
-        console.log(dataObj);
         //props数据复制到模块model
         if(dataObj){
             for(let d in dataObj){
@@ -441,7 +440,6 @@ export class Module {
                 if(typeof o === 'object' && this.model[d] !== o){
                     ModelManager.bindToModule(o,this);
                 }
-                console.log(d,o);
                 this.model[d] = o;
             }
         }

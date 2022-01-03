@@ -448,9 +448,11 @@ export default (function () {
                     //更改渲染子节点
                     src.children = chds;
                     //非内部渲染,更改model
-                    if (!src.getProp('innerRender')) {
+                    if (!src.getProp('innerrender')) {
                         for (let c of src.children) {
                             c.model = cfg.model;
+                            //对象绑定到当前模块
+                            ModelManager.bindToModule(cfg.model,module);
                         }
                     }
                 }

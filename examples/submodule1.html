@@ -202,8 +202,10 @@
         }
         
         change1(model){
-            model.xxx = 2;
-            model.style='background:#ccc'
+            // model.xxx = 2;
+            // model.style='background:#ccc'
+            model.rows.pop();
+            console.log(model.rows);
         }
     }
     nodom(Module1,'div');
