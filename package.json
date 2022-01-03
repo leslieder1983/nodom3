@@ -14,7 +14,8 @@
   "unpkg": "dist/nodom.js",
   "author": "",
   "license": "MIT",
-  "browser": "dist/nodom.js",
+  // "browser": "dist/nodom.global.js",
+  "module": "dist/nodom.esm.js",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^18.1.0",
     "@rollup/plugin-node-resolve": "^13.0.0",
