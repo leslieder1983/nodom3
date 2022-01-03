@@ -1,6 +1,7 @@
 import { Module } from "./module";
 import { ModuleFactory } from "./modulefactory";
 import { Route } from "./route";
+import { EModuleState } from "./types";
 import { Util } from "./util";
 
 /**
@@ -118,7 +119,7 @@ export class Router {
             // 清理map映射
             this.activeFieldMap.delete(module.id);
             //module置为不激活
-            module.unactive();
+            module.unactive(true);
         }
         if (diff[2].length === 0) { //路由相同，参数不同
             let route: Route = diff[0];
@@ -318,8 +319,8 @@ export class Router {
             o['data'] = route.data;
         }
         module.model['$route'] = o;
-        if (pm) {
-            if (pm.state === 2) {  //被依赖模块处于渲染后状态
+        if(pm){
+            if(pm.state === EModuleState.RENDERED){  //被依赖模块处于渲染后状态
                 module.setContainer(<HTMLElement>pm.getNode(Router.routerKeyMap.get(pm.id)));
                 this.setDomActive(pm, route.fullPath);
             } else { //被依赖模块不处于被渲染后状态

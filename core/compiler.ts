@@ -1,18 +1,17 @@
 import { DefineElementManager } from "./defineelementmanager";
 import { Directive } from "./directive";
-import { DirectiveElementManager } from "./directiveelementmanager";
+import { VirtualDom } from "./virtualdom";
 import { NError } from "./error";
 import { NEvent } from "./event";
 import { Expression } from "./expression";
 import { Module } from "./module";
 import { ModuleFactory } from "./modulefactory";
-import { VirtualDom } from "./virtualdom";
 
 export class Compiler {
     /**
      * 模块
      */
-    private module: Module;
+    private module:Module;
 
     /**
      * 构造器
@@ -35,7 +34,7 @@ export class Compiler {
      * @param srcStr    源串
      * @returns         
      */
-    private compileTemplate(srcStr: string): VirtualDom {
+    private compileTemplate(srcStr:string):VirtualDom{
         const me = this;
         // 清理comment
         srcStr = srcStr.replace(/\<\!\-\-[\s\S]*?\-\-\>/g,'');
@@ -170,8 +169,8 @@ export class Compiler {
             }
             
             //设置标签关闭
-            let ele = domArr[domArr.length - 1];
-            closedTag[closedTag.length - 1] = true;
+            let ele = domArr[domArr.length-1];
+            closedTag[closedTag.length-1] = true;
             me.postHandleNode(ele);
             ele.sortDirective();
             me.handleSlot(ele);
@@ -207,14 +206,14 @@ export class Compiler {
          * 处理属性
          * @param value     属性值
          */
-        function handleProp(value?: any) {
-            if (!dom || !propName) {
+        function handleProp(value?:any){
+            if(!dom || !propName){
                 return;
             }
             if(value){
                 let r;
                 //去掉字符串两端
-                if (((r = /((?<=^')(.*?)(?='$))|((?<=^")(.*?)(?="$)|((?<=^`)(.*?)(?=`$)))/.exec(value)) !== null)) {
+                if(((r=/((?<=^')(.*?)(?='$))|((?<=^")(.*?)(?="$)|((?<=^`)(.*?)(?=`$)))/.exec(value)) !== null)){
                     value = r[0].trim();
                 }
             }
@@ -225,7 +224,7 @@ export class Compiler {
             } else if (propName.startsWith("e-")) { //事件
                 dom.addEvent(new NEvent(me.module,propName.substr(2), value));
             } else { //普通属性
-                dom.setProp(propName, value);
+                dom.setProp(propName.toLowerCase(), value);
             }
             propName = undefined;
             
@@ -294,35 +293,35 @@ export class Compiler {
             }
         }
     }
-
-
+    
+    
     /**
      * 处理模块子节点为slot节点
      * @param dom   dom节点
      */
-    private handleSlot(dom: VirtualDom) {
-        if (!dom.children || dom.children.length === 0 || !dom.hasDirective('module')) {
+    private handleSlot(dom:VirtualDom){
+        if(!dom.children || dom.children.length === 0 || !dom.hasDirective('module')){
             return;
         }
-        let slotCt: VirtualDom;
-        for (let j = 0; j < dom.children.length; j++) {
+        let slotCt:VirtualDom;
+        for(let j=0;j<dom.children.length;j++){
             let c = dom.children[j];
-            if (c.tagName === 'template') { //模版作为模块的template属性
-                dom.setProp('template', c.getProp('template'));
+            if(c.tagName === 'template'){ //模版作为模块的template属性
+                dom.setProp('template',c.getProp('template'));
                 //template节点不再需要
-                dom.children.splice(j--, 1);
+                dom.children.splice(j--,1);
             }
-            if (c.hasDirective('slot')) { //带slot的不处理
+            if(c.hasDirective('slot')){ //带slot的不处理
                 continue;
             }
-            if (!slotCt) {//第一个直接被slotCt替换
-                slotCt = new VirtualDom('div', this.genKey());
-                slotCt.addDirective(new Directive('slot', null));
+            if(!slotCt){//第一个直接被slotCt替换
+                slotCt = new VirtualDom('div',this.genKey());
+                slotCt.addDirective(new Directive('slot',null));
                 //当前位置，用slot替代
-                dom.children.splice(j, 1, slotCt);
-            } else {
+                dom.children.splice(j,1,slotCt);
+            }else{
                 //直接删除
-                dom.children.splice(j--, 1);
+                dom.children.splice(j--,1);
             }
             slotCt.add(c);
         }
@@ -334,13 +333,15 @@ export class Compiler {
      * @param node  虚拟dom节点
      */
     private postHandleNode(node:VirtualDom){
-        // 模块类判断
-        if (ModuleFactory.hasClass(node.tagName)) {
-            node.addDirective(new Directive('module', node.tagName));
-            node.tagName = 'div';
-        }else if(DefineElementManager.has(node.tagName)){ //自定义元素
+        // 自定义元素判断
+        if(DefineElementManager.has(node.tagName)){ //自定义元素
             let clazz = DefineElementManager.get(node.tagName);
             Reflect.construct(clazz,[node,this.module]);
+        }
+        // 模块类判断
+        if (ModuleFactory.hasClass(node.tagName)) {
+            node.addDirective(new Directive('module',node.tagName));
+            node.tagName = 'div';
         }
     }
 
@@ -351,7 +352,7 @@ export class Compiler {
      */
     private preHandleText(str: string): string {
         let reg = /&[a-z]+;/;
-        if (reg.test(str)) {
+        if(reg.test(str)){
             let div = document.createElement('div');
             div.innerHTML = str;
             return div.textContent;
@@ -363,7 +364,7 @@ export class Compiler {
      * 产生dom key
      * @returns   dom key
      */
-    private genKey(): string {
+    private genKey():string{
         return this.module.getDomKeyId() + '';
     }
 }

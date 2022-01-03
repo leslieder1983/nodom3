@@ -1,10 +1,11 @@
-import { Module } from "../../dist/nodom.js";
-// import {ModuleB} from './moduleb.js'
-// import {ModuleC} from './modulec.js'
-// import {ModuleD} from './moduled.js'
-export class ModuleMain extends Module {
-	template() {
-		return `
+import {Module} from '../../dist/nodom.esm.js'
+import {ModuleA} from './modulea.js'
+import {ModuleB} from './moduleb.js'
+import {ModuleC} from './modulec.js'
+import {ModuleD} from './moduled.js'
+export class ModuleMain extends Module{
+    template(){
+        return `
             <div>
             
                 <button e-click='change'>change</button>
